@@ -1,18 +1,10 @@
-import { createContext, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { AuthContext } from './AuthContext';
 import {
   loginAdmin,
   logoutAdmin,
   subscribeToAuthChanges,
 } from '../services/auth.service';
-
-// Create Auth Context
-export const AuthContext = createContext({
-  user: null,
-  loading: true,
-  login: async () => {},
-  logout: async () => {},
-  isAuthenticated: false,
-});
 
 // Auth Provider Component
 export const AuthProvider = ({ children }) => {
@@ -69,4 +61,4 @@ export const AuthProvider = ({ children }) => {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-export default AuthContext;
+export default AuthProvider;

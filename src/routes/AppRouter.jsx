@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from '../contexts/AuthContext';
+import AuthProvider from '../contexts/AuthContext';
 import ProtectedRoute from './ProtectedRoute';
 
 // Page imports (we'll create these in next steps)
