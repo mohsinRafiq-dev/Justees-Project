@@ -1,10 +1,15 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, ShoppingBag, Truck, Shield, Headphones, Star, Quote, TrendingUp, Award, CheckCircle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ShoppingBag, Truck, Shield, Headphones, Star, Quote, TrendingUp, Award, CheckCircle, Menu, X, ArrowUp, MessageCircle, Lock, RefreshCw } from 'lucide-react';
+import { openWhatsAppInquiry } from '../utils/whatsapp';
 
 const Home = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showScrollTop, setShowScrollTop] = useState(false);
+  const [email, setEmail] = useState('');
+  const [newsletterStatus, setNewsletterStatus] = useState(''); // 'loading', 'success', 'error'
 
   // Hero slider images
   const heroSlides = [
@@ -32,32 +37,37 @@ const Home = () => {
   ];
 
   // Featured products
+  // Helper function to format price in Indian format
+  const formatPrice = (price) => {
+    return `Rs. ${price.toLocaleString('en-IN')}`;
+  };
+
   const featuredProducts = [
     {
       id: 1,
       name: 'Classic Black Tee',
-      price: 29.99,
+      price: 1499,
       image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&q=80',
       category: 'T-Shirts',
     },
     {
       id: 2,
       name: 'Denim Jacket',
-      price: 89.99,
+      price: 4999,
       image: 'https://images.unsplash.com/photo-1495105787522-5334e3ffa0ef?w=500&q=80',
       category: 'Jackets',
     },
     {
       id: 3,
       name: 'Casual Hoodie',
-      price: 49.99,
+      price: 2499,
       image: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=500&q=80',
       category: 'Hoodies',
     },
     {
       id: 4,
       name: 'Slim Fit Jeans',
-      price: 59.99,
+      price: 3499,
       image: 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=500&q=80',
       category: 'Pants',
     },
@@ -145,6 +155,17 @@ const Home = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  // Scroll detection for scroll-to-top button
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 400);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Mobile menu is closed by default, no need for effect
+
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
   };
@@ -153,15 +174,35 @@ const Home = () => {
     setCurrentSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length);
   };
 
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleNewsletterSubmit = (e) => {
+    e.preventDefault();
+    if (!email) return;
+    
+    setNewsletterStatus('loading');
+    
+    // Simulate API call
+    setTimeout(() => {
+      setNewsletterStatus('success');
+      setEmail('');
+      setTimeout(() => setNewsletterStatus(''), 3000);
+    }, 1500);
+  };
+
   return (
-    <div className="bg-gray-900 min-h-screen">
+    <div className="min-h-screen bg-gray-900">
       {/* Navbar */}
-      <nav className="fixed top-0 w-full bg-gray-900/95 backdrop-blur-sm z-50 border-b border-gray-800">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <Link to="/" className="text-2xl font-bold text-white hover:text-gray-300 transition-colors">
-              JUSTEES
+      <nav className="bg-gray-800 border-b border-gray-700 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <Link to="/" className="text-2xl font-bold text-white">
+              Justees
             </Link>
+
+            {/* Desktop Menu */}
             <div className="hidden md:flex items-center space-x-8">
               <Link to="/" className="text-gray-300 hover:text-white transition-colors">
                 Home
@@ -173,9 +214,59 @@ const Home = () => {
                 Admin
               </Link>
             </div>
+
+            <div className="flex items-center space-x-4">
+              <Link
+                to="/products"
+                className="hidden md:inline-block bg-white text-gray-900 px-6 py-2 rounded-full font-semibold hover:bg-gray-200 transition-all transform hover:scale-105"
+              >
+                Shop Now
+              </Link>
+              
+              {/* Mobile Menu Button */}
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="md:hidden text-white p-2"
+                aria-label="Toggle menu"
+              >
+                {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Menu */}
+        <div
+          className={`md:hidden bg-gray-800 border-t border-gray-700 transition-all duration-300 overflow-hidden ${
+            mobileMenuOpen ? 'max-h-64 opacity-100' : 'max-h-0 opacity-0'
+          }`}
+        >
+          <div className="container mx-auto px-4 py-4 space-y-4">
+            <Link
+              to="/"
+              className="block text-gray-300 hover:text-white transition-colors py-2"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Home
+            </Link>
             <Link
               to="/products"
-              className="bg-white text-gray-900 px-6 py-2 rounded-full font-semibold hover:bg-gray-200 transition-all transform hover:scale-105"
+              className="block text-gray-300 hover:text-white transition-colors py-2"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Products
+            </Link>
+            <Link
+              to="/admin/login"
+              className="block text-gray-300 hover:text-white transition-colors py-2"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Admin
+            </Link>
+            <Link
+              to="/products"
+              className="block bg-white text-gray-900 px-6 py-3 rounded-full font-semibold text-center hover:bg-gray-200 transition-all"
+              onClick={() => setMobileMenuOpen(false)}
             >
               Shop Now
             </Link>
@@ -183,7 +274,7 @@ const Home = () => {
         </div>
       </nav>
 
-      {/* Hero Slider */}
+      {/* Hero Section */}
       <section className="relative h-screen overflow-hidden mt-16">
         {heroSlides.map((slide, index) => (
           <div
@@ -257,7 +348,7 @@ const Home = () => {
             {[
               { icon: Truck, title: 'Free Shipping', desc: 'On orders over $50' },
               { icon: Shield, title: 'Secure Payment', desc: '100% secure checkout' },
-              { icon: ShoppingBag, title: 'Easy Returns', desc: '30-day return policy' },
+              { icon: RefreshCw, title: 'Easy Returns', desc: '30-day return policy' },
               { icon: Headphones, title: '24/7 Support', desc: 'Dedicated support team' },
             ].map((feature, index) => (
               <div
@@ -273,8 +364,29 @@ const Home = () => {
               </div>
             ))}
           </div>
+
+          {/* Trust Badges */}
+          <div className="mt-12 flex flex-wrap justify-center items-center gap-8 pt-8 border-t border-gray-700">
+            <div className="flex items-center space-x-2 text-gray-400">
+              <Lock className="w-5 h-5" />
+              <span className="text-sm">SSL Secured</span>
+            </div>
+            <div className="flex items-center space-x-2 text-gray-400">
+              <Shield className="w-5 h-5" />
+              <span className="text-sm">Verified Business</span>
+            </div>
+            <div className="flex items-center space-x-2 text-gray-400">
+              <CheckCircle className="w-5 h-5" />
+              <span className="text-sm">Money Back Guarantee</span>
+            </div>
+            <div className="flex items-center space-x-2 text-gray-400">
+              <Award className="w-5 h-5" />
+              <span className="text-sm">Premium Quality</span>
+            </div>
+          </div>
         </div>
       </section>
+
 
       {/* Categories */}
       <section className="py-20 bg-gray-900">
@@ -334,7 +446,7 @@ const Home = () => {
                   <p className="text-gray-400 text-sm mb-1">{product.category}</p>
                   <h3 className="text-xl font-semibold text-white mb-2">{product.name}</h3>
                   <div className="flex items-center justify-between">
-                    <span className="text-2xl font-bold text-white">${product.price}</span>
+                    <span className="text-2xl font-bold text-white">{formatPrice(product.price)}</span>
                     <Link
                       to="/products"
                       className="bg-white text-gray-900 px-4 py-2 rounded-full font-semibold hover:bg-gray-200 transition-all transform hover:scale-105"
@@ -389,12 +501,11 @@ const Home = () => {
             {reviews.map((review, index) => (
               <div
                 key={review.id}
-                className={`bg-gray-700 rounded-lg p-6 hover:bg-gray-600 transition-all transform hover:-translate-y-2 ${
+                className={`bg-gray-700 p-6 rounded-lg hover:bg-gray-600 transition-all transform hover:-translate-y-2 ${
                   isVisible ? 'animate-fade-in-up' : 'opacity-0'
                 }`}
-                style={{ animationDelay: `${index * 150}ms` }}
+                style={{ animationDelay: `${index * 100}ms` }}
               >
-                <Quote className="w-10 h-10 text-gray-500 mb-4" />
                 <div className="flex mb-3">
                   {[...Array(review.rating)].map((_, i) => (
                     <Star key={i} className="w-5 h-5 text-yellow-400 fill-yellow-400" />
@@ -417,6 +528,33 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+      {/* WhatsApp Floating Button */}
+      <button
+        onClick={() => openWhatsAppInquiry()}
+        className="fixed bottom-6 right-6 bg-green-500 hover:bg-green-600 text-white p-4 rounded-full shadow-2xl transition-all transform hover:scale-110 z-50 animate-bounce"
+        aria-label="Chat on WhatsApp"
+      >
+        <svg
+          className="w-6 h-6"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+        </svg>
+      </button>
+
+      {/* Scroll to Top Button */}
+      {showScrollTop && (
+        <button
+          onClick={scrollToTop}
+          className="fixed bottom-24 right-6 bg-gray-700 hover:bg-gray-600 text-white p-3 rounded-full shadow-lg transition-all transform hover:scale-110 z-50 animate-fade-in"
+          aria-label="Scroll to top"
+        >
+          <ArrowUp className="w-5 h-5" />
+        </button>
+      )}
 
       {/* Why Choose Us Section */}
       <section className="py-20 bg-gray-900">
@@ -458,16 +596,37 @@ const Home = () => {
           <p className="text-xl text-gray-400 mb-8 max-w-2xl mx-auto">
             Get exclusive access to new arrivals, special offers, and style inspiration
           </p>
-          <div className="flex flex-col md:flex-row gap-4 justify-center max-w-md mx-auto">
+          <form onSubmit={handleNewsletterSubmit} className="flex flex-col md:flex-row gap-4 justify-center max-w-md mx-auto">
             <input
               type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
-              className="flex-1 px-6 py-4 rounded-full bg-gray-800 text-white border border-gray-700 focus:outline-none focus:border-white transition-colors"
+              required
+              disabled={newsletterStatus === 'loading'}
+              className="flex-1 px-6 py-4 rounded-full bg-gray-800 text-white border border-gray-700 focus:outline-none focus:border-white transition-colors disabled:opacity-50"
             />
-            <button className="bg-white text-gray-900 px-8 py-4 rounded-full font-semibold hover:bg-gray-200 transition-all transform hover:scale-105">
-              Subscribe
+            <button
+              type="submit"
+              disabled={newsletterStatus === 'loading'}
+              className="bg-white text-gray-900 px-8 py-4 rounded-full font-semibold hover:bg-gray-200 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {newsletterStatus === 'loading' ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-gray-900 border-t-transparent rounded-full animate-spin" />
+                  Subscribing...
+                </>
+              ) : (
+                'Subscribe'
+              )}
             </button>
-          </div>
+          </form>
+          {newsletterStatus === 'success' && (
+            <p className="mt-4 text-green-400 animate-fade-in">✓ Successfully subscribed! Check your inbox.</p>
+          )}
+          {newsletterStatus === 'error' && (
+            <p className="mt-4 text-red-400 animate-fade-in">✗ Please enter a valid email address.</p>
+          )}
         </div>
       </section>
 

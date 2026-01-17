@@ -9,15 +9,18 @@ import { WHATSAPP_NUMBER, BUSINESS_NAME } from './constants';
 export const generateWhatsAppOrderLink = (product, options = {}) => {
   const { size = 'M', color = 'N/A', quantity = 1 } = options;
   
+  // Format price in Indian format
+  const formatPrice = (price) => `Rs. ${price.toLocaleString('en-IN')}`;
+  
   // Construct the message
   const message = `Hi ${BUSINESS_NAME}! I'm interested in ordering:
 
 *Product:* ${product.name}
-*Price:* $${product.price}
+*Price:* ${formatPrice(product.price)}
 *Size:* ${size}
 *Color:* ${color}
 *Quantity:* ${quantity}
-*Total:* $${(product.price * quantity).toFixed(2)}
+*Total:* ${formatPrice(product.price * quantity)}
 
 Please let me know the next steps!`;
 
