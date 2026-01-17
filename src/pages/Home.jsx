@@ -1,15 +1,22 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, ShoppingBag, Truck, Shield, Headphones, Star, Quote, TrendingUp, Award, CheckCircle, Menu, X, ArrowUp, MessageCircle, Lock, RefreshCw } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ShoppingBag, Truck, Shield, Headphones, Star, Quote, TrendingUp, Award, CheckCircle, Menu, X, ArrowUp, MessageCircle, Lock, RefreshCw, Eye, ShoppingCart } from 'lucide-react';
 import { openWhatsAppInquiry } from '../utils/whatsapp';
+import ProductQuickView from '../components/products/ProductQuickView';
+import LazyImage from '../components/common/LazyImage';
+import { useCart } from '../contexts/CartContext';
+import { subscribeToNewsletter } from '../services/newsletter.service';
 
 const Home = () => {
+  const { getCartCount } = useCart();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [email, setEmail] = useState('');
   const [newsletterStatus, setNewsletterStatus] = useState(''); // 'loading', 'success', 'error'
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
 
   // Hero slider images
   const heroSlides = [
@@ -49,13 +56,20 @@ const Home = () => {
       price: 1499,
       image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&q=80',
       category: 'T-Shirts',
+      badge: 'Bestseller',
+      stock: 8,
+      description: 'Premium cotton t-shirt with a comfortable fit. Perfect for everyday wear.',
     },
     {
       id: 2,
       name: 'Denim Jacket',
       price: 4999,
+      originalPrice: 6999,
       image: 'https://images.unsplash.com/photo-1495105787522-5334e3ffa0ef?w=500&q=80',
       category: 'Jackets',
+      badge: 'Sale',
+      stock: 5,
+      description: 'Classic denim jacket with modern fit. Durable and stylish for any season.',
     },
     {
       id: 3,
@@ -63,6 +77,9 @@ const Home = () => {
       price: 2499,
       image: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=500&q=80',
       category: 'Hoodies',
+      badge: 'New',
+      stock: 15,
+      description: 'Soft fleece hoodie with adjustable drawstrings. Cozy and warm.',
     },
     {
       id: 4,
@@ -70,6 +87,9 @@ const Home = () => {
       price: 3499,
       image: 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=500&q=80',
       category: 'Pants',
+      badge: 'Limited',
+      stock: 3,
+      description: 'Premium quality jeans with perfect fit. Comfortable stretch fabric.',
     },
   ];
 
@@ -178,18 +198,33 @@ const Home = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleNewsletterSubmit = (e) => {
+  const handleNewsletterSubmit = async (e) => {
     e.preventDefault();
     if (!email) return;
     
     setNewsletterStatus('loading');
     
-    // Simulate API call
-    setTimeout(() => {
+    // Save to Firebase
+    const result = await subscribeToNewsletter(email);
+    
+    if (result.success) {
       setNewsletterStatus('success');
       setEmail('');
-      setTimeout(() => setNewsletterStatus(''), 3000);
-    }, 1500);
+      setTimeout(() => setNewsletterStatus(''), 5000);
+    } else {
+      setNewsletterStatus('error');
+      setTimeout(() => setNewsletterStatus(''), 5000);
+    }
+  };
+
+  const openQuickView = (product) => {
+    setSelectedProduct(product);
+    setIsQuickViewOpen(true);
+  };
+
+  const closeQuickView = () => {
+    setIsQuickViewOpen(false);
+    setTimeout(() => setSelectedProduct(null), 300);
   };
 
   return (
@@ -216,6 +251,16 @@ const Home = () => {
             </div>
 
             <div className="flex items-center space-x-4">
+              {/* Cart Icon */}
+              <button className="relative text-white hover:text-gray-300 transition-colors">
+                <ShoppingCart className="w-6 h-6" />
+                {getCartCount() > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                    {getCartCount()}
+                  </span>
+                )}
+              </button>
+              
               <Link
                 to="/products"
                 className="hidden md:inline-block bg-white text-gray-900 px-6 py-2 rounded-full font-semibold hover:bg-gray-200 transition-all transform hover:scale-105"
@@ -402,7 +447,7 @@ const Home = () => {
                 to="/products"
                 className="group relative overflow-hidden rounded-lg aspect-square hover:shadow-2xl transition-all transform hover:scale-105"
               >
-                <img
+                <LazyImage
                   src={category.image}
                   alt={category.name}
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
@@ -435,24 +480,58 @@ const Home = () => {
                 style={{ animationDelay: `${index * 100}ms` }}
               >
                 <div className="relative overflow-hidden aspect-square">
-                  <img
+                  <LazyImage
                     src={product.image}
                     alt={product.name}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   />
-                  <div className="absolute inset-0 bg-gray-900/0 group-hover:bg-gray-900/20 transition-all" />
+                  
+                  {/* Badge */}
+                  {product.badge && (
+                    <span className={`absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-bold text-white ${
+                      product.badge === 'Sale' ? 'bg-red-500' :
+                      product.badge === 'New' ? 'bg-blue-500' :
+                      product.badge === 'Limited' ? 'bg-purple-500' :
+                      'bg-yellow-500'
+                    }`}>
+                      {product.badge}
+                    </span>
+                  )}
+                  
+                  {/* Quick View Button */}
+                  <button
+                    onClick={() => openQuickView(product)}
+                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white text-gray-900 px-6 py-3 rounded-full font-semibold opacity-0 group-hover:opacity-100 transition-all transform scale-90 group-hover:scale-100 flex items-center gap-2"
+                  >
+                    <Eye className="w-4 h-4" />
+                    Quick View
+                  </button>
+                  
+                  <div className="absolute inset-0 bg-gray-900/0 group-hover:bg-gray-900/40 transition-all" />
+                  
+                  {/* Stock Warning */}
+                  {product.stock && product.stock <= 5 && (
+                    <div className="absolute bottom-4 left-4 right-4 bg-red-500/90 text-white text-xs font-semibold px-3 py-2 rounded-lg">
+                      ⚡ Only {product.stock} left!
+                    </div>
+                  )}
                 </div>
                 <div className="p-6">
                   <p className="text-gray-400 text-sm mb-1">{product.category}</p>
                   <h3 className="text-xl font-semibold text-white mb-2">{product.name}</h3>
                   <div className="flex items-center justify-between">
-                    <span className="text-2xl font-bold text-white">{formatPrice(product.price)}</span>
-                    <Link
-                      to="/products"
+                    <div>
+                      <span className="text-2xl font-bold text-white">{formatPrice(product.price)}</span>
+                      {product.originalPrice && (
+                        <span className="text-sm text-gray-400 line-through ml-2">{formatPrice(product.originalPrice)}</span>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => openQuickView(product)}
                       className="bg-white text-gray-900 px-4 py-2 rounded-full font-semibold hover:bg-gray-200 transition-all transform hover:scale-105"
                     >
                       View
-                    </Link>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -589,6 +668,51 @@ const Home = () => {
         </div>
       </section>
 
+      {/* Instagram Feed Section */}
+      <section className="py-20 bg-gray-800">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold text-white mb-4">Follow Us on Instagram</h2>
+            <p className="text-gray-400 text-lg mb-6">@justees_official - Tag us in your photos!</p>
+            <a
+              href="https://instagram.com/justees_official"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 text-white px-6 py-3 rounded-full font-semibold hover:opacity-90 transition-all transform hover:scale-105"
+            >
+              Follow Us
+            </a>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            {[
+              'https://images.unsplash.com/photo-1523398002811-999ca8dec234?w=400&q=80',
+              'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400&q=80',
+              'https://images.unsplash.com/photo-1529374255404-311a2a4f1fd9?w=400&q=80',
+              'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=400&q=80',
+              'https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=400&q=80',
+              'https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?w=400&q=80',
+            ].map((image, index) => (
+              <a
+                key={index}
+                href="https://instagram.com/justees_official"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group relative aspect-square overflow-hidden rounded-lg hover:shadow-2xl transition-all"
+              >
+                <LazyImage
+                  src={image}
+                  alt={`Instagram post ${index + 1}`}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center">
+                  <MessageCircle className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="py-20 bg-gray-900 border-t border-gray-800">
         <div className="container mx-auto px-4 text-center">
@@ -668,6 +792,13 @@ const Home = () => {
           </div>
         </div>
       </footer>
+
+      {/* Product Quick View Modal */}
+      <ProductQuickView
+        product={selectedProduct}
+        isOpen={isQuickViewOpen}
+        onClose={closeQuickView}
+      />
     </div>
   );
 };
