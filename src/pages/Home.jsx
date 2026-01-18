@@ -272,8 +272,11 @@ const Home = () => {
               <Link to="/products" className={`${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'} transition-colors font-medium`}>
                 Products
               </Link>
-              <Link to="/admin/login" className={`${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'} transition-colors font-medium`}>
-                Admin
+              <Link to="/categories" className={`${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'} transition-colors font-medium`}>
+                Categories
+              </Link>
+              <Link to="/about" className={`${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'} transition-colors font-medium`}>
+                About
               </Link>
             </div>
 
@@ -351,10 +354,18 @@ const Home = () => {
                   Products
                 </Link>
                 <Link
-                  to="/admin/login"
+                  to="/categories"
                   className={`block ${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'} transition-colors py-2`}
                   onClick={() => setMobileMenuOpen(false)}
                 >
+                  Categories
+                </Link>
+                <Link
+                  to="/about"
+                  className={`block ${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'} transition-colors py-2`}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  About
                 </Link>
                 <Link
                   to="/products"
@@ -824,31 +835,31 @@ const Home = () => {
       </AnimatePresence>
 
       {/* Why Choose Us Section */}
-      <section className="py-20 bg-gray-900">
+      <section className={`py-20 ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-white mb-4">Why Choose Justees?</h2>
-            <p className="text-gray-400 text-lg">Experience the difference</p>
+            <h2 className={`text-4xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>Why Choose Justees?</h2>
+            <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'} text-lg`}>Experience the difference</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            <div className="text-center p-8 bg-gray-800 rounded-lg hover:bg-gray-700 transition-all transform hover:-translate-y-2">
-              <Award className="w-16 h-16 mx-auto mb-4 text-white" />
-              <h3 className="text-xl font-bold text-white mb-3">Premium Quality</h3>
-              <p className="text-gray-400">
+            <div className={`text-center p-8 ${isDark ? 'bg-gray-800 hover:bg-gray-700' : 'bg-white hover:shadow-lg'} rounded-lg transition-all transform hover:-translate-y-2`}>
+              <Award className={`w-16 h-16 mx-auto mb-4 ${isDark ? 'text-white' : 'text-blue-600'}`} />
+              <h3 className={`text-xl font-bold mb-3 ${isDark ? 'text-white' : 'text-gray-900'}`}>Premium Quality</h3>
+              <p className={isDark ? 'text-gray-400' : 'text-gray-600'}>
                 We use only the finest materials to ensure durability and comfort in every piece.
               </p>
             </div>
-            <div className="text-center p-8 bg-gray-800 rounded-lg hover:bg-gray-700 transition-all transform hover:-translate-y-2">
-              <Truck className="w-16 h-16 mx-auto mb-4 text-white" />
-              <h3 className="text-xl font-bold text-white mb-3">Fast Delivery</h3>
-              <p className="text-gray-400">
+            <div className={`text-center p-8 ${isDark ? 'bg-gray-800 hover:bg-gray-700' : 'bg-white hover:shadow-lg'} rounded-lg transition-all transform hover:-translate-y-2`}>
+              <Truck className={`w-16 h-16 mx-auto mb-4 ${isDark ? 'text-white' : 'text-blue-600'}`} />
+              <h3 className={`text-xl font-bold mb-3 ${isDark ? 'text-white' : 'text-gray-900'}`}>Fast Delivery</h3>
+              <p className={isDark ? 'text-gray-400' : 'text-gray-600'}>
                 Quick and reliable shipping to get your orders to you as fast as possible.
               </p>
             </div>
-            <div className="text-center p-8 bg-gray-800 rounded-lg hover:bg-gray-700 transition-all transform hover:-translate-y-2">
-              <CheckCircle className="w-16 h-16 mx-auto mb-4 text-white" />
-              <h3 className="text-xl font-bold text-white mb-3">100% Satisfaction</h3>
-              <p className="text-gray-400">
+            <div className={`text-center p-8 ${isDark ? 'bg-gray-800 hover:bg-gray-700' : 'bg-white hover:shadow-lg'} rounded-lg transition-all transform hover:-translate-y-2`}>
+              <CheckCircle className={`w-16 h-16 mx-auto mb-4 ${isDark ? 'text-white' : 'text-blue-600'}`} />
+              <h3 className={`text-xl font-bold mb-3 ${isDark ? 'text-white' : 'text-gray-900'}`}>100% Satisfaction</h3>
+              <p className={isDark ? 'text-gray-400' : 'text-gray-600'}>
                 Not happy? We offer easy returns and exchanges within 30 days.
               </p>
             </div>
@@ -857,11 +868,11 @@ const Home = () => {
       </section>
 
       {/* Instagram Feed Section */}
-      <section className="py-20 bg-gray-800">
+      <section className={`py-20 ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-white mb-4">Follow Us on Instagram</h2>
-            <p className="text-gray-400 text-lg mb-6">@justees_official - Tag us in your photos!</p>
+            <h2 className={`text-4xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>Follow Us on Instagram</h2>
+            <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'} text-lg mb-6`}>@justees_official - Tag us in your photos!</p>
             <a
               href="https://instagram.com/justees_official"
               target="_blank"
@@ -902,10 +913,10 @@ const Home = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gray-900 border-t border-gray-800">
+      <section className={`py-20 ${isDark ? 'bg-gray-900 border-gray-800' : 'bg-gray-100 border-gray-200'} border-t`}>
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-5xl font-bold text-white mb-6">Join the Justees Family</h2>
-          <p className="text-xl text-gray-400 mb-8 max-w-2xl mx-auto">
+          <h2 className={`text-5xl font-bold mb-6 ${isDark ? 'text-white' : 'text-gray-900'}`}>Join the Justees Family</h2>
+          <p className={`text-xl ${isDark ? 'text-gray-400' : 'text-gray-600'} mb-8 max-w-2xl mx-auto`}>
             Get exclusive access to new arrivals, special offers, and style inspiration
           </p>
           <form onSubmit={handleNewsletterSubmit} className="flex flex-col md:flex-row gap-4 justify-center max-w-md mx-auto">
@@ -916,12 +927,12 @@ const Home = () => {
               placeholder="Enter your email"
               required
               disabled={newsletterStatus === 'loading'}
-              className="flex-1 px-6 py-4 rounded-full bg-gray-800 text-white border border-gray-700 focus:outline-none focus:border-white transition-colors disabled:opacity-50"
+              className={`flex-1 px-6 py-4 rounded-full ${isDark ? 'bg-gray-800 text-white border-gray-700' : 'bg-white text-gray-900 border-gray-300'} border focus:outline-none focus:border-blue-500 transition-colors disabled:opacity-50`}
             />
             <button
               type="submit"
               disabled={newsletterStatus === 'loading'}
-              className="bg-white text-gray-900 px-8 py-4 rounded-full font-semibold hover:bg-gray-200 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className={`${isDark ? 'bg-white text-gray-900 hover:bg-gray-200' : 'bg-blue-600 text-white hover:bg-blue-700'} px-8 py-4 rounded-full font-semibold transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2`}
             >
               {newsletterStatus === 'loading' ? (
                 <>
@@ -943,7 +954,7 @@ const Home = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-950 text-gray-400 py-12 border-t border-gray-800">
+      <footer className={`${isDark ? 'bg-gray-950 text-gray-400 border-gray-800' : 'bg-gray-900 text-gray-300 border-gray-700'} py-12 border-t`}>
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             <div>
