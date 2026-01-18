@@ -4,6 +4,7 @@ import { ShoppingBag } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import LazyImage from '../components/common/LazyImage';
 import Navbar from '../components/common/Navbar';
+import Footer from '../components/common/Footer';
 
 const Categories = () => {
   const { isDark } = useTheme();
@@ -139,6 +140,7 @@ const Categories = () => {
         </div>
       </section>
     </div>
+    <Footer />
     </>
   );
 };

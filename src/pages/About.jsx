@@ -2,6 +2,7 @@ import { motion } from 'framer-motion'; // eslint-disable-line
 import { Award, Target, Users, Heart, Zap, Shield } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import Navbar from '../components/common/Navbar';
+import Footer from '../components/common/Footer';
 
 const About = () => {
   const { isDark } = useTheme();
@@ -210,6 +211,7 @@ const About = () => {
         </div>
       </section>
     </div>
+    <Footer />
     </>
   );
 };

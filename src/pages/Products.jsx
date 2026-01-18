@@ -6,6 +6,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useCart } from '../contexts/CartContext';
 import LazyImage from '../components/common/LazyImage';
 import Navbar from '../components/common/Navbar';
+import Footer from '../components/common/Footer';
 import TiltCard from '../components/common/TiltCard';
 import ProductQuickView from '../components/products/ProductQuickView';
 
@@ -284,6 +285,7 @@ const Products = () => {
           onClose={closeQuickView}
         />
       </div>
+      <Footer />
     </>
   );
 };

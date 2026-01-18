@@ -12,6 +12,7 @@ import { subscribeToNewsletter } from '../services/newsletter.service';
 import AnimatedBackground from '../components/common/AnimatedBackground';
 import AnimatedCounter from '../components/common/AnimatedCounter';
 import TiltCard from '../components/common/TiltCard';
+import Footer from '../components/common/Footer';
 
 const Home = () => {
   const { getCartCount, addToCart } = useCart();
@@ -954,43 +955,7 @@ const Home = () => {
       </section>
 
       {/* Footer */}
-      <footer className={`${isDark ? 'bg-gray-950 text-gray-400 border-gray-800' : 'bg-gray-900 text-gray-300 border-gray-700'} py-12 border-t`}>
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-            <div>
-              <h3 className="text-white text-xl font-bold mb-4">JUSTEES</h3>
-              <p className="text-sm">Premium quality clothing for the modern lifestyle.</p>
-            </div>
-            <div>
-              <h4 className="text-white font-semibold mb-4">Shop</h4>
-              <ul className="space-y-2 text-sm">
-                <li><Link to="/products" className="hover:text-white transition-colors">All Products</Link></li>
-                <li><Link to="/products" className="hover:text-white transition-colors">New Arrivals</Link></li>
-                <li><Link to="/products" className="hover:text-white transition-colors">Best Sellers</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-white font-semibold mb-4">Support</h4>
-              <ul className="space-y-2 text-sm">
-                <li><a href="#" className="hover:text-white transition-colors">Contact Us</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Shipping Info</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Returns</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-white font-semibold mb-4">Follow Us</h4>
-              <div className="flex space-x-4">
-                <a href="#" className="hover:text-white transition-colors">Instagram</a>
-                <a href="#" className="hover:text-white transition-colors">Facebook</a>
-                <a href="#" className="hover:text-white transition-colors">Twitter</a>
-              </div>
-            </div>
-          </div>
-          <div className="border-t border-gray-800 pt-8 text-center text-sm">
-            <p>&copy; 2026 Justees. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
 
       {/* Product Quick View Modal */}
       <ProductQuickView
