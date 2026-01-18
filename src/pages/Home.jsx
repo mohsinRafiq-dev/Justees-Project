@@ -1,22 +1,29 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, ShoppingBag, Truck, Shield, Headphones, Star, Quote, TrendingUp, Award, CheckCircle, Menu, X, ArrowUp, MessageCircle, Lock, RefreshCw, Eye, ShoppingCart } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion'; // eslint-disable-line
+import { ChevronLeft, ChevronRight, ShoppingBag, Truck, Shield, Headphones, Star, Quote, TrendingUp, Award, CheckCircle, Menu, X, ArrowUp, MessageCircle, Lock, RefreshCw, Eye, ShoppingCart, Sun, Moon, Heart, Zap } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 import { openWhatsAppInquiry } from '../utils/whatsapp';
 import ProductQuickView from '../components/products/ProductQuickView';
 import LazyImage from '../components/common/LazyImage';
 import { useCart } from '../contexts/CartContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { subscribeToNewsletter } from '../services/newsletter.service';
+import AnimatedBackground from '../components/common/AnimatedBackground';
+import AnimatedCounter from '../components/common/AnimatedCounter';
+import TiltCard from '../components/common/TiltCard';
 
 const Home = () => {
-  const { getCartCount } = useCart();
+  const { getCartCount, addToCart } = useCart();
+  const { isDark, toggleTheme } = useTheme();
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [isVisible, setIsVisible] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [email, setEmail] = useState('');
   const [newsletterStatus, setNewsletterStatus] = useState(''); // 'loading', 'success', 'error'
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
+  const [wishlist, setWishlist] = useState([]);
 
   // Hero slider images
   const heroSlides = [
@@ -155,10 +162,10 @@ const Home = () => {
 
   // Stats
   const stats = [
-    { icon: TrendingUp, value: '10K+', label: 'Happy Customers' },
-    { icon: Award, value: '500+', label: 'Products Sold' },
-    { icon: Star, value: '4.9', label: 'Average Rating' },
-    { icon: CheckCircle, value: '100%', label: 'Satisfaction' },
+    { icon: TrendingUp, value: '10000', label: 'Happy Customers', suffix: '+' },
+    { icon: Award, value: '500', label: 'Products Sold', suffix: '+' },
+    { icon: Star, value: '4.9', label: 'Average Rating', suffix: '' },
+    { icon: CheckCircle, value: '100', label: 'Satisfaction', suffix: '%' },
   ];
 
   // Auto-slide effect
@@ -168,12 +175,6 @@ const Home = () => {
     }, 5000);
     return () => clearInterval(timer);
   }, [heroSlides.length]);
-
-  // Fade-in animation on mount
-  useEffect(() => {
-    const timer = setTimeout(() => setIsVisible(true), 50);
-    return () => clearTimeout(timer);
-  }, []);
 
   // Scroll detection for scroll-to-top button
   useEffect(() => {
@@ -227,150 +228,245 @@ const Home = () => {
     setTimeout(() => setSelectedProduct(null), 300);
   };
 
+  const toggleWishlist = (productId) => {
+    setWishlist(prev => {
+      if (prev.includes(productId)) {
+        toast.error('Removed from wishlist');
+        return prev.filter(id => id !== productId);
+      } else {
+        toast.success('Added to wishlist! ❤️');
+        return [...prev, productId];
+      }
+    });
+  };
+
+  const handleQuickAdd = (product) => {
+    addToCart(product);
+    toast.success(`${product.name} added to cart!`, {
+      icon: '🛒',
+    });
+  };
+
   return (
-    <div className="min-h-screen bg-gray-900">
+    <div className={`min-h-screen transition-colors duration-300 ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
+      {/* Animated Background */}
+      <AnimatedBackground />
+      
       {/* Navbar */}
-      <nav className="bg-gray-800 border-b border-gray-700 sticky top-0 z-50">
+      <motion.nav 
+        initial={{ y: -100 }}
+        animate={{ y: 0 }}
+        className={`sticky top-0 z-50 glass ${isDark ? '' : 'glass-light'} border-b ${isDark ? 'border-gray-700' : 'border-gray-200'}`}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <Link to="/" className="text-2xl font-bold text-white">
+            <Link to="/" className={`text-2xl font-bold bg-gradient-to-r from-blue-500 via-cyan-500 to-teal-500 bg-clip-text text-transparent animate-gradient`}>
               Justees
             </Link>
 
             {/* Desktop Menu */}
             <div className="hidden md:flex items-center space-x-8">
-              <Link to="/" className="text-gray-300 hover:text-white transition-colors">
+              <Link to="/" className={`${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'} transition-colors font-medium`}>
                 Home
               </Link>
-              <Link to="/products" className="text-gray-300 hover:text-white transition-colors">
+              <Link to="/products" className={`${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'} transition-colors font-medium`}>
                 Products
               </Link>
-              <Link to="/admin/login" className="text-gray-300 hover:text-white transition-colors">
+              <Link to="/admin/login" className={`${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'} transition-colors font-medium`}>
                 Admin
               </Link>
             </div>
 
             <div className="flex items-center space-x-4">
+              {/* Theme Toggle */}
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={toggleTheme}
+                className={`p-2 rounded-full ${isDark ? 'bg-gray-700 text-yellow-400' : 'bg-gray-200 text-gray-700'} transition-all`}
+              >
+                {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              </motion.button>
+
               {/* Cart Icon */}
-              <button className="relative text-white hover:text-gray-300 transition-colors">
+              <motion.button 
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                className={`relative ${isDark ? 'text-white hover:text-gray-300' : 'text-gray-700 hover:text-gray-900'} transition-colors`}
+              >
                 <ShoppingCart className="w-6 h-6" />
                 {getCartCount() > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                  <motion.span 
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center"
+                  >
                     {getCartCount()}
-                  </span>
+                  </motion.span>
                 )}
-              </button>
+              </motion.button>
               
               <Link
                 to="/products"
-                className="hidden md:inline-block bg-white text-gray-900 px-6 py-2 rounded-full font-semibold hover:bg-gray-200 transition-all transform hover:scale-105"
+                className="hidden md:inline-block bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-6 py-2 rounded-full font-semibold hover:shadow-lg hover:shadow-cyan-500/50 transition-all transform hover:scale-105"
               >
                 Shop Now
               </Link>
               
               {/* Mobile Menu Button */}
-              <button
+              <motion.button
+                whileTap={{ scale: 0.9 }}
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="md:hidden text-white p-2"
+                className={`md:hidden p-2 ${isDark ? 'text-white' : 'text-gray-700'}`}
                 aria-label="Toggle menu"
               >
                 {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-              </button>
+              </motion.button>
             </div>
           </div>
         </div>
 
         {/* Mobile Menu */}
-        <div
-          className={`md:hidden bg-gray-800 border-t border-gray-700 transition-all duration-300 overflow-hidden ${
-            mobileMenuOpen ? 'max-h-64 opacity-100' : 'max-h-0 opacity-0'
-          }`}
-        >
-          <div className="container mx-auto px-4 py-4 space-y-4">
-            <Link
-              to="/"
-              className="block text-gray-300 hover:text-white transition-colors py-2"
-              onClick={() => setMobileMenuOpen(false)}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className={`md:hidden ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-t`}
             >
-              Home
-            </Link>
-            <Link
-              to="/products"
-              className="block text-gray-300 hover:text-white transition-colors py-2"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Products
-            </Link>
-            <Link
-              to="/admin/login"
-              className="block text-gray-300 hover:text-white transition-colors py-2"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Admin
-            </Link>
-            <Link
-              to="/products"
-              className="block bg-white text-gray-900 px-6 py-3 rounded-full font-semibold text-center hover:bg-gray-200 transition-all"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Shop Now
-            </Link>
-          </div>
-        </div>
-      </nav>
+              <div className="container mx-auto px-4 py-4 space-y-4">
+                <Link
+                  to="/"
+                  className={`block ${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'} transition-colors py-2`}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Home
+                </Link>
+                <Link
+                  to="/products"
+                  className={`block ${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'} transition-colors py-2`}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Products
+                </Link>
+                <Link
+                  to="/admin/login"
+                  className={`block ${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'} transition-colors py-2`}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                </Link>
+                <Link
+                  to="/products"
+                  className="block bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-6 py-3 rounded-full font-semibold text-center hover:shadow-lg transition-all"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Shop Now
+                </Link>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.nav>
 
       {/* Hero Section */}
-      <section className="relative h-screen overflow-hidden mt-16">
-        {heroSlides.map((slide, index) => (
-          <div
-            key={slide.id}
-            className={`absolute inset-0 transition-all duration-1000 ${
-              index === currentSlide ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
-            }`}
-          >
-            <div
-              className="absolute inset-0 bg-cover bg-center"
-              style={{ backgroundImage: `url(${slide.image})` }}
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-gray-900/90 to-gray-900/50" />
-            </div>
-            <div className="relative h-full flex items-center">
-              <div className="container mx-auto px-4">
+      <section className="relative h-screen overflow-hidden">
+        <AnimatePresence mode="wait">
+          {heroSlides.map((slide, index) => 
+            index === currentSlide && (
+              <motion.div
+                key={slide.id}
+                initial={{ opacity: 0, scale: 1.1 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 1 }}
+                className="absolute inset-0"
+              >
                 <div
-                  className={`max-w-2xl transform transition-all duration-1000 delay-300 ${
-                    index === currentSlide ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'
-                  }`}
+                  className="absolute inset-0 bg-cover bg-center"
+                  style={{ backgroundImage: `url(${slide.image})` }}
                 >
-                  <p className="text-gray-300 text-lg mb-2 animate-fade-in">{slide.subtitle}</p>
-                  <h1 className="text-6xl md:text-7xl font-bold text-white mb-4 leading-tight">
-                    {slide.title}
-                  </h1>
-                  <p className="text-xl text-gray-300 mb-8">{slide.description}</p>
-                  <Link
-                    to="/products"
-                    className="inline-block bg-white text-gray-900 px-8 py-4 rounded-full font-semibold hover:bg-gray-200 transition-all transform hover:scale-105 hover:shadow-2xl"
-                  >
-                    Explore Collection
-                  </Link>
+                  <div className="absolute inset-0 bg-gradient-to-r from-gray-900/90 via-blue-900/40 to-gray-900/50" />
                 </div>
-              </div>
-            </div>
-          </div>
-        ))}
+                <div className="relative h-full flex items-center">
+                  <div className="container mx-auto px-4">
+                    <motion.div
+                      initial={{ x: -100, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{ delay: 0.3, duration: 0.8 }}
+                      className="max-w-2xl"
+                    >
+                      <motion.p 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.5 }}
+                        className={`${isDark ? 'text-gray-300' : 'text-gray-100'} text-lg mb-2 font-medium`}
+                      >
+                        {slide.subtitle}
+                      </motion.p>
+                      <motion.h1 
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.6 }}
+                        className="text-6xl md:text-7xl font-bold text-white mb-4 leading-tight"
+                      >
+                        {slide.title.split(' ').map((word, i) => (
+                          <motion.span
+                            key={i}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.7 + i * 0.1 }}
+                            className="inline-block mr-4"
+                          >
+                            {word}
+                          </motion.span>
+                        ))}
+                      </motion.h1>
+                      <motion.p 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 1 }}
+                        className="text-xl text-gray-300 mb-8"
+                      >
+                        {slide.description}
+                      </motion.p>
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 1.2 }}
+                      >
+                        <Link
+                          to="/products"
+                          className="inline-block bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-8 py-4 rounded-full font-semibold hover:shadow-2xl hover:shadow-cyan-500/50 transition-all transform hover:scale-105"
+                        >
+                          Explore Collection
+                        </Link>
+                      </motion.div>
+                    </motion.div>
+                  </div>
+                </div>
+              </motion.div>
+            )
+          )}
+        </AnimatePresence>
 
         {/* Slider Controls */}
-        <button
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
           onClick={prevSlide}
-          className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-sm p-3 rounded-full hover:bg-white/30 transition-all z-10"
+          className="absolute left-4 top-1/2 -translate-y-1/2 glass p-3 rounded-full hover:bg-white/30 transition-all z-10"
         >
           <ChevronLeft className="w-6 h-6 text-white" />
-        </button>
-        <button
+        </motion.button>
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
           onClick={nextSlide}
-          className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-sm p-3 rounded-full hover:bg-white/30 transition-all z-10"
+          className="absolute right-4 top-1/2 -translate-y-1/2 glass p-3 rounded-full hover:bg-white/30 transition-all z-10"
         >
           <ChevronRight className="w-6 h-6 text-white" />
-        </button>
+        </motion.button>
 
         {/* Slider Indicators */}
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex space-x-2 z-10">
@@ -387,7 +483,7 @@ const Home = () => {
       </section>
 
       {/* Features */}
-      <section className="py-16 bg-gray-800 border-t border-gray-700">
+      <section className={`py-16 ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-gray-100 border-gray-200'} border-t`}>
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             {[
@@ -396,220 +492,305 @@ const Home = () => {
               { icon: RefreshCw, title: 'Easy Returns', desc: '30-day return policy' },
               { icon: Headphones, title: '24/7 Support', desc: 'Dedicated support team' },
             ].map((feature, index) => (
-              <div
+              <motion.div
                 key={index}
-                className={`text-center p-6 rounded-lg bg-gray-700/50 hover:bg-gray-700 transition-all transform hover:-translate-y-2 ${
-                  isVisible ? 'animate-fade-in-up' : 'opacity-0'
-                }`}
-                style={{ animationDelay: `${index * 100}ms` }}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+                whileHover={{ y: -10, scale: 1.05 }}
+                className={`text-center p-6 rounded-lg ${isDark ? 'bg-gray-700/50 hover:bg-gray-700' : 'bg-white hover:shadow-lg'} transition-all cursor-pointer`}
               >
-                <feature.icon className="w-12 h-12 mx-auto mb-4 text-white" />
-                <h3 className="text-lg font-semibold text-white mb-2">{feature.title}</h3>
-                <p className="text-gray-400">{feature.desc}</p>
-              </div>
+                <feature.icon className={`w-12 h-12 mx-auto mb-4 ${isDark ? 'text-white' : 'text-blue-600'}`} />
+                <h3 className={`text-lg font-semibold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>{feature.title}</h3>
+                <p className={isDark ? 'text-gray-400' : 'text-gray-600'}>{feature.desc}</p>
+              </motion.div>
             ))}
           </div>
 
           {/* Trust Badges */}
-          <div className="mt-12 flex flex-wrap justify-center items-center gap-8 pt-8 border-t border-gray-700">
-            <div className="flex items-center space-x-2 text-gray-400">
-              <Lock className="w-5 h-5" />
-              <span className="text-sm">SSL Secured</span>
-            </div>
-            <div className="flex items-center space-x-2 text-gray-400">
-              <Shield className="w-5 h-5" />
-              <span className="text-sm">Verified Business</span>
-            </div>
-            <div className="flex items-center space-x-2 text-gray-400">
-              <CheckCircle className="w-5 h-5" />
-              <span className="text-sm">Money Back Guarantee</span>
-            </div>
-            <div className="flex items-center space-x-2 text-gray-400">
-              <Award className="w-5 h-5" />
-              <span className="text-sm">Premium Quality</span>
-            </div>
+          <div className={`mt-12 flex flex-wrap justify-center items-center gap-8 pt-8 border-t ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
+            {[
+              { icon: Lock, text: 'SSL Secured' },
+              { icon: Shield, text: 'Verified Business' },
+              { icon: CheckCircle, text: 'Money Back Guarantee' },
+              { icon: Award, text: 'Premium Quality' },
+            ].map((badge, i) => (
+              <motion.div 
+                key={i}
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className={`flex items-center space-x-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}
+              >
+                <badge.icon className="w-5 h-5" />
+                <span className="text-sm">{badge.text}</span>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
 
 
       {/* Categories */}
-      <section className="py-20 bg-gray-900">
+      <section className={`py-20 ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-white mb-4">Shop by Category</h2>
-            <p className="text-gray-400 text-lg">Discover your perfect style</p>
-          </div>
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-12"
+          >
+            <h2 className={`text-4xl font-bold mb-4 bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-600 bg-clip-text text-transparent`}>
+              Shop by Category
+            </h2>
+            <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'} text-lg`}>Discover your perfect style</p>
+          </motion.div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {categories.map((category, index) => (
-              <Link
+              <motion.div
                 key={index}
-                to="/products"
-                className="group relative overflow-hidden rounded-lg aspect-square hover:shadow-2xl transition-all transform hover:scale-105"
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+                whileHover={{ scale: 1.05 }}
               >
-                <LazyImage
-                  src={category.image}
-                  alt={category.name}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/50 to-transparent opacity-90 group-hover:opacity-100 transition-opacity" />
-                <div className="absolute bottom-0 left-0 right-0 p-6 text-white transform translate-y-2 group-hover:translate-y-0 transition-transform">
-                  <h3 className="text-2xl font-bold mb-1">{category.name}</h3>
-                  <p className="text-gray-300">{category.count}</p>
-                </div>
-              </Link>
+                <Link
+                  to="/products"
+                  className="group relative overflow-hidden rounded-lg aspect-square hover:shadow-2xl transition-all block"
+                >
+                  <LazyImage
+                    src={category.image}
+                    alt={category.name}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/50 to-transparent opacity-90 group-hover:opacity-100 transition-opacity" />
+                  <div className="absolute bottom-0 left-0 right-0 p-6 text-white transform translate-y-2 group-hover:translate-y-0 transition-transform">
+                    <h3 className="text-2xl font-bold mb-1">{category.name}</h3>
+                    <p className="text-gray-300">{category.count}</p>
+                  </div>
+                </Link>
+              </motion.div>
             ))}
           </div>
         </div>
       </section>
 
       {/* Featured Products */}
-      <section className="py-20 bg-gray-800">
+      <section className={`py-20 ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-white mb-4">Featured Products</h2>
-            <p className="text-gray-400 text-lg">Our best-selling items</p>
-          </div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-12"
+          >
+            <h2 className={`text-4xl font-bold mb-4 bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-600 bg-clip-text text-transparent`}>
+              Featured Products
+            </h2>
+            <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'} text-lg`}>Our best-selling items</p>
+          </motion.div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {featuredProducts.map((product, index) => (
-              <div
+              <TiltCard
                 key={product.id}
-                className={`group bg-gray-700 rounded-lg overflow-hidden hover:shadow-2xl transition-all transform hover:-translate-y-2 ${
-                  isVisible ? 'animate-fade-in-up' : 'opacity-0'
-                }`}
-                style={{ animationDelay: `${index * 100}ms` }}
+                className={`group ${isDark ? 'bg-gray-700' : 'bg-gray-50'} rounded-lg overflow-hidden hover:shadow-2xl transition-all`}
               >
-                <div className="relative overflow-hidden aspect-square">
-                  <LazyImage
-                    src={product.image}
-                    alt={product.name}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
-                  
-                  {/* Badge */}
-                  {product.badge && (
-                    <span className={`absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-bold text-white ${
-                      product.badge === 'Sale' ? 'bg-red-500' :
-                      product.badge === 'New' ? 'bg-blue-500' :
-                      product.badge === 'Limited' ? 'bg-purple-500' :
-                      'bg-yellow-500'
-                    }`}>
-                      {product.badge}
-                    </span>
-                  )}
-                  
-                  {/* Quick View Button */}
-                  <button
-                    onClick={() => openQuickView(product)}
-                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white text-gray-900 px-6 py-3 rounded-full font-semibold opacity-0 group-hover:opacity-100 transition-all transform scale-90 group-hover:scale-100 flex items-center gap-2"
-                  >
-                    <Eye className="w-4 h-4" />
-                    Quick View
-                  </button>
-                  
-                  <div className="absolute inset-0 bg-gray-900/0 group-hover:bg-gray-900/40 transition-all" />
-                  
-                  {/* Stock Warning */}
-                  {product.stock && product.stock <= 5 && (
-                    <div className="absolute bottom-4 left-4 right-4 bg-red-500/90 text-white text-xs font-semibold px-3 py-2 rounded-lg">
-                      ⚡ Only {product.stock} left!
-                    </div>
-                  )}
-                </div>
-                <div className="p-6">
-                  <p className="text-gray-400 text-sm mb-1">{product.category}</p>
-                  <h3 className="text-xl font-semibold text-white mb-2">{product.name}</h3>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="text-2xl font-bold text-white">{formatPrice(product.price)}</span>
-                      {product.originalPrice && (
-                        <span className="text-sm text-gray-400 line-through ml-2">{formatPrice(product.originalPrice)}</span>
-                      )}
-                    </div>
-                    <button
-                      onClick={() => openQuickView(product)}
-                      className="bg-white text-gray-900 px-4 py-2 rounded-full font-semibold hover:bg-gray-200 transition-all transform hover:scale-105"
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <div className="relative overflow-hidden aspect-square">
+                    <LazyImage
+                      src={product.image}
+                      alt={product.name}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                    
+                    {/* Badge */}
+                    {product.badge && (
+                      <motion.span 
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        className={`absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-bold text-white ${
+                          product.badge === 'Sale' ? 'bg-red-500' :
+                          product.badge === 'New' ? 'bg-blue-500' :
+                          product.badge === 'Limited' ? 'bg-purple-500' :
+                          'bg-yellow-500'
+                        } animate-pulse-glow`}
+                      >
+                        {product.badge}
+                      </motion.span>
+                    )}
+
+                    {/* Wishlist Button */}
+                    <motion.button
+                      whileHover={{ scale: 1.2 }}
+                      whileTap={{ scale: 0.8 }}
+                      onClick={() => toggleWishlist(product.id)}
+                      className={`absolute top-4 right-4 p-2 rounded-full ${isDark ? 'bg-gray-800/80' : 'bg-white/80'} backdrop-blur-sm transition-all`}
                     >
-                      View
-                    </button>
+                      <Heart 
+                        className={`w-5 h-5 ${wishlist.includes(product.id) ? 'fill-red-500 text-red-500' : isDark ? 'text-white' : 'text-gray-700'}`} 
+                      />
+                    </motion.button>
+                    
+                    {/* Hover Actions */}
+                    <div className="absolute inset-0 bg-gray-900/0 group-hover:bg-gray-900/60 transition-all flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => openQuickView(product)}
+                        className="bg-white text-gray-900 px-4 py-2 rounded-full font-semibold hover:shadow-lg transition-all flex items-center gap-2"
+                      >
+                        <Eye className="w-4 h-4" />
+                        Quick View
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => handleQuickAdd(product)}
+                        className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-4 py-2 rounded-full font-semibold hover:shadow-lg transition-all flex items-center gap-2"
+                      >
+                        <ShoppingCart className="w-4 h-4" />
+                        Add
+                      </motion.button>
+                    </div>
+                    
+                    {/* Stock Warning */}
+                    {product.stock && product.stock <= 5 && (
+                      <motion.div 
+                        initial={{ x: -100 }}
+                        animate={{ x: 0 }}
+                        className="absolute bottom-4 left-4 right-4 bg-red-500/90 backdrop-blur-sm text-white text-xs font-semibold px-3 py-2 rounded-lg flex items-center gap-2"
+                      >
+                        <Zap className="w-4 h-4" />
+                        Only {product.stock} left!
+                      </motion.div>
+                    )}
                   </div>
-                </div>
-              </div>
+                  <div className="p-6">
+                    <p className={`${isDark ? 'text-gray-400' : 'text-gray-500'} text-sm mb-1`}>{product.category}</p>
+                    <h3 className={`text-xl font-semibold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>{product.name}</h3>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{formatPrice(product.price)}</span>
+                        {product.originalPrice && (
+                          <span className={`text-sm line-through ml-2 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{formatPrice(product.originalPrice)}</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              </TiltCard>
             ))}
           </div>
-          <div className="text-center mt-12">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mt-12"
+          >
             <Link
               to="/products"
-              className="inline-block bg-white text-gray-900 px-8 py-4 rounded-full font-semibold hover:bg-gray-200 transition-all transform hover:scale-105"
+              className="inline-block bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-8 py-4 rounded-full font-semibold hover:shadow-2xl hover:shadow-cyan-500/50 transition-all transform hover:scale-105"
             >
               View All Products
             </Link>
-          </div>
+          </motion.div>
         </div>
       </section>
 
       {/* Stats Section */}
-      <section className="py-16 bg-gray-900 border-t border-gray-800">
+      <section className={`py-16 ${isDark ? 'bg-gray-900 border-gray-800' : 'bg-gray-100 border-gray-200'} border-t`}>
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat, index) => (
-              <div
+              <motion.div
                 key={index}
-                className={`text-center transform transition-all hover:scale-105 ${
-                  isVisible ? 'animate-fade-in-up' : 'opacity-0'
-                }`}
-                style={{ animationDelay: `${index * 100}ms` }}
+                initial={{ opacity: 0, scale: 0.5 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1, type: 'spring' }}
+                whileHover={{ scale: 1.05 }}
+                className="text-center"
               >
-                <stat.icon className="w-12 h-12 mx-auto mb-4 text-white" />
-                <h3 className="text-4xl font-bold text-white mb-2">{stat.value}</h3>
-                <p className="text-gray-400">{stat.label}</p>
-              </div>
+                <stat.icon className={`w-12 h-12 mx-auto mb-4 ${isDark ? 'text-white' : 'text-blue-600'}`} />
+                <h3 className={`text-4xl font-bold mb-2 bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-600 bg-clip-text text-transparent`}>
+                  <AnimatedCounter end={stat.value} suffix={stat.suffix} />
+                </h3>
+                <p className={isDark ? 'text-gray-400' : 'text-gray-600'}>{stat.label}</p>
+              </motion.div>
             ))}
           </div>
         </div>
       </section>
 
       {/* Reviews Section */}
-      <section className="py-20 bg-gray-800">
+      <section className={`py-20 ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-white mb-4">What Our Customers Say</h2>
-            <p className="text-gray-400 text-lg">Real reviews from real customers</p>
-          </div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-12"
+          >
+            <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-600 bg-clip-text text-transparent">
+              What Our Customers Say
+            </h2>
+            <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'} text-lg`}>Real reviews from real customers</p>
+          </motion.div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {reviews.map((review, index) => (
-              <div
+              <motion.div
                 key={review.id}
-                className={`bg-gray-700 p-6 rounded-lg hover:bg-gray-600 transition-all transform hover:-translate-y-2 ${
-                  isVisible ? 'animate-fade-in-up' : 'opacity-0'
-                }`}
-                style={{ animationDelay: `${index * 100}ms` }}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+                whileHover={{ y: -10 }}
+                className={`${isDark ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-50 hover:bg-gray-100'} p-6 rounded-lg transition-all`}
               >
                 <div className="flex mb-3">
                   {[...Array(review.rating)].map((_, i) => (
-                    <Star key={i} className="w-5 h-5 text-yellow-400 fill-yellow-400" />
+                    <motion.div
+                      key={i}
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ delay: i * 0.1 }}
+                    >
+                      <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" />
+                    </motion.div>
                   ))}
                 </div>
-                <p className="text-gray-300 mb-6 italic">&quot;{review.comment}&quot;</p>
+                <p className={`${isDark ? 'text-gray-300' : 'text-gray-700'} mb-6 italic`}>&quot;{review.comment}&quot;</p>
                 <div className="flex items-center">
                   <img
                     src={review.image}
                     alt={review.name}
-                    className="w-12 h-12 rounded-full mr-4 border-2 border-gray-600"
+                    className={`w-12 h-12 rounded-full mr-4 border-2 ${isDark ? 'border-gray-600' : 'border-gray-300'}`}
                   />
                   <div>
-                    <h4 className="text-white font-semibold">{review.name}</h4>
-                    <p className="text-gray-400 text-sm">{review.product}</p>
+                    <h4 className={`${isDark ? 'text-white' : 'text-gray-900'} font-semibold`}>{review.name}</h4>
+                    <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'} text-sm`}>{review.product}</p>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
       </section>
 
       {/* WhatsApp Floating Button */}
-      <button
+      <motion.button
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
         onClick={() => openWhatsAppInquiry()}
         className="fixed bottom-6 right-6 bg-green-500 hover:bg-green-600 text-white p-4 rounded-full shadow-2xl transition-all transform hover:scale-110 z-50 animate-bounce"
         aria-label="Chat on WhatsApp"
@@ -622,18 +803,25 @@ const Home = () => {
         >
           <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
         </svg>
-      </button>
+      </motion.button>
 
       {/* Scroll to Top Button */}
-      {showScrollTop && (
-        <button
-          onClick={scrollToTop}
-          className="fixed bottom-24 right-6 bg-gray-700 hover:bg-gray-600 text-white p-3 rounded-full shadow-lg transition-all transform hover:scale-110 z-50 animate-fade-in"
-          aria-label="Scroll to top"
-        >
-          <ArrowUp className="w-5 h-5" />
-        </button>
-      )}
+      <AnimatePresence>
+        {showScrollTop && (
+          <motion.button
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0, opacity: 0 }}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={scrollToTop}
+            className={`fixed bottom-24 right-6 ${isDark ? 'bg-gray-700 hover:bg-gray-600' : 'bg-blue-600 hover:bg-blue-700'} text-white p-3 rounded-full shadow-lg transition-all z-50`}
+            aria-label="Scroll to top"
+          >
+            <ArrowUp className="w-5 h-5" />
+          </motion.button>
+        )}
+      </AnimatePresence>
 
       {/* Why Choose Us Section */}
       <section className="py-20 bg-gray-900">
