@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
-import { AuthContext } from './AuthContext.js';
+import React, { useState, useEffect } from "react";
+import { AuthContext } from "./AuthContext.js";
 import {
-  loginAdmin,
+  loginAdminWithGoogle,
   logoutAdmin,
   subscribeToAuthChanges,
-} from '../services/auth.service';
+} from "../services/auth.service";
 
 // Auth Provider Component
 export const AuthProvider = ({ children }) => {
@@ -13,7 +13,7 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     // Subscribe to Firebase auth state changes
-    const unsubscribe = subscribeToAuthChanges((user) => {
+    const unsubscribe = subscribeToAuthChanges(async (user) => {
       setUser(user);
       setLoading(false);
     });
@@ -23,18 +23,25 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   /**
-   * Login function
-   * @param {string} email - Admin email
-   * @param {string} password - Admin password
+   * Google Login function with client-side validation
    */
-  const login = async (email, password) => {
+  const loginWithGoogle = async () => {
     try {
-      const user = await loginAdmin(email, password);
+      const user = await loginAdminWithGoogle();
       setUser(user);
       return { success: true, user };
     } catch (error) {
+      setUser(null);
       return { success: false, error: error.message };
     }
+  };
+
+  /**
+   * Legacy login function - deprecated
+   * @deprecated Use loginWithGoogle instead
+   */
+  const login = async (email, password) => {
+    return { success: false, error: 'Email/password login is disabled. Please use Google login.' };
   };
 
   /**
@@ -54,6 +61,7 @@ export const AuthProvider = ({ children }) => {
     user,
     loading,
     login,
+    loginWithGoogle,
     logout,
     isAuthenticated: !!user,
   };

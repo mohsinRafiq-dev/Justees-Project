@@ -1,10 +1,11 @@
-import { createContext } from 'react';
+import React, { createContext } from 'react';
 
 // Create Auth Context with default values
 export const AuthContext = createContext({
   user: null,
   loading: true,
   login: async () => {},
+  loginWithGoogle: async () => {},
   logout: async () => {},
   isAuthenticated: false,
 });

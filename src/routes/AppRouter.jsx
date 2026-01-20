@@ -1,15 +1,15 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from '../contexts/AuthContext.jsx';
-import { CartProvider } from '../contexts/CartContext.jsx';
-import ProtectedRoute from './ProtectedRoute';
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider } from "../contexts/AuthContext.jsx";
+import { CartProvider } from "../contexts/CartContext.jsx";
+import ProtectedRoute from "./ProtectedRoute";
 
 // Page imports
-import Home from '../pages/Home';
-import Products from '../pages/Products';
-import Categories from '../pages/Categories';
-import About from '../pages/About';
-import AdminLogin from '../pages/admin/AdminLogin';
-import AdminDashboard from '../pages/admin/AdminDashboard';
+import Home from "../pages/Home";
+import Products from "../pages/Products";
+import Categories from "../pages/Categories";
+import About from "../pages/About";
+import AdminLogin from "../pages/admin/AdminLogin";
+import AdminDashboard from "../pages/admin/AdminDashboard";
 
 /**
  * Main Application Router
@@ -39,7 +39,10 @@ const AppRouter = () => {
             />
 
             {/* Redirect /admin to /admin/dashboard */}
-            <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+            <Route
+              path="/admin"
+              element={<Navigate to="/admin/dashboard" replace />}
+            />
 
             {/* 404 - Redirect to home */}
             <Route path="*" element={<Navigate to="/" replace />} />

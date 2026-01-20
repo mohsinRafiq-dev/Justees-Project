@@ -1,5 +1,6 @@
 import {
-  signInWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
   signOut,
   onAuthStateChanged,
   setPersistence,
@@ -7,22 +8,62 @@ import {
 } from 'firebase/auth';
 import { auth } from './firebase';
 
+// Allowed admin email from environment variables
+const ALLOWED_ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL;
+
 /**
- * Sign in admin user with email and password
- * @param {string} email - Admin email
- * @param {string} password - Admin password
- * @returns {Promise<UserCredential>}
+ * Sign in admin user with Google OAuth
+ * Uses client-side validation with environment variable
+ * @returns {Promise<User>}
  */
-export const loginAdmin = async (email, password) => {
+export const loginAdminWithGoogle = async () => {
   try {
+    // Validate that admin email is configured
+    if (!ALLOWED_ADMIN_EMAIL) {
+      throw new Error('Admin access is not properly configured. Please contact support.');
+    }
+    
     // Set persistence to LOCAL (survives browser restarts)
     await setPersistence(auth, browserLocalPersistence);
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    return userCredential.user;
+    
+    const provider = new GoogleAuthProvider();
+    provider.addScope('email');
+    provider.addScope('profile');
+    
+    const result = await signInWithPopup(auth, provider);
+    const user = result.user;
+    
+    // Check if the email is allowed
+    if (user.email !== ALLOWED_ADMIN_EMAIL) {
+      // Sign out and delete the user immediately if email doesn't match
+      await signOut(auth);
+      
+      // Delete unauthorized user account (optional cleanup)
+      try {
+        await user.delete();
+      } catch (deleteError) {
+        console.log('User deletion skipped:', deleteError.message);
+      }
+      
+      throw new Error('Access denied. You are not authorized to access the admin panel.');
+    }
+    
+    return user;
   } catch (error) {
-    console.error('Login error:', error);
+    console.error('Google login error:', error);
+    if (error.message.includes('Access denied') || error.message.includes('not properly configured')) {
+      throw error;
+    }
     throw new Error(getAuthErrorMessage(error.code));
   }
+};
+
+/**
+ * Legacy email/password login - kept for backwards compatibility
+ * @deprecated Use loginAdminWithGoogle instead
+ */
+export const loginAdmin = async (email, password) => {
+  throw new Error('Email/password login is disabled. Please use Google login.');
 };
 
 /**

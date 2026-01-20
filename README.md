@@ -94,6 +94,7 @@ firebase init
 ```
 
 Select:
+
 - Firestore
 - Storage
 - Hosting
