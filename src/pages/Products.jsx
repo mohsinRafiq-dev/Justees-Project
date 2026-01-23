@@ -1,133 +1,140 @@
-import { useState } from 'react';
-import { motion } from 'framer-motion'; // eslint-disable-line
-import { Heart, ShoppingCart, Eye, Filter } from 'lucide-react';
-import { toast } from 'react-hot-toast';
-import { useTheme } from '../contexts/ThemeContext';
-import { useCart } from '../contexts/CartContext';
-import LazyImage from '../components/common/LazyImage';
-import Navbar from '../components/common/Navbar';
-import Footer from '../components/common/Footer';
-import TiltCard from '../components/common/TiltCard';
-import ProductQuickView from '../components/products/ProductQuickView';
+import { useState, useEffect, useCallback } from "react";
+import { motion } from "framer-motion"; // eslint-disable-line
+import { Heart, ShoppingCart, Eye, Filter, Star } from "lucide-react";
+import { toast } from "react-hot-toast";
+import { useTheme } from "../contexts/ThemeContext";
+import { useCart } from "../contexts/CartContext";
+import { getAllProducts } from "../services/products.service";
+import LazyImage from "../components/common/LazyImage";
+import Navbar from "../components/common/Navbar";
+import Footer from "../components/common/Footer";
+import TiltCard from "../components/common/TiltCard";
+import ProductQuickView from "../components/products/ProductQuickView";
+import LoadingSpinner from "../components/common/LoadingSpinner";
+import { formatPrice } from "../utils/validation";
+import { CATEGORIES } from "../utils/constants";
 
 const Products = () => {
   const { isDark } = useTheme();
   const { addToCart } = useCart();
+  const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const [wishlist, setWishlist] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [priceRange, setPriceRange] = useState({ min: 0, max: 10000 });
+  const [sortBy, setSortBy] = useState("createdAt");
+  const [sortOrder, setSortOrder] = useState("desc");
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const formatPrice = (price) => {
-    return `Rs. ${price.toLocaleString('en-IN')}`;
+  // Load products
+  useEffect(() => {
+    loadProducts();
+  }, []);
+
+  const filterAndSortProducts = useCallback(() => {
+    let filtered = [...products];
+
+    // Category filter
+    if (selectedCategory !== "All") {
+      filtered = filtered.filter((p) => p.category === selectedCategory);
+    }
+
+    // Price range filter
+    filtered = filtered.filter(
+      (p) => p.price >= priceRange.min && p.price <= priceRange.max,
+    );
+
+    // Search filter
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      filtered = filtered.filter(
+        (product) =>
+          product.name.toLowerCase().includes(term) ||
+          product.description.toLowerCase().includes(term) ||
+          product.tags?.some((tag) => tag.toLowerCase().includes(term)),
+      );
+    }
+
+    // Sort products
+    filtered.sort((a, b) => {
+      let aVal = a[sortBy];
+      let bVal = b[sortBy];
+
+      if (sortBy === "createdAt" || sortBy === "updatedAt") {
+        aVal = new Date(aVal);
+        bVal = new Date(bVal);
+      }
+
+      if (sortOrder === "asc") {
+        return aVal > bVal ? 1 : -1;
+      } else {
+        return aVal < bVal ? 1 : -1;
+      }
+    });
+
+    setFilteredProducts(filtered);
+  }, [products, selectedCategory, priceRange, sortBy, sortOrder, searchTerm]);
+
+  // Filter and sort products when dependencies change
+  useEffect(() => {
+    filterAndSortProducts();
+  }, [filterAndSortProducts]);
+
+  const loadProducts = async () => {
+    try {
+      setLoading(true);
+      const result = await getAllProducts({
+        status: "active",
+        isVisible: true,
+        orderByField: "createdAt",
+        orderDirection: "desc",
+        limitCount: 100,
+      });
+
+      if (result.success) {
+        setProducts(result.products);
+      } else {
+        toast.error("Failed to load products");
+        console.error("Error loading products:", result.error);
+      }
+    } catch (error) {
+      console.error("Error loading products:", error);
+      toast.error("Error loading products");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const products = [
-    {
-      id: 1,
-      name: 'Classic Black Tee',
-      price: 1499,
-      image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&q=80',
-      category: 'T-Shirts',
-      badge: 'Bestseller',
-      stock: 8,
-      description: 'Premium cotton t-shirt with a comfortable fit. Perfect for everyday wear.',
-    },
-    {
-      id: 2,
-      name: 'Denim Jacket',
-      price: 4999,
-      originalPrice: 6999,
-      image: 'https://images.unsplash.com/photo-1495105787522-5334e3ffa0ef?w=500&q=80',
-      category: 'Jackets',
-      badge: 'Sale',
-      stock: 5,
-      description: 'Classic denim jacket with modern fit. Durable and stylish for any season.',
-    },
-    {
-      id: 3,
-      name: 'Casual Hoodie',
-      price: 2499,
-      image: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=500&q=80',
-      category: 'Hoodies',
-      badge: 'New',
-      stock: 15,
-      description: 'Soft fleece hoodie with adjustable drawstrings. Cozy and warm.',
-    },
-    {
-      id: 4,
-      name: 'Slim Fit Jeans',
-      price: 3499,
-      image: 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=500&q=80',
-      category: 'Pants',
-      badge: 'Limited',
-      stock: 3,
-      description: 'Premium quality jeans with perfect fit. Comfortable stretch fabric.',
-    },
-    {
-      id: 5,
-      name: 'White Cotton Shirt',
-      price: 1999,
-      image: 'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=500&q=80',
-      category: 'T-Shirts',
-      stock: 12,
-      description: 'Classic white shirt perfect for any occasion.',
-    },
-    {
-      id: 6,
-      name: 'Leather Jacket',
-      price: 8999,
-      originalPrice: 11999,
-      image: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=500&q=80',
-      category: 'Jackets',
-      badge: 'Sale',
-      stock: 4,
-      description: 'Genuine leather jacket with premium finish.',
-    },
-    {
-      id: 7,
-      name: 'Zip Hoodie',
-      price: 2799,
-      image: 'https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=500&q=80',
-      category: 'Hoodies',
-      badge: 'New',
-      stock: 10,
-      description: 'Comfortable zip hoodie with side pockets.',
-    },
-    {
-      id: 8,
-      name: 'Cargo Pants',
-      price: 3999,
-      image: 'https://images.unsplash.com/photo-1603252109303-2751441dd157?w=500&q=80',
-      category: 'Pants',
-      stock: 7,
-      description: 'Utility cargo pants with multiple pockets.',
-    },
-  ];
-
-  const categories = ['All', 'T-Shirts', 'Hoodies', 'Jackets', 'Pants'];
-
-  const filteredProducts = selectedCategory === 'All' 
-    ? products 
-    : products.filter(p => p.category === selectedCategory);
-
   const toggleWishlist = (productId) => {
-    setWishlist(prev => {
+    setWishlist((prev) => {
       if (prev.includes(productId)) {
-        toast.error('Removed from wishlist');
-        return prev.filter(id => id !== productId);
+        toast.error("Removed from wishlist");
+        return prev.filter((id) => id !== productId);
       } else {
-        toast.success('Added to wishlist! ❤️');
+        toast.success("Added to wishlist! ❤️");
         return [...prev, productId];
       }
     });
   };
 
   const handleQuickAdd = (product) => {
-    addToCart(product);
-    toast.success(`${product.name} added to cart!`, {
-      icon: '🛒',
-    });
+    // If product has variants, open quick view to select options
+    if (product.variants && product.variants.length > 0) {
+      openQuickView(product);
+    } else {
+      // Add to cart directly
+      addToCart({
+        ...product,
+        selectedVariant: null,
+        quantity: 1,
+      });
+      toast.success(`${product.name} added to cart!`, {
+        icon: "🛒",
+      });
+    }
   };
 
   const openQuickView = (product) => {
@@ -140,141 +147,440 @@ const Products = () => {
     setTimeout(() => setSelectedProduct(null), 300);
   };
 
+  const getProductStock = (product) => {
+    if (product.variants && product.variants.length > 0) {
+      return product.totalStock || 0;
+    }
+    return product.stock || 0;
+  };
+
+  const getProductImage = (product) => {
+    if (product.images && product.images.length > 0) {
+      return typeof product.images[0] === "object"
+        ? product.images[0].url
+        : product.images[0];
+    }
+    // Fallback image
+    return "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&q=80";
+  };
+
+  const ProductCard = ({ product }) => {
+    const stock = getProductStock(product);
+    const isOutOfStock = stock === 0;
+    const isLowStock = stock > 0 && stock <= 5;
+    const imageUrl = getProductImage(product);
+
+    return (
+      <TiltCard className="group h-full">
+        <div
+          className={`relative rounded-2xl overflow-hidden h-full ${
+            isDark ? "bg-gray-800" : "bg-white"
+          } shadow-lg hover:shadow-2xl transition-all duration-300`}
+        >
+          {/* Product Image */}
+          <div className="relative aspect-square overflow-hidden">
+            <LazyImage
+              src={imageUrl}
+              alt={product.name}
+              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+            />
+
+            {/* Badges */}
+            <div className="absolute top-4 left-4 flex flex-col space-y-2">
+              {product.badge && (
+                <span
+                  className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                    product.badge === "Sale"
+                      ? "bg-red-500 text-white"
+                      : product.badge === "New"
+                        ? "bg-green-500 text-white"
+                        : product.badge === "Hot"
+                          ? "bg-orange-500 text-white"
+                          : "bg-blue-500 text-white"
+                  }`}
+                >
+                  {product.badge}
+                </span>
+              )}
+              {isOutOfStock && (
+                <span className="bg-gray-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
+                  Out of Stock
+                </span>
+              )}
+              {isLowStock && !isOutOfStock && (
+                <span className="bg-orange-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
+                  Low Stock
+                </span>
+              )}
+            </div>
+
+            {/* Quick Actions */}
+            <div className="absolute top-4 right-4 flex flex-col space-y-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <button
+                onClick={() => toggleWishlist(product.id)}
+                className={`p-2 rounded-full backdrop-blur-sm transition-colors ${
+                  wishlist.includes(product.id)
+                    ? "bg-red-500 text-white"
+                    : "bg-white/80 text-gray-700 hover:bg-red-500 hover:text-white"
+                }`}
+              >
+                <Heart
+                  className={`w-4 h-4 ${wishlist.includes(product.id) ? "fill-current" : ""}`}
+                />
+              </button>
+              <button
+                onClick={() => openQuickView(product)}
+                className="p-2 rounded-full bg-white/80 text-gray-700 hover:bg-blue-500 hover:text-white backdrop-blur-sm transition-colors"
+              >
+                <Eye className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Overlay for out of stock */}
+            {isOutOfStock && (
+              <div className="absolute inset-0 bg-gray-900/50 flex items-center justify-center">
+                <span className="text-white font-semibold">Out of Stock</span>
+              </div>
+            )}
+          </div>
+
+          {/* Product Info */}
+          <div className="p-6">
+            <div className="flex items-start justify-between mb-2">
+              <h3
+                className={`font-semibold text-lg line-clamp-2 ${
+                  isDark ? "text-white" : "text-gray-900"
+                }`}
+              >
+                {product.name}
+              </h3>
+              {product.isFeatured && (
+                <Star className="w-5 h-5 text-yellow-500 fill-current flex-shrink-0 ml-2" />
+              )}
+            </div>
+
+            <p
+              className={`text-sm mb-4 line-clamp-2 ${
+                isDark ? "text-gray-300" : "text-gray-600"
+              }`}
+            >
+              {product.shortDescription || product.description}
+            </p>
+
+            {/* Rating */}
+            {product.rating && product.reviewCount > 0 && (
+              <div className="flex items-center mb-3">
+                <div className="flex items-center">
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      className={`w-4 h-4 ${
+                        i < Math.floor(product.rating)
+                          ? "text-yellow-500 fill-current"
+                          : "text-gray-300"
+                      }`}
+                    />
+                  ))}
+                </div>
+                <span
+                  className={`text-sm ml-2 ${isDark ? "text-gray-400" : "text-gray-500"}`}
+                >
+                  ({product.reviewCount})
+                </span>
+              </div>
+            )}
+
+            {/* Price */}
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <span
+                  className={`text-2xl font-bold ${
+                    isDark ? "text-white" : "text-gray-900"
+                  }`}
+                >
+                  {formatPrice(product.price)}
+                </span>
+                {product.originalPrice &&
+                  product.originalPrice !== product.price && (
+                    <span
+                      className={`text-sm ml-2 line-through ${
+                        isDark ? "text-gray-500" : "text-gray-400"
+                      }`}
+                    >
+                      {formatPrice(product.originalPrice)}
+                    </span>
+                  )}
+              </div>
+              <span
+                className={`text-sm ${
+                  isDark ? "text-gray-400" : "text-gray-500"
+                }`}
+              >
+                Stock: {stock}
+              </span>
+            </div>
+
+            {/* Variants Preview */}
+            {product.variants && product.variants.length > 0 && (
+              <div className="mb-4">
+                <div className="flex items-center space-x-2">
+                  <span
+                    className={`text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}
+                  >
+                    Colors:
+                  </span>
+                  <div className="flex space-x-1">
+                    {[
+                      ...new Set(
+                        product.variants.map((v) => v.colorHex || "#000000"),
+                      ),
+                    ]
+                      .slice(0, 4)
+                      .map((color, index) => (
+                        <div
+                          key={index}
+                          className="w-4 h-4 rounded-full border-2 border-white shadow-sm"
+                          style={{ backgroundColor: color }}
+                        />
+                      ))}
+                    {product.variants.length > 4 && (
+                      <span
+                        className={`text-xs ${isDark ? "text-gray-400" : "text-gray-500"}`}
+                      >
+                        +{product.variants.length - 4}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Add to Cart Button */}
+            <button
+              onClick={() => handleQuickAdd(product)}
+              disabled={isOutOfStock}
+              className={`w-full py-3 px-4 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center space-x-2 ${
+                isOutOfStock
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  : isDark
+                    ? "bg-blue-600 hover:bg-blue-700 text-white"
+                    : "bg-gray-900 hover:bg-blue-600 text-white"
+              }`}
+            >
+              <ShoppingCart className="w-5 h-5" />
+              <span>{isOutOfStock ? "Out of Stock" : "Add to Cart"}</span>
+            </button>
+          </div>
+        </div>
+      </TiltCard>
+    );
+  };
+
   return (
     <>
       <Navbar />
-      <div className={`min-h-screen ${isDark ? 'bg-gray-900' : 'bg-gray-50'} pt-20`}>
+      <div
+        className={`min-h-screen ${isDark ? "bg-gray-900" : "bg-gray-50"} pt-20`}
+      >
         {/* Hero Section */}
-        <section className={`py-16 ${isDark ? 'bg-gray-800' : 'bg-white'} border-b ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
+        <section
+          className={`py-16 ${isDark ? "bg-gray-800" : "bg-white"} border-b ${isDark ? "border-gray-700" : "border-gray-200"}`}
+        >
           <div className="container mx-auto px-4">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-center max-w-3xl mx-auto"
+              className="text-center"
             >
-              <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-600 bg-clip-text text-transparent">
+              <h1
+                className={`text-4xl md:text-6xl font-bold mb-6 ${
+                  isDark ? "text-white" : "text-gray-900"
+                }`}
+              >
                 Our Products
               </h1>
-              <p className={`text-xl ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                Discover our collection of premium quality clothing
+              <p
+                className={`text-xl mb-8 max-w-2xl mx-auto ${
+                  isDark ? "text-gray-300" : "text-gray-600"
+                }`}
+              >
+                Discover our curated collection of premium clothing designed for
+                comfort, style, and durability.
               </p>
             </motion.div>
           </div>
         </section>
 
-        {/* Filter Section */}
+        {/* Filters Section */}
         <section className="py-8">
           <div className="container mx-auto px-4">
-            <div className="flex items-center justify-between flex-wrap gap-4">
-              <div className="flex items-center gap-2">
-                <Filter className={`w-5 h-5 ${isDark ? 'text-gray-400' : 'text-gray-600'}`} />
-                <span className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>Filter by:</span>
+            <div
+              className={`rounded-2xl p-6 mb-8 ${
+                isDark ? "bg-gray-800" : "bg-white"
+              } shadow-lg`}
+            >
+              <div className="flex flex-wrap items-center gap-4 mb-4">
+                <div className="flex items-center space-x-2">
+                  <Filter
+                    className={`w-5 h-5 ${isDark ? "text-gray-300" : "text-gray-600"}`}
+                  />
+                  <span
+                    className={`font-medium ${isDark ? "text-white" : "text-gray-900"}`}
+                  >
+                    Filters:
+                  </span>
+                </div>
               </div>
-              <div className="flex flex-wrap gap-2">
-                {categories.map((category) => (
-                  <button
-                    key={category}
-                    onClick={() => setSelectedCategory(category)}
-                    className={`px-6 py-2 rounded-full font-medium transition-all ${
-                      selectedCategory === category
-                        ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg'
-                        : isDark
-                        ? 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-                        : 'bg-white text-gray-700 hover:bg-gray-100'
+
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                {/* Search */}
+                <div>
+                  <input
+                    type="text"
+                    placeholder="Search products..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className={`w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500 ${
+                      isDark
+                        ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+                        : "bg-white border-gray-300 text-gray-900 placeholder-gray-500"
+                    }`}
+                  />
+                </div>
+
+                {/* Category Filter */}
+                <div>
+                  <select
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    className={`w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500 ${
+                      isDark
+                        ? "bg-gray-700 border-gray-600 text-white"
+                        : "bg-white border-gray-300 text-gray-900"
                     }`}
                   >
-                    {category}
-                  </button>
-                ))}
+                    <option value="All">All Categories</option>
+                    {CATEGORIES.map((category) => (
+                      <option key={category} value={category}>
+                        {category}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Price Range */}
+                <div>
+                  <select
+                    onChange={(e) => {
+                      const [min, max] = e.target.value.split("-").map(Number);
+                      setPriceRange({ min, max });
+                    }}
+                    className={`w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500 ${
+                      isDark
+                        ? "bg-gray-700 border-gray-600 text-white"
+                        : "bg-white border-gray-300 text-gray-900"
+                    }`}
+                  >
+                    <option value="0-10000">All Prices</option>
+                    <option value="0-1000">Under Rs. 1,000</option>
+                    <option value="1000-2500">Rs. 1,000 - 2,500</option>
+                    <option value="2500-5000">Rs. 2,500 - 5,000</option>
+                    <option value="5000-10000">Above Rs. 5,000</option>
+                  </select>
+                </div>
+
+                {/* Sort */}
+                <div>
+                  <select
+                    value={`${sortBy}-${sortOrder}`}
+                    onChange={(e) => {
+                      const [field, order] = e.target.value.split("-");
+                      setSortBy(field);
+                      setSortOrder(order);
+                    }}
+                    className={`w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500 ${
+                      isDark
+                        ? "bg-gray-700 border-gray-600 text-white"
+                        : "bg-white border-gray-300 text-gray-900"
+                    }`}
+                  >
+                    <option value="createdAt-desc">Newest First</option>
+                    <option value="createdAt-asc">Oldest First</option>
+                    <option value="name-asc">Name A-Z</option>
+                    <option value="name-desc">Name Z-A</option>
+                    <option value="price-asc">Price: Low to High</option>
+                    <option value="price-desc">Price: High to Low</option>
+                    <option value="views-desc">Most Popular</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Results Summary */}
+              <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <p
+                  className={`text-sm ${isDark ? "text-gray-300" : "text-gray-600"}`}
+                >
+                  Showing {filteredProducts.length} of {products.length}{" "}
+                  products
+                </p>
               </div>
             </div>
-          </div>
-        </section>
 
-        {/* Products Grid */}
-        <section className="py-12">
-          <div className="container mx-auto px-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {filteredProducts.map((product, index) => (
-                <TiltCard
-                  key={product.id}
-                  className={`group ${isDark ? 'bg-gray-800' : 'bg-white'} rounded-lg overflow-hidden hover:shadow-2xl transition-all`}
+            {/* Products Grid */}
+            {loading ? (
+              <div className="flex items-center justify-center py-20">
+                <LoadingSpinner size="large" />
+              </div>
+            ) : filteredProducts.length === 0 ? (
+              <div className="text-center py-20">
+                <div
+                  className={`text-6xl mb-4 ${isDark ? "text-gray-600" : "text-gray-300"}`}
                 >
+                  🛍️
+                </div>
+                <h3
+                  className={`text-2xl font-bold mb-4 ${
+                    isDark ? "text-white" : "text-gray-900"
+                  }`}
+                >
+                  No products found
+                </h3>
+                <p
+                  className={`mb-6 ${isDark ? "text-gray-300" : "text-gray-600"}`}
+                >
+                  Try adjusting your filters or search terms to find what you're
+                  looking for.
+                </p>
+                <button
+                  onClick={() => {
+                    setSelectedCategory("All");
+                    setPriceRange({ min: 0, max: 10000 });
+                    setSearchTerm("");
+                  }}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors"
+                >
+                  Clear Filters
+                </button>
+              </div>
+            ) : (
+              <motion.div
+                layout
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
+              >
+                {filteredProducts.map((product, index) => (
                   <motion.div
+                    key={product.id}
+                    layout
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 20 }}
                     transition={{ delay: index * 0.1 }}
                   >
-                    <div className="relative overflow-hidden aspect-square">
-                      <LazyImage
-                        src={product.image}
-                        alt={product.name}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                      />
-                      
-                      {product.badge && (
-                        <motion.span 
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          className={`absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-bold text-white ${
-                            product.badge === 'Sale' ? 'bg-red-500' :
-                            product.badge === 'New' ? 'bg-blue-500' :
-                            product.badge === 'Limited' ? 'bg-purple-500' :
-                            'bg-yellow-500'
-                          }`}
-                        >
-                          {product.badge}
-                        </motion.span>
-                      )}
-
-                      <motion.button
-                        whileHover={{ scale: 1.2 }}
-                        whileTap={{ scale: 0.8 }}
-                        onClick={() => toggleWishlist(product.id)}
-                        className={`absolute top-4 right-4 p-2 rounded-full ${isDark ? 'bg-gray-800/80' : 'bg-white/80'} backdrop-blur-sm transition-all`}
-                      >
-                        <Heart 
-                          className={`w-5 h-5 ${wishlist.includes(product.id) ? 'fill-red-500 text-red-500' : isDark ? 'text-white' : 'text-gray-700'}`} 
-                        />
-                      </motion.button>
-                      
-                      <div className="absolute inset-0 bg-gray-900/0 group-hover:bg-gray-900/60 transition-all flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
-                        <motion.button
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          onClick={() => openQuickView(product)}
-                          className="bg-white text-gray-900 px-4 py-2 rounded-full font-semibold hover:shadow-lg transition-all flex items-center gap-2"
-                        >
-                          <Eye className="w-4 h-4" />
-                          View
-                        </motion.button>
-                        <motion.button
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          onClick={() => handleQuickAdd(product)}
-                          className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-4 py-2 rounded-full font-semibold hover:shadow-lg transition-all flex items-center gap-2"
-                        >
-                          <ShoppingCart className="w-4 h-4" />
-                          Add
-                        </motion.button>
-                      </div>
-                    </div>
-                    <div className="p-6">
-                      <p className={`${isDark ? 'text-gray-400' : 'text-gray-500'} text-sm mb-1`}>{product.category}</p>
-                      <h3 className={`text-xl font-semibold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>{product.name}</h3>
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <span className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{formatPrice(product.price)}</span>
-                          {product.originalPrice && (
-                            <span className={`text-sm line-through ml-2 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{formatPrice(product.originalPrice)}</span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
+                    <ProductCard product={product} />
                   </motion.div>
-                </TiltCard>
-              ))}
-            </div>
+                ))}
+              </motion.div>
+            )}
           </div>
         </section>
 
