@@ -16,6 +16,7 @@ const ALLOWED_ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL;
  * Uses client-side validation with environment variable
  * @returns {Promise<User>}
  */
+
 export const loginAdminWithGoogle = async () => {
   try {
     // Validate that admin email is configured
