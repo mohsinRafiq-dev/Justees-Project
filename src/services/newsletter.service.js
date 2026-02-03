@@ -15,6 +15,7 @@ export const subscribeToNewsletter = async (email) => {
       throw new Error('Please enter a valid email address');
     }
 
+    
     // Check if email already exists
     const q = query(
       collection(db, NEWSLETTER_COLLECTION),
