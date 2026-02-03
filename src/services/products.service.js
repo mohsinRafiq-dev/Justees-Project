@@ -25,8 +25,7 @@ const PRODUCTS_COLLECTION = "products";
 const CATEGORIES_COLLECTION = "categories";
 const INVENTORY_COLLECTION = "inventory";
 const SIZES_COLLECTION = "sizes";
-const COLORS_COLLECTION = "colors";  // separate collections for admin-managed colors
-
+const COLORS_COLLECTION = "colors"; // separate collections for admin-managed colors
 
 /**
  * Generate URL-friendly slug from product name
@@ -129,7 +128,7 @@ export const getAllProducts = async (options = {}) => {
     } = options;
 
     const productsRef = collection(db, PRODUCTS_COLLECTION);
-    
+
     // Simple query with just ordering - no complex where clauses
     let q = query(productsRef, orderBy(orderByField, orderDirection));
 
@@ -157,19 +156,19 @@ export const getAllProducts = async (options = {}) => {
 
     // Apply filters client-side to avoid index requirements
     if (status) {
-      products = products.filter(p => p.status === status);
+      products = products.filter((p) => p.status === status);
     }
 
     if (typeof isVisible === "boolean") {
-      products = products.filter(p => p.isVisible === isVisible);
+      products = products.filter((p) => p.isVisible === isVisible);
     }
 
     if (category && category !== "All") {
-      products = products.filter(p => p.category === category);
+      products = products.filter((p) => p.category === category);
     }
 
     if (typeof featured === "boolean") {
-      products = products.filter(p => p.isFeatured === featured);
+      products = products.filter((p) => p.isFeatured === featured);
     }
 
     // Apply search filter if provided (client-side)
@@ -254,7 +253,7 @@ export const createProduct = async (
   productData,
   imageFiles = [],
   userId = null,
-  imageColorMapping = []
+  imageColorMapping = [],
 ) => {
   try {
     // Validate product data
@@ -333,15 +332,17 @@ export const createProduct = async (
       const imageUploadResult = await uploadMultipleProductImages(
         imageFiles,
         productId,
-        imageColorMapping
+        imageColorMapping,
       );
       if (imageUploadResult.success) {
         // Map uploaded images with color information
-        uploadedImages = imageUploadResult.uploadedImages.map((imageData, index) => ({
-          ...imageData,
-          color: imageColorMapping[index] || 'default',
-          isPrimary: index === 0
-        }));
+        uploadedImages = imageUploadResult.uploadedImages.map(
+          (imageData, index) => ({
+            ...imageData,
+            color: imageColorMapping[index] || "default",
+            isPrimary: index === 0,
+          }),
+        );
 
         // Update product with image URLs
         await updateDoc(productRef, {
@@ -384,7 +385,7 @@ export const updateProduct = async (
   newImageFiles = [],
   imagesToRemove = [],
   userId = null,
-  imageColorMapping = []
+  imageColorMapping = [],
 ) => {
   try {
     const productRef = doc(db, PRODUCTS_COLLECTION, productId);
@@ -481,16 +482,18 @@ export const updateProduct = async (
       const imageUploadResult = await uploadMultipleProductImages(
         newImageFiles,
         productId,
-        imageColorMapping
+        imageColorMapping,
       );
       if (imageUploadResult.success) {
         // Add new images with color information
-        const newImagesWithColor = imageUploadResult.uploadedImages.map((imageData, index) => ({
-          ...imageData,
-          color: imageColorMapping[index] || 'default',
-          isPrimary: currentImages.length === 0 && index === 0
-        }));
-        
+        const newImagesWithColor = imageUploadResult.uploadedImages.map(
+          (imageData, index) => ({
+            ...imageData,
+            color: imageColorMapping[index] || "default",
+            isPrimary: currentImages.length === 0 && index === 0,
+          }),
+        );
+
         currentImages = [...currentImages, ...newImagesWithColor];
       }
     }
@@ -725,8 +728,11 @@ export const getCategories = async () => {
     const categories = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
     return { success: true, categories };
   } catch (error) {
-    console.error('Error getting categories:', error);
-    return { success: false, error: error.message || 'Failed to get categories' };
+    console.error("Error getting categories:", error);
+    return {
+      success: false,
+      error: error.message || "Failed to get categories",
+    };
   }
 };
 
@@ -738,8 +744,11 @@ export const createCategory = async (name) => {
     });
     return { success: true, id: docRef.id };
   } catch (error) {
-    console.error('Error creating category:', error);
-    return { success: false, error: error.message || 'Failed to create category' };
+    console.error("Error creating category:", error);
+    return {
+      success: false,
+      error: error.message || "Failed to create category",
+    };
   }
 };
 
@@ -749,8 +758,11 @@ export const updateCategory = async (id, data) => {
     await updateDoc(ref, { ...data, updatedAt: serverTimestamp() });
     return { success: true };
   } catch (error) {
-    console.error('Error updating category:', error);
-    return { success: false, error: error.message || 'Failed to update category' };
+    console.error("Error updating category:", error);
+    return {
+      success: false,
+      error: error.message || "Failed to update category",
+    };
   }
 };
 
@@ -759,8 +771,11 @@ export const deleteCategory = async (id) => {
     await deleteDoc(doc(db, CATEGORIES_COLLECTION, id));
     return { success: true };
   } catch (error) {
-    console.error('Error deleting category:', error);
-    return { success: false, error: error.message || 'Failed to delete category' };
+    console.error("Error deleting category:", error);
+    return {
+      success: false,
+      error: error.message || "Failed to delete category",
+    };
   }
 };
 
@@ -773,8 +788,8 @@ export const getSizes = async () => {
     const sizes = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
     return { success: true, sizes };
   } catch (error) {
-    console.error('Error getting sizes:', error);
-    return { success: false, error: error.message || 'Failed to get sizes' };
+    console.error("Error getting sizes:", error);
+    return { success: false, error: error.message || "Failed to get sizes" };
   }
 };
 
@@ -786,8 +801,8 @@ export const createSize = async (name) => {
     });
     return { success: true, id: docRef.id };
   } catch (error) {
-    console.error('Error creating size:', error);
-    return { success: false, error: error.message || 'Failed to create size' };
+    console.error("Error creating size:", error);
+    return { success: false, error: error.message || "Failed to create size" };
   }
 };
 
@@ -796,8 +811,8 @@ export const deleteSize = async (id) => {
     await deleteDoc(doc(db, SIZES_COLLECTION, id));
     return { success: true };
   } catch (error) {
-    console.error('Error deleting size:', error);
-    return { success: false, error: error.message || 'Failed to delete size' };
+    console.error("Error deleting size:", error);
+    return { success: false, error: error.message || "Failed to delete size" };
   }
 };
 
@@ -807,8 +822,8 @@ export const getColors = async () => {
     const colors = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
     return { success: true, colors };
   } catch (error) {
-    console.error('Error getting colors:', error);
-    return { success: false, error: error.message || 'Failed to get colors' };
+    console.error("Error getting colors:", error);
+    return { success: false, error: error.message || "Failed to get colors" };
   }
 };
 
@@ -820,8 +835,8 @@ export const createColor = async (name) => {
     });
     return { success: true, id: docRef.id };
   } catch (error) {
-    console.error('Error creating color:', error);
-    return { success: false, error: error.message || 'Failed to create color' };
+    console.error("Error creating color:", error);
+    return { success: false, error: error.message || "Failed to create color" };
   }
 };
 
@@ -830,8 +845,8 @@ export const deleteColor = async (id) => {
     await deleteDoc(doc(db, COLORS_COLLECTION, id));
     return { success: true };
   } catch (error) {
-    console.error('Error deleting color:', error);
-    return { success: false, error: error.message || 'Failed to delete color' };
+    console.error("Error deleting color:", error);
+    return { success: false, error: error.message || "Failed to delete color" };
   }
 };
 
@@ -840,22 +855,22 @@ export const deleteColor = async (id) => {
  */
 export const getAllOrders = async () => {
   try {
-    const snap = await getDocs(collection(db, 'orders'));
+    const snap = await getDocs(collection(db, "orders"));
     const orders = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
     return { success: true, orders };
   } catch (error) {
-    console.error('Error getting orders:', error);
-    return { success: false, error: error.message || 'Failed to get orders' };
+    console.error("Error getting orders:", error);
+    return { success: false, error: error.message || "Failed to get orders" };
   }
 };
 
 export const updateOrderStatus = async (orderId, status) => {
   try {
-    const ref = doc(db, 'orders', orderId);
+    const ref = doc(db, "orders", orderId);
     await updateDoc(ref, { status, updatedAt: serverTimestamp() });
     return { success: true };
   } catch (error) {
-    console.error('Error updating order:', error);
-    return { success: false, error: error.message || 'Failed to update order' };
+    console.error("Error updating order:", error);
+    return { success: false, error: error.message || "Failed to update order" };
   }
 };
