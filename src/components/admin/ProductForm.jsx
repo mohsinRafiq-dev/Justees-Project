@@ -13,7 +13,8 @@ import {
   validateProductForm, 
   validateVariants
 } from '../../utils/validation';
-import { CATEGORIES, SIZES, COLORS } from '../../utils/constants';
+import { CATEGORIES, SIZES as DEFAULT_SIZES, COLORS as DEFAULT_COLORS } from '../../utils/constants';
+import { getSizes, getColors } from '../../services/products.service';
 import { useAuth } from '../../hooks/useAuth';
 
 const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) => {
@@ -46,8 +47,28 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
   const [imagesToRemove, setImagesToRemove] = useState([]);
   const [errors, setErrors] = useState({});
   const [tagInput, setTagInput] = useState('');
-  const [availableColors, setAvailableColors] = useState([]);
+  const [availableColors, setAvailableColors] = useState(DEFAULT_COLORS || []);
+  const [availableSizes, setAvailableSizes] = useState(DEFAULT_SIZES || []);
   const [newColorInput, setNewColorInput] = useState('');
+
+  // Load admin-defined sizes/colors (if any) and keep defaults as fallback
+  useEffect(() => {
+    const loadAttributes = async () => {
+      try {
+        const [sizesRes, colorsRes] = await Promise.all([getSizes(), getColors()]);
+        if (sizesRes.success && sizesRes.sizes) {
+          setAvailableSizes(sizesRes.sizes.map((s) => s.name));
+        }
+        if (colorsRes.success && colorsRes.colors) {
+          setAvailableColors(colorsRes.colors.map((c) => c.name));
+        }
+      } catch (err) {
+        console.error('Error loading sizes/colors:', err);
+      }
+    };
+
+    loadAttributes();
+  }, []);
 
   // Initialize form with existing product data
   useEffect(() => {

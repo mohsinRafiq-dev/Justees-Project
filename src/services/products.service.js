@@ -24,6 +24,9 @@ import {
 const PRODUCTS_COLLECTION = "products";
 const CATEGORIES_COLLECTION = "categories";
 const INVENTORY_COLLECTION = "inventory";
+const SIZES_COLLECTION = "sizes";
+const COLORS_COLLECTION = "colors";  // separate collections for admin-managed colors
+
 
 /**
  * Generate URL-friendly slug from product name
@@ -709,5 +712,150 @@ export const getProductAnalytics = async (productId = null) => {
       success: false,
       error: error.message || "Failed to get analytics",
     };
+  }
+};
+
+/**
+ * Categories management (admin)
+ */
+export const getCategories = async () => {
+  try {
+    const q = collection(db, CATEGORIES_COLLECTION);
+    const snap = await getDocs(q);
+    const categories = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    return { success: true, categories };
+  } catch (error) {
+    console.error('Error getting categories:', error);
+    return { success: false, error: error.message || 'Failed to get categories' };
+  }
+};
+
+export const createCategory = async (name) => {
+  try {
+    const docRef = await addDoc(collection(db, CATEGORIES_COLLECTION), {
+      name,
+      createdAt: serverTimestamp(),
+    });
+    return { success: true, id: docRef.id };
+  } catch (error) {
+    console.error('Error creating category:', error);
+    return { success: false, error: error.message || 'Failed to create category' };
+  }
+};
+
+export const updateCategory = async (id, data) => {
+  try {
+    const ref = doc(db, CATEGORIES_COLLECTION, id);
+    await updateDoc(ref, { ...data, updatedAt: serverTimestamp() });
+    return { success: true };
+  } catch (error) {
+    console.error('Error updating category:', error);
+    return { success: false, error: error.message || 'Failed to update category' };
+  }
+};
+
+export const deleteCategory = async (id) => {
+  try {
+    await deleteDoc(doc(db, CATEGORIES_COLLECTION, id));
+    return { success: true };
+  } catch (error) {
+    console.error('Error deleting category:', error);
+    return { success: false, error: error.message || 'Failed to delete category' };
+  }
+};
+
+/**
+ * Sizes & Colors management (admin)
+ */
+export const getSizes = async () => {
+  try {
+    const snap = await getDocs(collection(db, SIZES_COLLECTION));
+    const sizes = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    return { success: true, sizes };
+  } catch (error) {
+    console.error('Error getting sizes:', error);
+    return { success: false, error: error.message || 'Failed to get sizes' };
+  }
+};
+
+export const createSize = async (name) => {
+  try {
+    const docRef = await addDoc(collection(db, SIZES_COLLECTION), {
+      name,
+      createdAt: serverTimestamp(),
+    });
+    return { success: true, id: docRef.id };
+  } catch (error) {
+    console.error('Error creating size:', error);
+    return { success: false, error: error.message || 'Failed to create size' };
+  }
+};
+
+export const deleteSize = async (id) => {
+  try {
+    await deleteDoc(doc(db, SIZES_COLLECTION, id));
+    return { success: true };
+  } catch (error) {
+    console.error('Error deleting size:', error);
+    return { success: false, error: error.message || 'Failed to delete size' };
+  }
+};
+
+export const getColors = async () => {
+  try {
+    const snap = await getDocs(collection(db, COLORS_COLLECTION));
+    const colors = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    return { success: true, colors };
+  } catch (error) {
+    console.error('Error getting colors:', error);
+    return { success: false, error: error.message || 'Failed to get colors' };
+  }
+};
+
+export const createColor = async (name) => {
+  try {
+    const docRef = await addDoc(collection(db, COLORS_COLLECTION), {
+      name,
+      createdAt: serverTimestamp(),
+    });
+    return { success: true, id: docRef.id };
+  } catch (error) {
+    console.error('Error creating color:', error);
+    return { success: false, error: error.message || 'Failed to create color' };
+  }
+};
+
+export const deleteColor = async (id) => {
+  try {
+    await deleteDoc(doc(db, COLORS_COLLECTION, id));
+    return { success: true };
+  } catch (error) {
+    console.error('Error deleting color:', error);
+    return { success: false, error: error.message || 'Failed to delete color' };
+  }
+};
+
+/**
+ * Orders management (basic)
+ */
+export const getAllOrders = async () => {
+  try {
+    const snap = await getDocs(collection(db, 'orders'));
+    const orders = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    return { success: true, orders };
+  } catch (error) {
+    console.error('Error getting orders:', error);
+    return { success: false, error: error.message || 'Failed to get orders' };
+  }
+};
+
+export const updateOrderStatus = async (orderId, status) => {
+  try {
+    const ref = doc(db, 'orders', orderId);
+    await updateDoc(ref, { status, updatedAt: serverTimestamp() });
+    return { success: true };
+  } catch (error) {
+    console.error('Error updating order:', error);
+    return { success: false, error: error.message || 'Failed to update order' };
   }
 };

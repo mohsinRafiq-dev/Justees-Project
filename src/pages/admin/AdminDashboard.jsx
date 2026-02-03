@@ -11,12 +11,17 @@ import {
   Settings,
   BarChart3,
   AlertTriangle,
+  Tag,
+  Layers,
 } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { getProductAnalytics } from "../../services/products.service";
 import { formatPrice } from "../../utils/validation";
 import ProductManagement from "../../components/admin/ProductManagement";
+import CategoriesManagement from "./CategoriesManagement";
+import SizesManagement from "./SizesManagement";
+import OrdersManagement from "./OrdersManagement";
 
 const AdminDashboard = () => {
   const { user, logout } = useAuth();
@@ -77,6 +82,8 @@ const AdminDashboard = () => {
   const sidebarItems = [
     { id: "dashboard", name: "Dashboard", icon: BarChart3 },
     { id: "products", name: "Products", icon: Package },
+    { id: "categories", name: "Categories", icon: Tag },
+    { id: "sizes", name: "Sizes & Colors", icon: Layers },
     { id: "orders", name: "Orders", icon: ShoppingBag },
     { id: "users", name: "Users", icon: Users },
     { id: "settings", name: "Settings", icon: Settings },
@@ -326,16 +333,11 @@ const AdminDashboard = () => {
 
         {activeTab === "products" && <ProductManagement />}
 
-        {activeTab === "orders" && (
-          <div className="p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              Orders Management
-            </h2>
-            <p className="text-gray-600">
-              Orders management feature coming soon...
-            </p>
-          </div>
-        )}
+        {activeTab === "categories" && <CategoriesManagement />}
+
+        {activeTab === "sizes" && <SizesManagement />}
+
+        {activeTab === "orders" && <OrdersManagement />}
 
         {activeTab === "users" && (
           <div className="p-8">
