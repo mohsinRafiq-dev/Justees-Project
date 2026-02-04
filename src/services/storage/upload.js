@@ -62,6 +62,30 @@ export const uploadProductImageEnhanced = async (file, productId = null, onProgr
   }
 };
 
+export const uploadCategoryImage = async (file) => {
+  try {
+    const validation = validateImage(file);
+    if (!validation.valid) {
+      throw new Error(validation.error);
+    }
+
+    const compressedBlob = await compressImage(file);
+    const fileName = generateFileName(file.name, 'category');
+    const imagePath = `categories/${fileName}`;
+    const storageRef = ref(storage, imagePath);
+
+    const uploadResult = await uploadBytes(storageRef, compressedBlob, {
+      customMetadata: { originalName: file.name, uploadedAt: new Date().toISOString() }
+    });
+
+    const downloadURL = await getDownloadURL(uploadResult.ref);
+    return { success: true, url: downloadURL };
+  } catch (error) {
+    console.error('Error uploading category image:', error);
+    return { success: false, error: error.message || 'Failed to upload category image' };
+  }
+};
+
 export const uploadMultipleProductImages = async (files, productId, colorMapping = [], onProgress = null) => {
   console.log('[storage] uploadMultipleProductImages called', { count: files?.length, productId });
   try {

@@ -19,9 +19,13 @@ export const getCategories = async () => {
   }
 };
 
-export const createCategory = async (name) => {
+export const createCategory = async (name, imageUrl = '') => {
   try {
-    const docRef = await addDoc(collection(db, CATEGORIES_COLLECTION), { name, createdAt: new Date() });
+    const docRef = await addDoc(collection(db, CATEGORIES_COLLECTION), {
+      name,
+      image: imageUrl,
+      createdAt: new Date()
+    });
     return { success: true, id: docRef.id };
   } catch (error) {
     console.error("Error creating category:", error);
