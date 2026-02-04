@@ -45,6 +45,7 @@ const CategoriesManagement = () => {
         toast.success('Category added');
         setNewCategory('');
         loadCategories();
+        window.dispatchEvent(new Event('productAttributes:changed'));
       } else {
         toast.error(res.error || 'Failed to add category');
       }

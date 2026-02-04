@@ -8,8 +8,8 @@ service firebase.storage {
       // Anyone can read images
       allow read: if true;
       
-      // Only authenticated admins can upload/delete images
-      allow create, delete: if request.auth != null;
+      // Only authenticated users can upload/update/delete images
+      allow write: if request.auth != null;
     }
   }
 }

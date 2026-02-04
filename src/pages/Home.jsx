@@ -9,6 +9,7 @@ import LazyImage from '../components/common/LazyImage';
 import { useCart } from '../contexts/CartContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { subscribeToNewsletter } from '../services/newsletter.service';
+import { getAllProducts } from '../services/products.service';
 import AnimatedBackground from '../components/common/AnimatedBackground';
 import AnimatedCounter from '../components/common/AnimatedCounter';
 import TiltCard from '../components/common/TiltCard';
@@ -25,6 +26,7 @@ const Home = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const [wishlist, setWishlist] = useState([]);
+  const [featuredProducts, setFeaturedProducts] = useState([]);
 
   // Hero slider images
   const heroSlides = [
@@ -51,55 +53,65 @@ const Home = () => {
     },
   ];
 
-  // Featured products
   // Helper function to format price in Indian format
   const formatPrice = (price) => {
     return `Rs. ${price.toLocaleString('en-IN')}`;
   };
 
-  const featuredProducts = [
-    {
-      id: 1,
-      name: 'Classic Black Tee',
-      price: 1499,
-      image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&q=80',
-      category: 'T-Shirts',
-      badge: 'Bestseller',
-      stock: 8,
-      description: 'Premium cotton t-shirt with a comfortable fit. Perfect for everyday wear.',
-    },
-    {
-      id: 2,
-      name: 'Denim Jacket',
-      price: 4999,
-      originalPrice: 6999,
-      image: 'https://images.unsplash.com/photo-1495105787522-5334e3ffa0ef?w=500&q=80',
-      category: 'Jackets',
-      badge: 'Sale',
-      stock: 5,
-      description: 'Classic denim jacket with modern fit. Durable and stylish for any season.',
-    },
-    {
-      id: 3,
-      name: 'Casual Hoodie',
-      price: 2499,
-      image: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=500&q=80',
-      category: 'Hoodies',
-      badge: 'New',
-      stock: 15,
-      description: 'Soft fleece hoodie with adjustable drawstrings. Cozy and warm.',
-    },
-    {
-      id: 4,
-      name: 'Slim Fit Jeans',
-      price: 3499,
-      image: 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=500&q=80',
-      category: 'Pants',
-      badge: 'Limited',
-      stock: 3,
-      description: 'Premium quality jeans with perfect fit. Comfortable stretch fabric.',
-    },
-  ];
+  // Helper function to get product image
+  const getProductImage = (product) => {
+    if (product.images && product.images.length > 0) {
+      return typeof product.images[0] === "object"
+        ? product.images[0].url
+        : product.images[0];
+    }
+    // Return placeholder for products without images instead of external URL
+    return `/api/placeholder/400/400?text=${encodeURIComponent(product.name || 'Product')}`;
+  };
+
+  // Helper function to get product stock
+  const getProductStock = (product) => {
+    if (product.variants && product.variants.length > 0) {
+      return product.totalStock || 0;
+    }
+    return product.stock || 0;
+  };
+
+  // Load featured products from database
+  useEffect(() => {
+    const loadFeaturedProducts = async () => {
+      try {
+        const result = await getAllProducts({
+          status: 'active',
+          isVisible: true,
+          featured: true,
+          orderByField: 'createdAt',
+          orderDirection: 'desc',
+          limitCount: 4,
+        });
+
+        if (result.success && result.products.length > 0) {
+          setFeaturedProducts(result.products);
+        } else {
+          // Fallback: get any 4 active products if no featured ones
+          const fallbackResult = await getAllProducts({
+            status: 'active',
+            isVisible: true,
+            orderByField: 'createdAt',
+            orderDirection: 'desc',
+            limitCount: 4,
+          });
+          if (fallbackResult.success) {
+            setFeaturedProducts(fallbackResult.products);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading featured products:', error);
+      }
+    };
+
+    loadFeaturedProducts();
+  }, []);
 
   // Categories
   const categories = [
@@ -618,7 +630,7 @@ const Home = () => {
                 >
                   <div className="relative overflow-hidden aspect-square">
                     <LazyImage
-                      src={product.image}
+                      src={getProductImage(product)}
                       alt={product.name}
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                     />
@@ -628,14 +640,27 @@ const Home = () => {
                       <motion.span 
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
-                        className={`absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-bold text-white ${
+                        className={`absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-bold text-white z-10 ${
                           product.badge === 'Sale' ? 'bg-red-500' :
                           product.badge === 'New' ? 'bg-blue-500' :
                           product.badge === 'Limited' ? 'bg-purple-500' :
-                          'bg-yellow-500'
+                          product.badge === 'Hot' ? 'bg-orange-500' :
+                          product.badge === 'Featured' ? 'bg-yellow-500' :
+                          'bg-gray-500'
                         } animate-pulse-glow`}
                       >
                         {product.badge}
+                      </motion.span>
+                    )}
+
+                    {/* Stock Status Badge - only show if no other badge and out of stock */}
+                    {!product.badge && getProductStock(product) === 0 && (
+                      <motion.span 
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        className="absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-bold text-white bg-gray-500 z-10"
+                      >
+                        Out of Stock
                       </motion.span>
                     )}
 
@@ -666,35 +691,48 @@ const Home = () => {
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={() => handleQuickAdd(product)}
-                        className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-4 py-2 rounded-full font-semibold hover:shadow-lg transition-all flex items-center gap-2"
+                        disabled={getProductStock(product) === 0}
+                        className={`px-4 py-2 rounded-full font-semibold hover:shadow-lg transition-all flex items-center gap-2 ${
+                          getProductStock(product) === 0
+                            ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                            : 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white'
+                        }`}
                       >
                         <ShoppingCart className="w-4 h-4" />
-                        Add
+                        {getProductStock(product) === 0 ? 'Out of Stock' : 'Add'}
                       </motion.button>
                     </div>
                     
                     {/* Stock Warning */}
-                    {product.stock && product.stock <= 5 && (
+                    {getProductStock(product) > 0 && getProductStock(product) <= 5 && (
                       <motion.div 
                         initial={{ x: -100 }}
                         animate={{ x: 0 }}
                         className="absolute bottom-4 left-4 right-4 bg-red-500/90 backdrop-blur-sm text-white text-xs font-semibold px-3 py-2 rounded-lg flex items-center gap-2"
                       >
                         <Zap className="w-4 h-4" />
-                        Only {product.stock} left!
+                        Only {getProductStock(product)} left!
                       </motion.div>
                     )}
                   </div>
                   <div className="p-6">
                     <p className={`${isDark ? 'text-gray-400' : 'text-gray-500'} text-sm mb-1`}>{product.category}</p>
                     <h3 className={`text-xl font-semibold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>{product.name}</h3>
+                    {(product.shortDescription || product.description) && (
+                      <p className={`text-sm mb-3 line-clamp-2 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                        {product.shortDescription || product.description}
+                      </p>
+                    )}
                     <div className="flex items-center justify-between">
                       <div>
                         <span className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{formatPrice(product.price)}</span>
-                        {product.originalPrice && (
+                        {product.originalPrice && product.originalPrice !== product.price && (
                           <span className={`text-sm line-through ml-2 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{formatPrice(product.originalPrice)}</span>
                         )}
                       </div>
+                      <span className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                        Stock: {getProductStock(product)}
+                      </span>
                     </div>
                   </div>
                 </motion.div>

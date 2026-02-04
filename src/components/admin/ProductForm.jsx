@@ -11,10 +11,11 @@ import {
 } from '../../services/storage.service';
 import { 
   validateProductForm, 
-  validateVariants
+  validateVariants,
+  validateImages
 } from '../../utils/validation';
 import { CATEGORIES, SIZES as DEFAULT_SIZES, COLORS as DEFAULT_COLORS } from '../../utils/constants';
-import { getSizes, getColors } from '../../services/products.service';
+import { getSizes, getColors, getCategories } from '../../services/products.service';
 import { useAuth } from '../../hooks/useAuth';
 
 const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) => {
@@ -26,14 +27,19 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
   const [formData, setFormData] = useState({
     name: '',
     description: '',
+    shortDescription: '',
     category: CATEGORIES?.[0] || 'T-Shirts',
+    // We keep both originalPrice and salePrice. `price` will be set to effective price on save.
     price: '',
     originalPrice: '',
+    onSale: false,
+    salePrice: '',
     badge: '',
     tags: [],
     status: 'active',
     isVisible: true,
     isFeatured: false,
+    trackInventory: false,
     specifications: {
       material: '',
       careInstructions: '',
@@ -49,35 +55,57 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
   const [tagInput, setTagInput] = useState('');
   const [availableColors, setAvailableColors] = useState(DEFAULT_COLORS || []);
   const [availableSizes, setAvailableSizes] = useState(DEFAULT_SIZES || []);
+  const [availableCategories, setAvailableCategories] = useState(CATEGORIES || []);
+  // Colors and sizes selected for this specific product (checkboxes in UI)
+  const [selectedColors, setSelectedColors] = useState([]);
+  const [selectedSizes, setSelectedSizes] = useState([]);
   const [newColorInput, setNewColorInput] = useState('');
 
   // Load admin-defined sizes/colors (if any) and keep defaults as fallback
-  useEffect(() => {
-    const loadAttributes = async () => {
-      try {
-        const [sizesRes, colorsRes] = await Promise.all([getSizes(), getColors()]);
-        if (sizesRes.success && sizesRes.sizes) {
-          setAvailableSizes(sizesRes.sizes.map((s) => s.name));
-        }
-        if (colorsRes.success && colorsRes.colors) {
-          setAvailableColors(colorsRes.colors.map((c) => c.name));
-        }
-      } catch (err) {
-        console.error('Error loading sizes/colors:', err);
+  const loadAttributes = async () => {
+    try {
+      const [sizesRes, colorsRes, categoriesRes] = await Promise.all([getSizes(), getColors(), getCategories()]);
+      if (sizesRes.success && sizesRes.sizes) {
+        setAvailableSizes(sizesRes.sizes.map((s) => s.name));
       }
-    };
+      if (colorsRes.success && colorsRes.colors) {
+        setAvailableColors(colorsRes.colors.map((c) => c.name));
+      }
+      if (categoriesRes.success && categoriesRes.categories) {
+        setAvailableCategories(categoriesRes.categories.map(cat => cat.name));
+      }
 
+      // If no category is selected, default to first available
+      setFormData(prev => ({
+        ...prev,
+        category: prev.category || (categoriesRes.success && categoriesRes.categories && categoriesRes.categories[0] ? categoriesRes.categories[0].name : CATEGORIES?.[0])
+      }));
+    } catch (err) {
+      console.error('Error loading sizes/colors/categories:', err);
+    }
+  };
+
+  useEffect(() => {
     loadAttributes();
+
+    const onAttributesChanged = () => loadAttributes();
+    window.addEventListener('productAttributes:changed', onAttributesChanged);
+    return () => window.removeEventListener('productAttributes:changed', onAttributesChanged);
   }, []);
 
   // Initialize form with existing product data
   useEffect(() => {
     if (product) {
+      console.log('[ProductForm] Loading product for edit:', product);
+      console.log('[ProductForm] Product images:', product.images);
+      
       setFormData(prevFormData => ({
         ...prevFormData,
         ...product,
         price: product.price?.toString() || '',
         originalPrice: product.originalPrice?.toString() || '',
+        onSale: product.onSale || false,
+        salePrice: product.salePrice?.toString() || '',
         tags: product.tags || [],
         specifications: {
           ...prevFormData.specifications,
@@ -87,23 +115,35 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
       
       setVariants(product.variants || []);
       
-      // Set available colors from existing variants
+      // Set available colors from existing variants (but keep master list intact)
       if (product.variants && product.variants.length > 0) {
         const colors = [...new Set(product.variants.map(v => v.color))];
-        setAvailableColors(colors);
+        // Pre-select colors present on product
+        setSelectedColors(colors);
       }
       
+      // Set selected sizes from existing variants
+      if (product.variants && product.variants.length > 0) {
+        const sizes = [...new Set(product.variants.map(v => v.size))];
+        setSelectedSizes(sizes);
+      }
+
       // Set existing images grouped by color
       if (product.images) {
+        console.log('[ProductForm] Processing images for colors...');
         const imagesByColor = {};
         product.images.forEach(img => {
+          console.log('[ProductForm] Processing image:', img);
           const color = img.color || 'default';
           if (!imagesByColor[color]) {
             imagesByColor[color] = [];
           }
           imagesByColor[color].push(img.url);
         });
+        console.log('[ProductForm] Images by color:', imagesByColor);
         setExistingImages(imagesByColor);
+      } else {
+        console.log('[ProductForm] No images found in product data');
       }
     }
   }, [product]);
@@ -172,8 +212,8 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
       setVariants([]);
     } else {
       const newVariants = [];
-      SIZES.forEach(size => {
-        availableColors.forEach(color => {
+      selectedSizes.forEach(size => {
+        selectedColors.forEach(color => {
           newVariants.push({
             id: `${size}-${color}`,
             size,
@@ -186,35 +226,58 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
     }
   };
 
-  const handleAddColor = () => {
-    if (newColorInput.trim() && !availableColors.includes(newColorInput.trim())) {
-      setAvailableColors(prev => [...prev, newColorInput.trim()]);
-      setNewColorInput('');
-    }
+  const toggleColorSelection = (color) => {
+    setSelectedColors(prev => {
+      if (prev.includes(color)) {
+        // Removing color: remove variants and images for that color
+        setVariants(vprev => vprev.filter(v => v.color !== color));
+        setColorImages(prevImgs => {
+          const updated = { ...prevImgs };
+          delete updated[color];
+          return updated;
+        });
+        return prev.filter(c => c !== color);
+      } else {
+        // Add color and ensure variants exist for selected sizes with stock 0
+        setVariants(vprev => {
+          const updated = [...vprev];
+          selectedSizes.forEach(size => {
+            const exists = updated.some(v => v.size === size && v.color === color);
+            if (!exists) {
+              updated.push({ id: `${size}-${color}`, size, color, stock: 0 });
+            }
+          });
+          return updated;
+        });
+        return [...prev, color];
+      }
+    });
   };
 
-  const handleRemoveColor = (colorToRemove) => {
-    setAvailableColors(prev => prev.filter(color => color !== colorToRemove));
-    // Remove variants with this color
-    setVariants(prev => prev.filter(variant => variant.color !== colorToRemove));
-    
-    // Remove images for this color
-    setColorImages(prev => {
-      const updated = { ...prev };
-      delete updated[colorToRemove];
-      return updated;
+  const toggleSizeSelection = (size) => {
+    setSelectedSizes(prev => {
+      if (prev.includes(size)) {
+        // Removing size: remove variants with this size
+        setVariants(vprev => vprev.filter(v => v.size !== size));
+        return prev.filter(s => s !== size);
+      } else {
+        // Add size and ensure variants exist for selected colors with stock 0
+        setVariants(vprev => {
+          const updated = [...vprev];
+          selectedColors.forEach(color => {
+            const exists = updated.some(v => v.size === size && v.color === color);
+            if (!exists) {
+              updated.push({ id: `${size}-${color}`, size, color, stock: 0 });
+            }
+          });
+          return updated;
+        });
+        return [...prev, size];
+      }
     });
-    
-    // Mark existing images for removal
-    if (existingImages[colorToRemove]) {
-      setImagesToRemove(prev => [...prev, ...existingImages[colorToRemove]]);
-      setExistingImages(prev => {
-        const updated = { ...prev };
-        delete updated[colorToRemove];
-        return updated;
-      });
-    }
   };
+
+
 
   // Image handling functions
   const handleImageUpload = (color, files) => {
@@ -273,6 +336,19 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
       ...(variantValidation.errors || variantValidation)
     };
 
+    // Validate any new image files per color
+    const imageErrors = [];
+    Object.entries(colorImages).forEach(([color, files]) => {
+      const validation = validateImages(files);
+      if (!validation.valid) {
+        imageErrors.push(`${color}: ${validation.errors.join('; ')}`);
+      }
+    });
+
+    if (imageErrors.length > 0) {
+      allErrors.images = imageErrors.join(' | ');
+    }
+
     console.log('All errors:', allErrors);
     setErrors(allErrors);
     return Object.keys(allErrors).length === 0;
@@ -301,8 +377,11 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
       // Prepare product data
       const productData = {
         ...formData,
-        price: parseFloat(formData.price),
-        originalPrice: formData.originalPrice ? parseFloat(formData.originalPrice) : null,
+        // Persist both originalPrice and salePrice (if any). `price` is the effective selling price used across the app.
+        originalPrice: parseFloat(formData.originalPrice),
+        salePrice: formData.onSale && formData.salePrice ? parseFloat(formData.salePrice) : null,
+        onSale: !!formData.onSale,
+        price: formData.onSale && formData.salePrice ? parseFloat(formData.salePrice) : parseFloat(formData.originalPrice),
         variants: variants.map(variant => ({
           ...variant,
           stock: parseInt(variant.stock) || 0,
@@ -367,9 +446,24 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
         
         onSave(result.product || { ...product, ...productData });
       } else {
+        // Show general error
         toast.error(result.error || 'Failed to save product');
+
+        // Show upload-specific errors if present
+        if (result.uploadErrors && result.uploadErrors.length > 0) {
+          result.uploadErrors.forEach(err => toast.error(err.message || err));
+        }
+
+        // Legacy `errors` array handling
         if (result.errors) {
-          result.errors.forEach(error => toast.error(error));
+          // errors may be strings or objects
+          result.errors.forEach(error => {
+            if (typeof error === 'string') {
+              toast.error(error);
+            } else if (error && error.message) {
+              toast.error(`${error.message} ${error.code ? `(${error.code})` : ''}`);
+            }
+          });
         }
       }
 
@@ -464,7 +558,7 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
                         errors.category ? 'border-red-500' : 'border-gray-300'
                       }`}
                     >
-                      {CATEGORIES.map(category => (
+                      {availableCategories.map(category => (
                         <option key={category} value={category}>{category}</option>
                       ))}
                     </select>
@@ -473,39 +567,60 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
                     )}
                   </div>
 
-                  {/* Price */}
+                  {/* Original Price (required) */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Price *
-                    </label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={formData.price}
-                      onChange={(e) => handleInputChange('price', e.target.value)}
-                      className={`w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                        errors.price ? 'border-red-500' : 'border-gray-300'
-                      }`}
-                      placeholder="0.00"
-                    />
-                    {errors.price && (
-                      <p className="text-red-500 text-sm mt-1">{errors.price}</p>
-                    )}
-                  </div>
-
-                  {/* Original Price */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Original Price (Optional)
+                      Original Price *
                     </label>
                     <input
                       type="number"
                       step="0.01"
                       value={formData.originalPrice}
                       onChange={(e) => handleInputChange('originalPrice', e.target.value)}
-                      className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className={`w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                        errors.originalPrice ? 'border-red-500' : 'border-gray-300'
+                      }`}
                       placeholder="0.00"
                     />
+                    {errors.originalPrice && (
+                      <p className="text-red-500 text-sm mt-1">{errors.originalPrice}</p>
+                    )}
+                  </div>
+
+                  {/* On Sale toggle + Sale Price */}
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        On Sale
+                      </label>
+                      <input
+                        type="checkbox"
+                        checked={formData.onSale}
+                        onChange={(e) => handleInputChange('onSale', e.target.checked)}
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      />
+                    </div>
+
+                    {formData.onSale && (
+                      <div className="mt-2">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Sale Price *
+                        </label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          value={formData.salePrice}
+                          onChange={(e) => handleInputChange('salePrice', e.target.value)}
+                          className={`w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                            errors.salePrice ? 'border-red-500' : 'border-gray-300'
+                          }`}
+                          placeholder="0.00"
+                        />
+                        {errors.salePrice && (
+                          <p className="text-red-500 text-sm mt-1">{errors.salePrice}</p>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   {/* Badge */}
@@ -654,65 +769,49 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
                 <h3 className="text-lg font-semibold text-gray-900">Stock Management</h3>
                 <p className="text-gray-600">Add colors and set stock levels for different sizes</p>
                 
-                {/* Color Management */}
+                {/* Color & Size Selection (choose from admin-managed lists) */}
                 <div className="border border-gray-200 rounded-lg p-4">
-                  <h4 className="font-medium text-gray-900 mb-3">Available Colors</h4>
-                  
-                  {/* Add New Color */}
-                  <div className="flex gap-2 mb-4">
-                    <input
-                      type="text"
-                      placeholder="Enter color name (e.g., Black, White, Navy)"
-                      value={newColorInput}
-                      onChange={(e) => setNewColorInput(e.target.value)}
-                      className="flex-1 border border-gray-300 rounded px-3 py-2"
-                      onKeyPress={(e) => e.key === 'Enter' && handleAddColor()}
-                    />
-                    <button
-                      type="button"
-                      onClick={handleAddColor}
-                      className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                    >
-                      Add Color
-                    </button>
+                  <h4 className="font-medium text-gray-900 mb-3">Select Colors for this Product</h4>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {availableColors.length > 0 ? availableColors.map(color => (
+                      <label key={color} className={`flex items-center gap-2 px-3 py-1 border rounded ${selectedColors.includes(color) ? 'bg-blue-50 border-blue-200' : 'bg-gray-50 border-gray-200'}`}>
+                        <input type="checkbox" checked={selectedColors.includes(color)} onChange={() => toggleColorSelection(color)} />
+                        <span className="text-sm">{color}</span>
+                      </label>
+                    )) : (
+                      <p className="text-gray-500 text-sm">No colors available. Add colors on the Sizes & Colors page.</p>
+                    )}
                   </div>
 
-                  {/* Color List */}
+                  <h4 className="font-medium text-gray-900 mb-3">Select Sizes for this Product</h4>
                   <div className="flex flex-wrap gap-2">
-                    {availableColors.map(color => (
-                      <span key={color} className="bg-gray-100 px-3 py-1 rounded-full text-sm flex items-center gap-2">
-                        {color}
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveColor(color)}
-                          className="text-red-500 hover:text-red-700"
-                        >
-                          ×
-                        </button>
-                      </span>
-                    ))}
-                    {availableColors.length === 0 && (
-                      <p className="text-gray-500 text-sm">No colors added yet. Add colors to start managing stock.</p>
+                    {availableSizes.length > 0 ? availableSizes.map(size => (
+                      <label key={size} className={`flex items-center gap-2 px-3 py-1 border rounded ${selectedSizes.includes(size) ? 'bg-blue-50 border-blue-200' : 'bg-gray-50 border-gray-200'}`}>
+                        <input type="checkbox" checked={selectedSizes.includes(size)} onChange={() => toggleSizeSelection(size)} />
+                        <span className="text-sm">{size}</span>
+                      </label>
+                    )) : (
+                      <p className="text-gray-500 text-sm">No sizes available. Add sizes on the Sizes & Colors page.</p>
                     )}
                   </div>
                 </div>
 
                 {/* Size & Color Stock Grid */}
-                {availableColors.length > 0 && (
+                {selectedColors.length > 0 && selectedSizes.length > 0 && (
                   <div className="border border-gray-200 rounded-lg p-4">
                     <div className="overflow-x-auto">
-                      <div className="grid gap-2 text-sm" style={{gridTemplateColumns: `1fr repeat(${availableColors.length}, minmax(80px, 1fr))`}}>
+                      <div className="grid gap-2 text-sm" style={{gridTemplateColumns: `1fr repeat(${selectedColors.length}, minmax(80px, 1fr))`}}>
                         {/* Header */}
                         <div className="font-medium text-gray-700">Size/Color</div>
-                        {availableColors.map(color => (
+                        {selectedColors.map(color => (
                           <div key={color} className="font-medium text-gray-700 text-center">{color}</div>
                         ))}
                         
                         {/* Stock Grid */}
-                        {SIZES.map(size => (
+                        {selectedSizes.map(size => (
                           <div key={size} className="contents">
                             <div className="font-medium text-gray-700">{size}</div>
-                            {availableColors.map(color => {
+                            {selectedColors.map(color => {
                               const existingVariant = variants.find(v => v.size === size && v.color === color);
                               return (
                                 <input
@@ -733,8 +832,14 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
                   </div>
                 )}
 
+                {(!selectedColors.length || !selectedSizes.length) && (
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-sm text-yellow-800">
+                    Select at least one color and one size above to manage stock for this product.
+                  </div>
+                )}
+
                 {/* Quick Stock Actions */}
-                {availableColors.length > 0 && (
+                {selectedColors.length > 0 && selectedSizes.length > 0 && (
                   <div className="flex space-x-4">
                     <button
                       type="button"
@@ -769,11 +874,14 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
               <div className="space-y-6">
                 <h3 className="text-lg font-semibold text-gray-900">Product Images</h3>
                 <p className="text-gray-600">Upload images for each color variant. You can add multiple images per color.</p>
+                {errors.images && (
+                  <p className="text-red-500 text-sm mt-2">{errors.images}</p>
+                )}
                 
-                {availableColors.length === 0 ? (
+                {selectedColors.length === 0 ? (
                   <div className="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
                     <div className="text-gray-500 mb-2">📦</div>
-                    <p className="text-gray-600">Please add colors in the "Variants & Stock" tab first</p>
+                    <p className="text-gray-600">Please select colors in the "Variants & Stock" tab first</p>
                     <button
                       type="button"
                       onClick={() => setActiveTab('variants')}
@@ -784,7 +892,7 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
                   </div>
                 ) : (
                   <div className="space-y-6">
-                    {availableColors.map(color => (
+                    {selectedColors.map(color => (
                       <div key={color} className="border border-gray-200 rounded-lg p-4">
                         <h4 className="font-medium text-gray-900 mb-4 flex items-center gap-2">
                           <div 
@@ -819,7 +927,7 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
                             </div>
                           </label>
                         </div>
-                        
+
                         {/* Existing Images */}
                         {existingImages[color] && existingImages[color].length > 0 && (
                           <div className="mb-4">

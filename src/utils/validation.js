@@ -17,18 +17,24 @@ export const validateProductForm = (formData) => {
     errors.name = `Product name must be less than ${VALIDATION.MAX_PRODUCT_NAME_LENGTH} characters`;
   }
 
-  // Price validation
-  if (!formData.price) {
-    errors.price = 'Price is required';
-  } else if (isNaN(formData.price) || parseFloat(formData.price) <= VALIDATION.MIN_PRICE) {
-    errors.price = 'Price must be a valid number greater than 0';
-  } else if (parseFloat(formData.price) > VALIDATION.MAX_PRICE) {
-    errors.price = `Price cannot exceed ${VALIDATION.MAX_PRICE.toLocaleString()}`;
+  // Original price validation (required - base price)
+  if (!formData.originalPrice) {
+    errors.originalPrice = 'Original price is required';
+  } else if (isNaN(formData.originalPrice) || parseFloat(formData.originalPrice) <= VALIDATION.MIN_PRICE) {
+    errors.originalPrice = 'Original price must be a valid number greater than 0';
+  } else if (parseFloat(formData.originalPrice) > VALIDATION.MAX_PRICE) {
+    errors.originalPrice = `Original price cannot exceed ${VALIDATION.MAX_PRICE.toLocaleString()}`;
   }
 
-  // Original price validation (optional)
-  if (formData.originalPrice && (isNaN(formData.originalPrice) || parseFloat(formData.originalPrice) <= VALIDATION.MIN_PRICE)) {
-    errors.originalPrice = 'Original price must be a valid number greater than 0';
+  // Sale price validation (required when on sale)
+  if (formData.onSale) {
+    if (!formData.salePrice) {
+      errors.salePrice = 'Sale price is required when product is on sale';
+    } else if (isNaN(formData.salePrice) || parseFloat(formData.salePrice) <= VALIDATION.MIN_PRICE) {
+      errors.salePrice = 'Sale price must be a valid number greater than 0';
+    } else if (parseFloat(formData.salePrice) >= parseFloat(formData.originalPrice)) {
+      errors.salePrice = 'Sale price must be less than original price';
+    }
   }
 
   // Category validation

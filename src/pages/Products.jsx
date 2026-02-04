@@ -160,8 +160,8 @@ const Products = () => {
         ? product.images[0].url
         : product.images[0];
     }
-    // Fallback image
-    return "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&q=80";
+    // Return placeholder instead of external URL
+    return `/api/placeholder/400/400?text=${encodeURIComponent(product.name || 'Product')}`;
   };
 
   const ProductCard = ({ product }) => {

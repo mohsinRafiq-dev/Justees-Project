@@ -9,10 +9,13 @@ import {
   getSizes,
   createSize,
   deleteSize,
+  updateSize,
   getColors,
   createColor,
   deleteColor,
+  updateColor,
 } from '../../services/products.service';
+import { generateSlug } from '../../utils/validation';
 
 const SizesManagement = () => {
   const { user } = useAuth();
@@ -22,6 +25,8 @@ const SizesManagement = () => {
   const [newSize, setNewSize] = useState('');
   const [newColor, setNewColor] = useState('');
   const [confirm, setConfirm] = useState({ open: false, id: null, type: null });
+  const [editingItem, setEditingItem] = useState(null); // { id, type, name, slug, order, isActive, hex }
+
 
   useEffect(() => {
     if (!isAdminUser(user)) return;
@@ -50,6 +55,8 @@ const SizesManagement = () => {
         toast.success('Size added');
         setNewSize('');
         loadAll();
+        // notify other components (eg. ProductForm) to refresh available sizes/colors
+        window.dispatchEvent(new Event('productAttributes:changed'));
       } else toast.error(res.error || 'Failed to add size');
     } catch (err) {
       console.error(err);
@@ -65,6 +72,8 @@ const SizesManagement = () => {
         toast.success('Color added');
         setNewColor('');
         loadAll();
+        // notify other components to refresh
+        window.dispatchEvent(new Event('productAttributes:changed'));
       } else toast.error(res.error || 'Failed to add color');
     } catch (err) {
       console.error(err);
@@ -87,10 +96,72 @@ const SizesManagement = () => {
       if (res.success) {
         toast.success('Deleted');
         loadAll();
-      } else toast.error(res.error || 'Failed to delete');
+        // notify other components to refresh
+        window.dispatchEvent(new Event('productAttributes:changed'));
+      } else {
+        if (res.blockingProducts && res.blockingProducts.length > 0) {
+          const names = res.blockingProducts.slice(0,5).map(p => p.name).join(', ');
+          const more = res.blockingProducts.length > 5 ? ` and ${res.blockingProducts.length - 5} more` : '';
+          toast.error(`Cannot delete: used by products: ${names}${more}. Remove variants from those products first.`);
+          console.warn('Blocking products:', res.blockingProducts);
+        } else {
+          toast.error(res.error || 'Failed to delete');
+        }
+      }
     } catch (err) {
       console.error(err);
       toast.error('Error deleting');
+    }
+  };
+
+  const startEdit = (item, type) => {
+    setEditingItem({
+      id: item.id,
+      type,
+      name: item.name,
+      slug: item.slug || generateSlug(item.name),
+      order: item.order || 0,
+      isActive: item.isActive !== undefined ? item.isActive : true,
+      hex: item.hex || ''
+    });
+  };
+
+  const cancelEdit = () => setEditingItem(null);
+
+  const saveEdit = async () => {
+    if (!editingItem || !editingItem.name.trim()) return toast.error('Name is required');
+    try {
+      if (editingItem.type === 'size') {
+        const res = await updateSize(editingItem.id, {
+          name: editingItem.name.trim(),
+          slug: editingItem.slug.trim() || generateSlug(editingItem.name.trim()),
+          order: Number(editingItem.order) || 0,
+          isActive: !!editingItem.isActive
+        });
+        if (res.success) {
+          toast.success('Size updated');
+          setEditingItem(null);
+          loadAll();
+          window.dispatchEvent(new Event('productAttributes:changed'));
+        } else toast.error(res.error || 'Failed to update size');
+      } else {
+        const res = await updateColor(editingItem.id, {
+          name: editingItem.name.trim(),
+          slug: editingItem.slug.trim() || generateSlug(editingItem.name.trim()),
+          order: Number(editingItem.order) || 0,
+          isActive: !!editingItem.isActive,
+          hex: editingItem.hex || ''
+        });
+        if (res.success) {
+          toast.success('Color updated');
+          setEditingItem(null);
+          loadAll();
+          window.dispatchEvent(new Event('productAttributes:changed'));
+        } else toast.error(res.error || 'Failed to update color');
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error('Error updating');
     }
   };
 
@@ -137,10 +208,29 @@ const SizesManagement = () => {
             <ul className="space-y-2">
               {sizes.map((s) => (
                 <li key={s.id} className="flex items-center justify-between border-b py-2">
-                  <span>{s.name}</span>
-                  <button onClick={() => handleDelete(s.id, 'size')} className="text-red-600 flex items-center">
-                    <Trash2 className="w-4 h-4 mr-1" /> Delete
-                  </button>
+                  {editingItem && editingItem.type === 'size' && editingItem.id === s.id ? (
+                    <div className="flex items-center gap-2 w-full">
+                      <input className="border rounded px-2 py-1" value={editingItem.name} onChange={(e) => setEditingItem(prev => ({...prev, name: e.target.value}))} />
+                      <input className="border rounded px-2 py-1 w-20" value={editingItem.order} onChange={(e) => setEditingItem(prev => ({...prev, order: e.target.value}))} />
+                      <label className="flex items-center gap-2">
+                        <input type="checkbox" checked={editingItem.isActive} onChange={(e) => setEditingItem(prev => ({...prev, isActive: e.target.checked}))} /> Active
+                      </label>
+                      <div className="ml-auto flex gap-2">
+                        <button onClick={saveEdit} className="bg-green-600 text-white px-3 py-1 rounded">Save</button>
+                        <button onClick={cancelEdit} className="bg-gray-200 px-3 py-1 rounded">Cancel</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <span>{s.name}</span>
+                      <div className="flex gap-2">
+                        <button onClick={() => startEdit(s, 'size')} className="text-blue-600">Edit</button>
+                        <button onClick={() => handleDelete(s.id, 'size')} className="text-red-600 flex items-center">
+                          <Trash2 className="w-4 h-4 mr-1" /> Delete
+                        </button>
+                      </div>
+                    </>
+                  )}
                 </li>
               ))}
             </ul>
@@ -171,10 +261,30 @@ const SizesManagement = () => {
             <ul className="space-y-2">
               {colors.map((c) => (
                 <li key={c.id} className="flex items-center justify-between border-b py-2">
-                  <span>{c.name}</span>
-                  <button onClick={() => handleDelete(c.id, 'color')} className="text-red-600 flex items-center">
-                    <Trash2 className="w-4 h-4 mr-1" /> Delete
-                  </button>
+                  {editingItem && editingItem.type === 'color' && editingItem.id === c.id ? (
+                    <div className="flex items-center gap-2 w-full">
+                      <input className="border rounded px-2 py-1" value={editingItem.name} onChange={(e) => setEditingItem(prev => ({...prev, name: e.target.value}))} />
+                      <input className="border rounded px-2 py-1 w-20" value={editingItem.order} onChange={(e) => setEditingItem(prev => ({...prev, order: e.target.value}))} />
+                      <input className="border rounded px-2 py-1 w-28" value={editingItem.hex} placeholder="#hex" onChange={(e) => setEditingItem(prev => ({...prev, hex: e.target.value}))} />
+                      <label className="flex items-center gap-2">
+                        <input type="checkbox" checked={editingItem.isActive} onChange={(e) => setEditingItem(prev => ({...prev, isActive: e.target.checked}))} /> Active
+                      </label>
+                      <div className="ml-auto flex gap-2">
+                        <button onClick={saveEdit} className="bg-green-600 text-white px-3 py-1 rounded">Save</button>
+                        <button onClick={cancelEdit} className="bg-gray-200 px-3 py-1 rounded">Cancel</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <span className="flex items-center gap-2"><span style={{width:12,height:12,background:c.hex||'#eee',display:'inline-block',borderRadius:4,border:'1px solid #ccc'}} />{c.name}</span>
+                      <div className="flex gap-2">
+                        <button onClick={() => startEdit(c, 'color')} className="text-blue-600">Edit</button>
+                        <button onClick={() => handleDelete(c.id, 'color')} className="text-red-600 flex items-center">
+                          <Trash2 className="w-4 h-4 mr-1" /> Delete
+                        </button>
+                      </div>
+                    </>
+                  )}
                 </li>
               ))}
             </ul>
