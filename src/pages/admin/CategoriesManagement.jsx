@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
-import { Plus, Trash2, Upload, X } from 'lucide-react';
+import { Plus, Trash2, Upload, X, Edit3 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { isAdminUser } from '../../utils/validation';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
@@ -8,6 +8,7 @@ import ConfirmDialog from '../../components/common/ConfirmDialog';
 import {
   getCategories,
   createCategory,
+  updateCategory,
   deleteCategory,
 } from '../../services/products.service';
 import { uploadCategoryImage } from '../../services/storage.service';
@@ -16,10 +17,18 @@ const CategoriesManagement = () => {
   const { user } = useAuth();
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [newCategory, setNewCategory] = useState('');
+
+  // Form State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    description: '',
+    image: '',
+  });
   const [selectedImage, setSelectedImage] = useState(null);
   const [imagePreview, setImagePreview] = useState('');
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
   const [confirm, setConfirm] = useState({ open: false, id: null });
 
   useEffect(() => {
@@ -60,17 +69,45 @@ const CategoriesManagement = () => {
   const clearImage = () => {
     setSelectedImage(null);
     setImagePreview('');
+    setFormData(prev => ({ ...prev, image: '' }));
   };
 
-  const handleAdd = async () => {
-    if (!newCategory.trim()) return;
+  const openModal = (category = null) => {
+    if (category) {
+      setEditingId(category.id);
+      setFormData({
+        name: category.name,
+        description: category.description || '',
+        image: category.image || '',
+      });
+      setImagePreview(category.image || '');
+    } else {
+      setEditingId(null);
+      setFormData({ name: '', description: '', image: '' });
+      setImagePreview('');
+    }
+    setSelectedImage(null);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setEditingId(null);
+    setFormData({ name: '', description: '', image: '' });
+    setSelectedImage(null);
+    setImagePreview('');
+  };
+
+  const handleSave = async () => {
+    if (!formData.name.trim()) return;
 
     // Check if image is selected but not uploaded yet
-    let imageUrl = '';
+    let imageUrl = formData.image;
 
     try {
+      setLoading(true);
+
       if (selectedImage) {
-        setLoading(true);
         const uploadRes = await uploadCategoryImage(selectedImage);
         if (uploadRes.success) {
           imageUrl = uploadRes.url;
@@ -81,20 +118,28 @@ const CategoriesManagement = () => {
         }
       }
 
-      const res = await createCategory(newCategory.trim(), imageUrl);
+      let res;
+      if (editingId) {
+        res = await updateCategory(editingId, {
+          name: formData.name.trim(),
+          description: formData.description.trim(),
+          image: imageUrl
+        });
+      } else {
+        res = await createCategory(formData.name.trim(), imageUrl, formData.description.trim());
+      }
+
       if (res.success) {
-        toast.success('Category added');
-        setNewCategory('');
-        clearImage();
-        setIsAddModalOpen(false);
+        toast.success(editingId ? 'Category updated' : 'Category added');
+        closeModal();
         loadCategories();
         window.dispatchEvent(new Event('productAttributes:changed'));
       } else {
-        toast.error(res.error || 'Failed to add category');
+        toast.error(res.error || `Failed to ${editingId ? 'update' : 'add'} category`);
       }
     } catch (err) {
       console.error(err);
-      toast.error('Error adding category');
+      toast.error(`Error ${editingId ? 'updating' : 'adding'} category`);
     } finally {
       setLoading(false);
     }
@@ -141,7 +186,7 @@ const CategoriesManagement = () => {
         </div>
         <div className="flex items-center space-x-2">
           <button
-            onClick={() => setIsAddModalOpen(true)}
+            onClick={() => openModal()}
             className="bg-blue-600 text-white px-4 py-2 rounded flex items-center space-x-2 hover:bg-blue-700 transition-colors"
           >
             <Plus className="w-4 h-4" />
@@ -150,11 +195,11 @@ const CategoriesManagement = () => {
         </div>
       </div>
 
-      {/* Add Category Modal */}
-      {isAddModalOpen && (
+      {/* Add/Edit Category Modal */}
+      {isModalOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl p-6">
-            <h3 className="text-xl font-bold text-gray-900 mb-6">Add New Category</h3>
+            <h3 className="text-xl font-bold text-gray-900 mb-6">{editingId ? 'Edit Category' : 'Add New Category'}</h3>
 
             <div className="space-y-6">
               {/* Image Upload */}
@@ -194,34 +239,48 @@ const CategoriesManagement = () => {
                 <input
                   className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
                   placeholder="e.g. T-Shirts"
-                  value={newCategory}
-                  onChange={(e) => setNewCategory(e.target.value)}
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                />
+              </div>
+
+              {/* Description Input */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Description
+                </label>
+                <textarea
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                  placeholder="Category description..."
+                  rows={3}
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 />
               </div>
 
               {/* Actions */}
               <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
                 <button
-                  onClick={() => setIsAddModalOpen(false)}
+                  onClick={closeModal}
                   className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                   disabled={loading}
                 >
                   Cancel
                 </button>
                 <button
-                  onClick={handleAdd}
-                  disabled={loading || !newCategory.trim()}
+                  onClick={handleSave}
+                  disabled={loading || !formData.name.trim()}
                   className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-70 flex items-center gap-2"
                 >
                   {loading ? (
                     <>
                       <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      <span>Adding...</span>
+                      <span>Saving...</span>
                     </>
                   ) : (
                     <>
-                      <Plus className="w-4 h-4" />
-                      <span>Add Category</span>
+                      {editingId ? <Edit3 className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                      <span>{editingId ? 'Update' : 'Add'} Category</span>
                     </>
                   )}
                 </button>
@@ -232,28 +291,41 @@ const CategoriesManagement = () => {
       )}
 
       <div className="bg-white rounded-lg shadow p-4">
-        {loading ? (
+        {loading && !isModalOpen ? (
           <LoadingSpinner />
         ) : categories.length === 0 ? (
           <p className="text-gray-600">No categories found.</p>
         ) : (
           <ul className="space-y-2">
             {categories.map((c) => (
-              <li key={c.id} className="flex items-center justify-between border-b py-2">
-                <div className="flex items-center gap-3">
+              <li key={c.id} className="flex items-center justify-between border-b py-3 last:border-0 hover:bg-gray-50 px-2 rounded transition-colors">
+                <div className="flex items-center gap-4 flex-1">
                   {c.image ? (
-                    <img src={c.image} alt={c.name} className="w-10 h-10 rounded object-cover border" />
+                    <img src={c.image} alt={c.name} className="w-12 h-12 rounded object-cover border bg-gray-100" />
                   ) : (
-                    <div className="w-10 h-10 rounded bg-gray-100 flex items-center justify-center text-xs text-gray-400">No Img</div>
+                    <div className="w-12 h-12 rounded bg-gray-200 flex items-center justify-center text-xs text-gray-500">No Img</div>
                   )}
-                  <span className="text-gray-900">{c.name}</span>
+                  <div>
+                    <h3 className="text-gray-900 font-medium">{c.name}</h3>
+                    {c.description && <p className="text-gray-500 text-sm line-clamp-1">{c.description}</p>}
+                  </div>
                 </div>
-                <button
-                  onClick={() => handleDelete(c.id)}
-                  className="text-red-600 hover:text-red-700 flex items-center"
-                >
-                  <Trash2 className="w-4 h-4 mr-1" /> Delete
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => openModal(c)}
+                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
+                    title="Edit"
+                  >
+                    <Edit3 className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(c.id)}
+                    className="p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors"
+                    title="Delete"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
               </li>
             ))}
           </ul>

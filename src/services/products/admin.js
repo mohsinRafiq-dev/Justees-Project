@@ -19,11 +19,12 @@ export const getCategories = async () => {
   }
 };
 
-export const createCategory = async (name, imageUrl = '') => {
+export const createCategory = async (name, imageUrl = '', description = '') => {
   try {
     const docRef = await addDoc(collection(db, CATEGORIES_COLLECTION), {
       name,
       image: imageUrl,
+      description,
       createdAt: new Date()
     });
     return { success: true, id: docRef.id };
