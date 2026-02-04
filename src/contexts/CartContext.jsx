@@ -23,6 +23,13 @@ export const CartProvider = ({ children }) => {
     localStorage.setItem('justees_cart', JSON.stringify(cartItems));
   }, [cartItems]);
 
+  // Cart Drawer State
+  const [isCartOpen, setIsCartOpen] = useState(false);
+
+  const openCart = () => setIsCartOpen(true);
+  const closeCart = () => setIsCartOpen(false);
+  const toggleCart = () => setIsCartOpen((prev) => !prev);
+
   const addToCart = (product, options = {}) => {
     const { size = 'M', color = 'Black', quantity = 1 } = options;
 
@@ -97,6 +104,10 @@ export const CartProvider = ({ children }) => {
     clearCart,
     getCartTotal,
     getCartCount,
+    isCartOpen,
+    openCart,
+    closeCart,
+    toggleCart,
   };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

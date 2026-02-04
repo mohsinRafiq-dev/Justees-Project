@@ -4,18 +4,14 @@ import { motion, AnimatePresence } from 'framer-motion'; // eslint-disable-line
 import { ShoppingCart, Sun, Moon, Menu, X, Instagram } from 'lucide-react';
 import { useCart } from '../../contexts/CartContext';
 import { useTheme } from '../../contexts/ThemeContext';
-import CartDrawer from './CartDrawer';
 
 const Navbar = () => {
-  const { getCartCount } = useCart();
+  const { getCartCount, openCart } = useCart();
   const { isDark, toggleTheme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isCartOpen, setIsCartOpen] = useState(false);
 
   return (
     <>
-      <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
-
       <motion.nav
         initial={{ y: -100 }}
         animate={{ y: 0 }}
@@ -99,7 +95,7 @@ const Navbar = () => {
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
-                onClick={() => setIsCartOpen(true)}
+                onClick={openCart}
                 className={`relative ${isDark ? 'text-white hover:text-gray-300' : 'text-gray-700 hover:text-gray-900'} transition-colors`}
               >
                 <ShoppingCart className="w-6 h-6" />

@@ -1,7 +1,14 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "../contexts/AuthContext.jsx";
-import { CartProvider } from "../contexts/CartContext.jsx";
+import { CartProvider, useCart } from "../contexts/CartContext.jsx";
 import ProtectedRoute from "./ProtectedRoute";
+import CartDrawer from "../components/common/CartDrawer";
+
+// Wrapper to use context
+const GlobalCartDrawer = () => {
+  const { isCartOpen, closeCart } = useCart();
+  return <CartDrawer isOpen={isCartOpen} onClose={closeCart} />;
+};
 
 // Page imports
 import Home from "../pages/Home";
@@ -15,11 +22,13 @@ import AdminDashboard from "../pages/admin/AdminDashboard";
  * Main Application Router
  * Defines all routes and their access control
  */
+
 const AppRouter = () => {
   return (
     <BrowserRouter>
       <AuthProvider>
         <CartProvider>
+          <GlobalCartDrawer />
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<Home />} />
