@@ -3,6 +3,8 @@ import {
   GoogleAuthProvider,
   signOut,
   onAuthStateChanged,
+  signInWithEmailAndPassword,
+  updatePassword,
   setPersistence,
   browserLocalPersistence,
 } from 'firebase/auth';
@@ -23,32 +25,32 @@ export const loginAdminWithGoogle = async () => {
     if (!ALLOWED_ADMIN_EMAIL) {
       throw new Error('Admin access is not properly configured. Please contact support.');
     }
-    
+
     // Set persistence to LOCAL (survives browser restarts)
     await setPersistence(auth, browserLocalPersistence);
-    
+
     const provider = new GoogleAuthProvider();
     provider.addScope('email');
     provider.addScope('profile');
-    
+
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
-    
+
     // Check if the email is allowed
     if (user.email !== ALLOWED_ADMIN_EMAIL) {
       // Sign out and delete the user immediately if email doesn't match
       await signOut(auth);
-      
+
       // Delete unauthorized user account (optional cleanup)
       try {
         await user.delete();
       } catch (deleteError) {
         console.log('User deletion skipped:', deleteError.message);
       }
-      
+
       throw new Error('Access denied. You are not authorized to access the admin panel.');
     }
-    
+
     return user;
   } catch (error) {
     console.error('Google login error:', error);
@@ -64,7 +66,25 @@ export const loginAdminWithGoogle = async () => {
  * @deprecated Use loginAdminWithGoogle instead
  */
 export const loginAdmin = async (email, password) => {
-  throw new Error('Email/password login is disabled. Please use Google login.');
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    return userCredential.user;
+  } catch (error) {
+    if (error.code === 'auth/invalid-login-credentials' || error.code === 'auth/invalid-credential') {
+      throw new Error('Invalid email or password');
+    }
+    throw error;
+  }
+};
+
+export const updateAdminPassword = async (user, newPassword) => {
+  try {
+    await updatePassword(user, newPassword);
+    return { success: true };
+  } catch (error) {
+    console.error('Error updating password:', error);
+    return { success: false, error: error.message };
+  }
 };
 
 /**

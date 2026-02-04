@@ -8,6 +8,7 @@ import {
   TrendingUp,
   Plus,
   Eye,
+  EyeOff,
   Settings,
   BarChart3,
   AlertTriangle,
@@ -109,9 +110,79 @@ const AdminDashboard = () => {
       description: "View reports",
       icon: TrendingUp,
       color: "purple",
-      action: () => {},
+      action: () => { },
     },
   ];
+
+  const PasswordUpdateForm = () => {
+    const { updatePassword } = useAuth();
+    const [passLoading, setPassLoading] = useState(false);
+    const [message, setMessage] = useState({ type: '', text: '' });
+    const [pass, setPass] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+
+    const handleUpdate = async (e) => {
+      e.preventDefault();
+      if (pass.length < 6) {
+        setMessage({ type: 'error', text: 'Password must be at least 6 characters' });
+        return;
+      }
+      setPassLoading(true);
+      setMessage({ type: '', text: '' });
+
+      const res = await updatePassword(pass);
+      if (res.success) {
+        setMessage({ type: 'success', text: 'Password updated successfully!' });
+        setPass('');
+      } else {
+        setMessage({ type: 'error', text: res.error || 'Failed to update password' });
+      }
+      setPassLoading(false);
+    };
+
+    return (
+      <div>
+        <h4 className="font-medium text-gray-900 mb-4">Change Password</h4>
+        {message.text && (
+          <div className={`p-3 rounded mb-4 text-sm ${message.type === 'error' ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'}`}>
+            {message.text}
+          </div>
+        )}
+        <form onSubmit={handleUpdate} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                value={pass}
+                onChange={(e) => setPass(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none pr-10"
+                placeholder="Enter new password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-500"
+              >
+                {showPassword ? (
+                  <EyeOff className="h-5 w-5" aria-hidden="true" />
+                ) : (
+                  <Eye className="h-5 w-5" aria-hidden="true" />
+                )}
+              </button>
+            </div>
+          </div>
+          <button
+            type="submit"
+            disabled={passLoading}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+          >
+            {passLoading ? 'Changing...' : 'Change Password'}
+          </button>
+        </form>
+      </div>
+    );
+  };
 
   const StatCard = ({ title, value, icon: Icon, color, change, loading }) => (
     <motion.div
@@ -160,11 +231,10 @@ const AdminDashboard = () => {
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
-                className={`w-full flex items-center px-6 py-3 text-left transition-colors ${
-                  activeTab === item.id
-                    ? "bg-blue-50 text-blue-600 border-r-2 border-blue-600"
-                    : "text-gray-600 hover:bg-gray-50"
-                }`}
+                className={`w-full flex items-center px-6 py-3 text-left transition-colors ${activeTab === item.id
+                  ? "bg-blue-50 text-blue-600 border-r-2 border-blue-600"
+                  : "text-gray-600 hover:bg-gray-50"
+                  }`}
               >
                 <Icon className="w-5 h-5 mr-3" />
                 {item.name}
@@ -352,8 +422,18 @@ const AdminDashboard = () => {
 
         {activeTab === "settings" && (
           <div className="p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Settings</h2>
-            <p className="text-gray-600">Settings panel coming soon...</p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Settings</h2>
+
+            <div className="bg-white rounded-lg shadow max-w-2xl">
+              <div className="p-6 border-b border-gray-200">
+                <h3 className="text-lg font-medium text-gray-900">Security Settings</h3>
+                <p className="text-sm text-gray-600 mt-1">Manage your account security</p>
+              </div>
+
+              <div className="p-6">
+                <PasswordUpdateForm />
+              </div>
+            </div>
           </div>
         )}
       </div>

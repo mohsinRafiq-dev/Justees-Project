@@ -37,11 +37,26 @@ export const AuthProvider = ({ children }) => {
   };
 
   /**
-   * Legacy login function - deprecated
-   * @deprecated Use loginWithGoogle instead
+   * Email/Password Login
    */
   const login = async (email, password) => {
-    return { success: false, error: 'Email/password login is disabled. Please use Google login.' };
+    try {
+      const { loginAdmin } = await import("../services/auth.service");
+      const user = await loginAdmin(email, password);
+      setUser(user);
+      return { success: true, user };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  };
+
+  const updatePassword = async (newPassword) => {
+    try {
+      const { updateAdminPassword } = await import("../services/auth.service");
+      return await updateAdminPassword(user, newPassword);
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
   };
 
   /**
@@ -61,6 +76,7 @@ export const AuthProvider = ({ children }) => {
     user,
     loading,
     login,
+    updatePassword,
     loginWithGoogle,
     logout,
     isAuthenticated: !!user,
