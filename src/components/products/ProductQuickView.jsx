@@ -187,19 +187,31 @@ const ProductQuickView = ({ product, isOpen, onClose }) => {
                     const hasStock = selectedSize ?
                       product.variants.some(v => v.color === color && v.size === selectedSize && v.stock > 0) :
                       product.variants.some(v => v.color === color && v.stock > 0);
+
                     return (
                       <button
                         key={color}
                         onClick={() => setSelectedColor(color)}
                         disabled={!hasStock}
-                        className={`py-2 px-4 rounded-lg border-2 transition-all ${selectedColor === color
-                          ? 'border-white bg-white text-gray-900 font-semibold'
+                        title={color}
+                        className={`w-10 h-10 rounded-full border-2 transition-all flex items-center justify-center relative ${selectedColor === color
+                          ? 'border-white scale-110 ring-2 ring-blue-500 ring-offset-2 ring-offset-gray-900'
                           : hasStock
-                            ? 'border-gray-600 text-gray-300 hover:border-gray-400'
-                            : 'border-gray-700 text-gray-500 cursor-not-allowed line-through'
+                            ? 'border-gray-600 hover:scale-110 hover:border-gray-400'
+                            : 'border-gray-700 opacity-50 cursor-not-allowed'
                           }`}
+                        style={{ backgroundColor: color }}
                       >
-                        {color}
+                        {!hasStock && (
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="w-full h-0.5 bg-gray-500 rotate-45"></div>
+                          </div>
+                        )}
+                        {selectedColor === color && (
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="w-2 h-2 bg-white rounded-full shadow-sm"></div>
+                          </div>
+                        )}
                       </button>
                     );
                   })}

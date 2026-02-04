@@ -323,7 +323,7 @@ const Products = () => {
                   <div className="flex space-x-1">
                     {[
                       ...new Set(
-                        product.variants.map((v) => v.colorHex || "#000000"),
+                        product.variants.map((v) => v.color).filter(Boolean)
                       ),
                     ]
                       .slice(0, 4)
@@ -332,13 +332,14 @@ const Products = () => {
                           key={index}
                           className="w-4 h-4 rounded-full border-2 border-white shadow-sm"
                           style={{ backgroundColor: color }}
+                          title={color}
                         />
                       ))}
-                    {product.variants.length > 4 && (
+                    {[...new Set(product.variants.map((v) => v.color).filter(Boolean))].length > 4 && (
                       <span
                         className={`text-xs ${isDark ? "text-gray-400" : "text-gray-500"}`}
                       >
-                        +{product.variants.length - 4}
+                        +{[...new Set(product.variants.map((v) => v.color).filter(Boolean))].length - 4}
                       </span>
                     )}
                   </div>
