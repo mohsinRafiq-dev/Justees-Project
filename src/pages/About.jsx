@@ -196,7 +196,7 @@ const About = () => {
             viewport={{ once: true }}
           >
             <h2 className={`text-4xl font-bold mb-6 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-              Join the Justice League
+              Join the Justees League
             </h2>
             <p className={`text-xl ${isDark ? 'text-gray-400' : 'text-gray-600'} mb-8`}>
               Experience the difference quality and care can make

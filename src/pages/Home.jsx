@@ -1108,7 +1108,7 @@ const Home = () => {
       {/* CTA Section */}
       <section className={`py-20 ${isDark ? 'bg-gray-900 border-gray-800' : 'bg-gray-100 border-gray-200'} border-t`}>
         <div className="container mx-auto px-4 text-center">
-          <h2 className={`text-5xl font-bold mb-6 ${isDark ? 'text-white' : 'text-gray-900'}`}>Join the Justice League</h2>
+          <h2 className={`text-5xl font-bold mb-6 ${isDark ? 'text-white' : 'text-gray-900'}`}>Join the Justees League</h2>
           <p className={`text-xl ${isDark ? 'text-gray-400' : 'text-gray-600'} mb-8 max-w-2xl mx-auto`}>
             Get exclusive access to new arrivals, special offers, and style inspiration
           </p>
