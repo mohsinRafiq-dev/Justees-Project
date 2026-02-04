@@ -263,7 +263,7 @@ const Products = () => {
             </p>
 
             {/* Rating */}
-            {product.rating && product.reviewCount > 0 && (
+            {product.rating > 0 && product.reviewCount > 0 && (
               <div className="flex items-center mb-3">
                 <div className="flex items-center">
                   {[...Array(5)].map((_, i) => (

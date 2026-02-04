@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { X, ShoppingCart, Heart } from 'lucide-react';
-import { openWhatsAppOrder } from '../../utils/whatsapp';
+import { useCart } from '../../contexts/CartContext';
+import { toast } from 'react-hot-toast';
 
 const ProductQuickView = ({ product, isOpen, onClose }) => {
+  const { addToCart } = useCart();
   const [selectedSize, setSelectedSize] = useState('');
   const [selectedColor, setSelectedColor] = useState('');
   const [quantity, setQuantity] = useState(1);
@@ -66,11 +68,13 @@ const ProductQuickView = ({ product, isOpen, onClose }) => {
   };
 
   const handleOrder = () => {
-    openWhatsAppOrder(product, {
+    addToCart(product, {
       size: selectedSize,
       color: selectedColor,
       quantity
     });
+    toast.success('Added to cart!');
+    onClose();
   };
 
   if (!isOpen || !product) return null;
@@ -282,14 +286,14 @@ const ProductQuickView = ({ product, isOpen, onClose }) => {
                     onClick={handleOrder}
                     disabled={!canOrder}
                     className={`flex-1 py-4 rounded-full font-semibold transition-all transform hover:scale-105 flex items-center justify-center gap-2 ${canOrder
-                      ? 'bg-green-500 hover:bg-green-600 text-white'
+                      ? 'bg-blue-600 hover:bg-blue-700 text-white'
                       : 'bg-gray-600 text-gray-400 cursor-not-allowed'
                       }`}
                   >
                     <ShoppingCart className="w-5 h-5" />
                     {isManuallyOutOfStock ? 'Out of Stock' :
                       !selectedSize || !selectedColor ? 'Select Options' :
-                        getSelectedVariantStock() === 0 ? 'Out of Stock' : 'Order on WhatsApp'}
+                        getSelectedVariantStock() === 0 ? 'Out of Stock' : 'Add to Cart'}
                   </button>
                 );
               })()}

@@ -40,8 +40,6 @@ export const validateProductForm = (formData) => {
   // Category validation
   if (!formData.category) {
     errors.category = 'Category is required';
-  } else if (!CATEGORIES.includes(formData.category)) {
-    errors.category = 'Invalid category selected';
   }
 
   // Description validation
@@ -86,15 +84,11 @@ export const validateVariant = (variant, index = 0) => {
   // Size validation
   if (!variant.size) {
     errors.size = 'Size is required';
-  } else if (!SIZES.includes(variant.size)) {
-    errors.size = 'Invalid size selected';
   }
 
   // Color validation
   if (!variant.color) {
     errors.color = 'Color is required';
-  } else if (!COLORS.includes(variant.color)) {
-    errors.color = 'Invalid color selected';
   }
 
   // Stock validation
@@ -173,13 +167,13 @@ export const validateVariants = (variants) => {
  */
 export const validateImages = (files) => {
   const errors = [];
-  
+
   if (!files || files.length === 0) {
     return { valid: true, errors: [] };
   }
 
   const fileArray = Array.from(files);
-  
+
   fileArray.forEach((file, index) => {
     // Check file type
     if (!VALIDATION.ALLOWED_IMAGE_TYPES.includes(file.type)) {
@@ -251,7 +245,7 @@ export const validateCategory = (categoryData) => {
  */
 export const sanitizeContent = (content) => {
   if (typeof content !== 'string') return '';
-  
+
   return content
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -270,7 +264,7 @@ export const formatPrice = (price) => {
   if (typeof price !== 'number' || isNaN(price)) {
     return 'Rs. 0';
   }
-  
+
   return `Rs. ${price.toLocaleString('en-IN')}`;
 };
 
@@ -281,7 +275,7 @@ export const formatPrice = (price) => {
  */
 export const generateSlug = (name) => {
   if (typeof name !== 'string') return '';
-  
+
   return name
     .toLowerCase()
     .trim()
@@ -318,13 +312,13 @@ export const isValidPhone = (phone) => {
  */
 export const isAdminUser = (user) => {
   if (!user || !user.email) return false;
-  
+
   const adminEmail = import.meta.env.VITE_ADMIN_EMAIL;
   if (!adminEmail) {
     console.warn('VITE_ADMIN_EMAIL not configured');
     return false;
   }
-  
+
   return user.email.toLowerCase() === adminEmail.toLowerCase();
 };
 

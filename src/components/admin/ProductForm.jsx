@@ -80,7 +80,7 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
       setFormData(prev => ({
         ...prev,
         stockStatus: prev.stockStatus || 'in_stock',
-        category: prev.category || (categoriesRes.success && categoriesRes.categories && categoriesRes.categories[0] ? categoriesRes.categories[0].name : CATEGORIES?.[0])
+        category: prev.category || (categoriesRes.success && categoriesRes.categories && categoriesRes.categories.length > 0 ? categoriesRes.categories[0].name : (CATEGORIES?.[0] || ''))
       }));
     } catch (err) {
       console.error('Error loading sizes/colors/categories:', err);
@@ -557,9 +557,16 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
                       className={`w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.category ? 'border-red-500' : 'border-gray-300'
                         }`}
                     >
-                      {availableCategories.map(category => (
-                        <option key={category} value={category}>{category}</option>
-                      ))}
+                      <option value="">Select Category</option>
+                      {availableCategories && availableCategories.length > 0 ? (
+                        availableCategories.map(category => (
+                          <option key={category} value={category}>{category}</option>
+                        ))
+                      ) : (
+                        CATEGORIES.map(category => (
+                          <option key={category} value={category}>{category}</option>
+                        ))
+                      )}
                     </select>
                     {errors.category && (
                       <p className="text-red-500 text-sm mt-1">{errors.category}</p>

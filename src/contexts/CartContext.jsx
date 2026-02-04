@@ -25,13 +25,24 @@ export const CartProvider = ({ children }) => {
 
   const addToCart = (product, options = {}) => {
     const { size = 'M', color = 'Black', quantity = 1 } = options;
-    
+
+    // Determine the correct image based on selected color
+    let selectedImage = product.image;
+    if (product.images && product.images.length > 0) {
+      const colorImage = product.images.find(
+        (img) => img.color && img.color.toLowerCase() === color.toLowerCase()
+      );
+      // Use color-specific image if found, otherwise use first image
+      const imageObj = colorImage || product.images[0];
+      selectedImage = typeof imageObj === "object" ? imageObj.url : imageObj;
+    }
+
     const cartItem = {
       id: `${product.id}-${size}-${color}`,
       productId: product.id,
       name: product.name,
       price: product.price,
-      image: product.image,
+      image: selectedImage || '/api/placeholder/400/400',
       size,
       color,
       quantity,
