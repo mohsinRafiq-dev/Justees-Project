@@ -64,7 +64,7 @@ export const getSizes = async () => {
 export const createSize = async (name) => {
   try {
     const slug = generateSlug(name);
-    const docRef = await addDoc(collection(db, SIZES_COLLECTION), { name, slug, order: 0, isActive: true, createdAt: new Date() });
+    const docRef = await addDoc(collection(db, SIZES_COLLECTION), { name, slug, createdAt: new Date() });
     return { success: true, id: docRef.id };
   } catch (error) {
     console.error("Error creating size:", error);
@@ -85,7 +85,8 @@ export const updateSize = async (id, data) => {
 
 export const getProductsUsingSize = async (sizeName) => {
   try {
-    const res = await getAllProducts({ limitCount: 1000 });
+    // Only check active products to allow deleting sizes used by deleted/inactive products
+    const res = await getAllProducts({ limitCount: 1000, status: 'active' });
     if (!res.success) return { success: false, error: res.error };
 
     const products = (res.products || []).filter(p => (p.variants || []).some(v => v.size === sizeName));
@@ -127,10 +128,11 @@ export const getColors = async () => {
   }
 };
 
-export const createColor = async (name, hex = '') => {
+export const createColor = async (name) => {
   try {
     const slug = generateSlug(name);
-    const docRef = await addDoc(collection(db, COLORS_COLLECTION), { name, slug, hex: hex || '', order: 0, isActive: true, createdAt: new Date() });
+    // Removed hex, order, isActive
+    const docRef = await addDoc(collection(db, COLORS_COLLECTION), { name, slug, createdAt: new Date() });
     return { success: true, id: docRef.id };
   } catch (error) {
     console.error("Error creating color:", error);
@@ -151,7 +153,8 @@ export const updateColor = async (id, data) => {
 
 export const getProductsUsingColor = async (colorName) => {
   try {
-    const res = await getAllProducts({ limitCount: 1000 });
+    // Only check active products
+    const res = await getAllProducts({ limitCount: 1000, status: 'active' });
     if (!res.success) return { success: false, error: res.error };
 
     const products = (res.products || []).filter(p => (p.variants || []).some(v => v.color === colorName));

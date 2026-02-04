@@ -100,7 +100,7 @@ const SizesManagement = () => {
         window.dispatchEvent(new Event('productAttributes:changed'));
       } else {
         if (res.blockingProducts && res.blockingProducts.length > 0) {
-          const names = res.blockingProducts.slice(0,5).map(p => p.name).join(', ');
+          const names = res.blockingProducts.slice(0, 5).map(p => p.name).join(', ');
           const more = res.blockingProducts.length > 5 ? ` and ${res.blockingProducts.length - 5} more` : '';
           toast.error(`Cannot delete: used by products: ${names}${more}. Remove variants from those products first.`);
           console.warn('Blocking products:', res.blockingProducts);
@@ -135,8 +135,7 @@ const SizesManagement = () => {
         const res = await updateSize(editingItem.id, {
           name: editingItem.name.trim(),
           slug: editingItem.slug.trim() || generateSlug(editingItem.name.trim()),
-          order: Number(editingItem.order) || 0,
-          isActive: !!editingItem.isActive
+          isActive: true
         });
         if (res.success) {
           toast.success('Size updated');
@@ -148,9 +147,7 @@ const SizesManagement = () => {
         const res = await updateColor(editingItem.id, {
           name: editingItem.name.trim(),
           slug: editingItem.slug.trim() || generateSlug(editingItem.name.trim()),
-          order: Number(editingItem.order) || 0,
-          isActive: !!editingItem.isActive,
-          hex: editingItem.hex || ''
+          isActive: true
         });
         if (res.success) {
           toast.success('Color updated');
@@ -210,11 +207,7 @@ const SizesManagement = () => {
                 <li key={s.id} className="flex items-center justify-between border-b py-2">
                   {editingItem && editingItem.type === 'size' && editingItem.id === s.id ? (
                     <div className="flex items-center gap-2 w-full">
-                      <input className="border rounded px-2 py-1" value={editingItem.name} onChange={(e) => setEditingItem(prev => ({...prev, name: e.target.value}))} />
-                      <input className="border rounded px-2 py-1 w-20" value={editingItem.order} onChange={(e) => setEditingItem(prev => ({...prev, order: e.target.value}))} />
-                      <label className="flex items-center gap-2">
-                        <input type="checkbox" checked={editingItem.isActive} onChange={(e) => setEditingItem(prev => ({...prev, isActive: e.target.checked}))} /> Active
-                      </label>
+                      <input className="border rounded px-2 py-1 w-full" value={editingItem.name} onChange={(e) => setEditingItem(prev => ({ ...prev, name: e.target.value }))} />
                       <div className="ml-auto flex gap-2">
                         <button onClick={saveEdit} className="bg-green-600 text-white px-3 py-1 rounded">Save</button>
                         <button onClick={cancelEdit} className="bg-gray-200 px-3 py-1 rounded">Cancel</button>
@@ -263,12 +256,7 @@ const SizesManagement = () => {
                 <li key={c.id} className="flex items-center justify-between border-b py-2">
                   {editingItem && editingItem.type === 'color' && editingItem.id === c.id ? (
                     <div className="flex items-center gap-2 w-full">
-                      <input className="border rounded px-2 py-1" value={editingItem.name} onChange={(e) => setEditingItem(prev => ({...prev, name: e.target.value}))} />
-                      <input className="border rounded px-2 py-1 w-20" value={editingItem.order} onChange={(e) => setEditingItem(prev => ({...prev, order: e.target.value}))} />
-                      <input className="border rounded px-2 py-1 w-28" value={editingItem.hex} placeholder="#hex" onChange={(e) => setEditingItem(prev => ({...prev, hex: e.target.value}))} />
-                      <label className="flex items-center gap-2">
-                        <input type="checkbox" checked={editingItem.isActive} onChange={(e) => setEditingItem(prev => ({...prev, isActive: e.target.checked}))} /> Active
-                      </label>
+                      <input className="border rounded px-2 py-1 w-full" value={editingItem.name} onChange={(e) => setEditingItem(prev => ({ ...prev, name: e.target.value }))} />
                       <div className="ml-auto flex gap-2">
                         <button onClick={saveEdit} className="bg-green-600 text-white px-3 py-1 rounded">Save</button>
                         <button onClick={cancelEdit} className="bg-gray-200 px-3 py-1 rounded">Cancel</button>
@@ -276,7 +264,7 @@ const SizesManagement = () => {
                     </div>
                   ) : (
                     <>
-                      <span className="flex items-center gap-2"><span style={{width:12,height:12,background:c.hex||'#eee',display:'inline-block',borderRadius:4,border:'1px solid #ccc'}} />{c.name}</span>
+                      <span>{c.name}</span>
                       <div className="flex gap-2">
                         <button onClick={() => startEdit(c, 'color')} className="text-blue-600">Edit</button>
                         <button onClick={() => handleDelete(c.id, 'color')} className="text-red-600 flex items-center">
@@ -293,7 +281,7 @@ const SizesManagement = () => {
       </div>
 
       <ConfirmDialog
-        open={confirm.open}
+        isOpen={confirm.open}
         title="Confirm Delete"
         message="Are you sure you want to delete this item?"
         onConfirm={confirmDelete}

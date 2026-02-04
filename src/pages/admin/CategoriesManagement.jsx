@@ -134,7 +134,7 @@ const CategoriesManagement = () => {
       </div>
 
       <ConfirmDialog
-        open={confirm.open}
+        isOpen={confirm.open}
         title="Delete Category"
         message="Are you sure you want to delete this category? This will not delete existing products but they may become uncategorized."
         onConfirm={confirmDelete}

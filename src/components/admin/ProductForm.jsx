@@ -1,16 +1,16 @@
 import { useState, useEffect } from 'react';
 import { X, Upload, Trash2, Plus, Save, Eye } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { 
-  createProduct, 
-  updateProduct 
+import {
+  createProduct,
+  updateProduct
 } from '../../services/products.service';
-import { 
+import {
   uploadMultipleProductImages,
-  deleteProductImage 
+  deleteProductImage
 } from '../../services/storage.service';
-import { 
-  validateProductForm, 
+import {
+  validateProductForm,
   validateVariants,
   validateImages
 } from '../../utils/validation';
@@ -22,7 +22,7 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('basic');
-  
+
   // Form data
   const [formData, setFormData] = useState({
     name: '',
@@ -44,7 +44,8 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
       material: '',
       careInstructions: '',
       fit: 'Regular'
-    }
+    },
+    stockStatus: 'in_stock'
   });
 
   const [variants, setVariants] = useState([]);
@@ -78,6 +79,7 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
       // If no category is selected, default to first available
       setFormData(prev => ({
         ...prev,
+        stockStatus: prev.stockStatus || 'in_stock',
         category: prev.category || (categoriesRes.success && categoriesRes.categories && categoriesRes.categories[0] ? categoriesRes.categories[0].name : CATEGORIES?.[0])
       }));
     } catch (err) {
@@ -98,7 +100,7 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
     if (product) {
       console.log('[ProductForm] Loading product for edit:', product);
       console.log('[ProductForm] Product images:', product.images);
-      
+
       setFormData(prevFormData => ({
         ...prevFormData,
         ...product,
@@ -112,16 +114,16 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
           ...product.specifications
         }
       }));
-      
+
       setVariants(product.variants || []);
-      
+
       // Set available colors from existing variants (but keep master list intact)
       if (product.variants && product.variants.length > 0) {
         const colors = [...new Set(product.variants.map(v => v.color))];
         // Pre-select colors present on product
         setSelectedColors(colors);
       }
-      
+
       // Set selected sizes from existing variants
       if (product.variants && product.variants.length > 0) {
         const sizes = [...new Set(product.variants.map(v => v.size))];
@@ -153,7 +155,7 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
       ...prev,
       [field]: value
     }));
-    
+
     // Clear field error when user starts typing
     if (errors[field]) {
       setErrors(prev => ({
@@ -182,17 +184,17 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
 
   const handleStockChange = (size, color, stock) => {
     const stockValue = parseInt(stock) || 0;
-    
+
     setVariants(prev => {
       const existingIndex = prev.findIndex(v => v.size === size && v.color === color);
-      
+
       if (stockValue === 0) {
         // Remove variant if stock is 0
         return existingIndex >= 0 ? prev.filter((_, i) => i !== existingIndex) : prev;
       } else {
         // Update existing or add new variant
         if (existingIndex >= 0) {
-          return prev.map((variant, i) => 
+          return prev.map((variant, i) =>
             i === existingIndex ? { ...variant, stock: stockValue } : variant
           );
         } else {
@@ -282,12 +284,12 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
   // Image handling functions
   const handleImageUpload = (color, files) => {
     const fileArray = Array.from(files);
-    
+
     // Validate file types and sizes
     const validFiles = fileArray.filter(file => {
       const isValidType = file.type.startsWith('image/');
       const isValidSize = file.size <= 5 * 1024 * 1024; // 5MB limit
-      
+
       if (!isValidType) {
         toast.error(`${file.name} is not a valid image file`);
         return false;
@@ -298,7 +300,7 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
       }
       return true;
     });
-    
+
     if (validFiles.length > 0) {
       setColorImages(prev => ({
         ...prev,
@@ -325,12 +327,12 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
   const validateForm = () => {
     const formValidation = validateProductForm(formData);
     const variantValidation = validateVariants(variants);
-    
+
     console.log('Form validation:', formValidation);
     console.log('Variant validation:', variantValidation);
     console.log('Current variants:', variants);
     console.log('Form data:', formData);
-    
+
     const allErrors = {
       ...(formValidation.errors || formValidation),
       ...(variantValidation.errors || variantValidation)
@@ -356,10 +358,10 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     console.log('Form submission started');
     console.log('User:', user);
-    
+
     if (!validateForm()) {
       toast.error('Please fix the errors before submitting');
       return;
@@ -395,7 +397,7 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
       // Prepare images data for upload
       const allNewImageFiles = [];
       const imageColorMapping = [];
-      
+
       Object.entries(colorImages).forEach(([color, files]) => {
         files.forEach(file => {
           allNewImageFiles.push(file);
@@ -407,7 +409,7 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
       console.log('Image color mapping:', imageColorMapping);
 
       let result;
-      
+
       if (product) {
         console.log('Updating existing product:', product.id);
         // Update existing product
@@ -434,7 +436,7 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
 
       if (result.success) {
         toast.success(product ? 'Product updated successfully!' : 'Product created successfully!');
-        
+
         // Clear form state if creating a new product
         if (!product) {
           setColorImages({});
@@ -443,7 +445,7 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
           setVariants([]);
           setAvailableColors([]);
         }
-        
+
         onSave(result.product || { ...product, ...productData });
       } else {
         // Show general error
@@ -508,11 +510,10 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
                   key={tab.id}
                   type="button"
                   onClick={() => setActiveTab(tab.id)}
-                  className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                    activeTab === tab.id
-                      ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700'
-                  }`}
+                  className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === tab.id
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                    }`}
                 >
                   <span className="mr-2">{tab.icon}</span>
                   {tab.name}
@@ -536,9 +537,8 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
                       type="text"
                       value={formData.name}
                       onChange={(e) => handleInputChange('name', e.target.value)}
-                      className={`w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                        errors.name ? 'border-red-500' : 'border-gray-300'
-                      }`}
+                      className={`w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.name ? 'border-red-500' : 'border-gray-300'
+                        }`}
                       placeholder="Enter product name"
                     />
                     {errors.name && (
@@ -554,9 +554,8 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
                     <select
                       value={formData.category}
                       onChange={(e) => handleInputChange('category', e.target.value)}
-                      className={`w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                        errors.category ? 'border-red-500' : 'border-gray-300'
-                      }`}
+                      className={`w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.category ? 'border-red-500' : 'border-gray-300'
+                        }`}
                     >
                       {availableCategories.map(category => (
                         <option key={category} value={category}>{category}</option>
@@ -577,9 +576,8 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
                       step="0.01"
                       value={formData.originalPrice}
                       onChange={(e) => handleInputChange('originalPrice', e.target.value)}
-                      className={`w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                        errors.originalPrice ? 'border-red-500' : 'border-gray-300'
-                      }`}
+                      className={`w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.originalPrice ? 'border-red-500' : 'border-gray-300'
+                        }`}
                       placeholder="0.00"
                     />
                     {errors.originalPrice && (
@@ -611,9 +609,8 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
                           step="0.01"
                           value={formData.salePrice}
                           onChange={(e) => handleInputChange('salePrice', e.target.value)}
-                          className={`w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                            errors.salePrice ? 'border-red-500' : 'border-gray-300'
-                          }`}
+                          className={`w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.salePrice ? 'border-red-500' : 'border-gray-300'
+                            }`}
                           placeholder="0.00"
                         />
                         {errors.salePrice && (
@@ -652,9 +649,8 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
                     value={formData.description}
                     onChange={(e) => handleInputChange('description', e.target.value)}
                     rows={4}
-                    className={`w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                      errors.description ? 'border-red-500' : 'border-gray-300'
-                    }`}
+                    className={`w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.description ? 'border-red-500' : 'border-gray-300'
+                      }`}
                     placeholder="Enter product description"
                   />
                   {errors.description && (
@@ -758,17 +754,32 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
                     </label>
                   </div>
                 </div>
+
+                {/* Stock Status */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Stock Status
+                  </label>
+                  <select
+                    value={formData.stockStatus}
+                    onChange={(e) => handleInputChange('stockStatus', e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="in_stock">In Stock</option>
+                    <option value="out_of_stock">Out of Stock</option>
+                  </select>
+                </div>
               </div>
             )}
 
             {/* Add other tab contents here... */}
-            
+
             {/* Variants Tab */}
             {activeTab === 'variants' && (
               <div className="space-y-6">
                 <h3 className="text-lg font-semibold text-gray-900">Stock Management</h3>
                 <p className="text-gray-600">Add colors and set stock levels for different sizes</p>
-                
+
                 {/* Color & Size Selection (choose from admin-managed lists) */}
                 <div className="border border-gray-200 rounded-lg p-4">
                   <h4 className="font-medium text-gray-900 mb-3">Select Colors for this Product</h4>
@@ -800,13 +811,13 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
                 {selectedColors.length > 0 && selectedSizes.length > 0 && (
                   <div className="border border-gray-200 rounded-lg p-4">
                     <div className="overflow-x-auto">
-                      <div className="grid gap-2 text-sm" style={{gridTemplateColumns: `1fr repeat(${selectedColors.length}, minmax(80px, 1fr))`}}>
+                      <div className="grid gap-2 text-sm" style={{ gridTemplateColumns: `1fr repeat(${selectedColors.length}, minmax(80px, 1fr))` }}>
                         {/* Header */}
                         <div className="font-medium text-gray-700">Size/Color</div>
                         {selectedColors.map(color => (
                           <div key={color} className="font-medium text-gray-700 text-center">{color}</div>
                         ))}
-                        
+
                         {/* Stock Grid */}
                         {selectedSizes.map(size => (
                           <div key={size} className="contents">
@@ -862,7 +873,7 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
                 <div className="bg-gray-50 rounded-lg p-4">
                   <h4 className="font-medium text-gray-900 mb-2">Stock Summary</h4>
                   <div className="text-sm text-gray-600">
-                    Total Variants: {variants.length} | 
+                    Total Variants: {variants.length} |
                     Total Stock: {variants.reduce((sum, v) => sum + (parseInt(v.stock) || 0), 0)} units
                   </div>
                 </div>
@@ -877,7 +888,7 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
                 {errors.images && (
                   <p className="text-red-500 text-sm mt-2">{errors.images}</p>
                 )}
-                
+
                 {selectedColors.length === 0 ? (
                   <div className="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
                     <div className="text-gray-500 mb-2">📦</div>
@@ -895,13 +906,13 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
                     {selectedColors.map(color => (
                       <div key={color} className="border border-gray-200 rounded-lg p-4">
                         <h4 className="font-medium text-gray-900 mb-4 flex items-center gap-2">
-                          <div 
+                          <div
                             className="w-4 h-4 rounded border border-gray-300"
                             style={{ backgroundColor: color.toLowerCase() }}
                           />
                           {color} Images
                         </h4>
-                        
+
                         {/* Image Upload */}
                         <div className="mb-4">
                           <input
@@ -952,7 +963,7 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
                             </div>
                           </div>
                         )}
-                        
+
                         {/* New Images Preview */}
                         {colorImages[color] && colorImages[color].length > 0 && (
                           <div>

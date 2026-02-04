@@ -166,16 +166,15 @@ const Products = () => {
 
   const ProductCard = ({ product }) => {
     const stock = getProductStock(product);
-    const isOutOfStock = stock === 0;
+    const isOutOfStock = product.stockStatus === 'out_of_stock' || (product.trackInventory && stock === 0);
     const isLowStock = stock > 0 && stock <= 5;
     const imageUrl = getProductImage(product);
 
     return (
       <TiltCard className="group h-full">
         <div
-          className={`relative rounded-2xl overflow-hidden h-full ${
-            isDark ? "bg-gray-800" : "bg-white"
-          } shadow-lg hover:shadow-2xl transition-all duration-300`}
+          className={`relative rounded-2xl overflow-hidden h-full ${isDark ? "bg-gray-800" : "bg-white"
+            } shadow-lg hover:shadow-2xl transition-all duration-300`}
         >
           {/* Product Image */}
           <div className="relative aspect-square overflow-hidden">
@@ -189,15 +188,14 @@ const Products = () => {
             <div className="absolute top-4 left-4 flex flex-col space-y-2">
               {product.badge && (
                 <span
-                  className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                    product.badge === "Sale"
-                      ? "bg-red-500 text-white"
-                      : product.badge === "New"
-                        ? "bg-green-500 text-white"
-                        : product.badge === "Hot"
-                          ? "bg-orange-500 text-white"
-                          : "bg-blue-500 text-white"
-                  }`}
+                  className={`px-3 py-1 rounded-full text-xs font-semibold ${product.badge === "Sale"
+                    ? "bg-red-500 text-white"
+                    : product.badge === "New"
+                      ? "bg-green-500 text-white"
+                      : product.badge === "Hot"
+                        ? "bg-orange-500 text-white"
+                        : "bg-blue-500 text-white"
+                    }`}
                 >
                   {product.badge}
                 </span>
@@ -218,11 +216,10 @@ const Products = () => {
             <div className="absolute top-4 right-4 flex flex-col space-y-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
               <button
                 onClick={() => toggleWishlist(product.id)}
-                className={`p-2 rounded-full backdrop-blur-sm transition-colors ${
-                  wishlist.includes(product.id)
-                    ? "bg-red-500 text-white"
-                    : "bg-white/80 text-gray-700 hover:bg-red-500 hover:text-white"
-                }`}
+                className={`p-2 rounded-full backdrop-blur-sm transition-colors ${wishlist.includes(product.id)
+                  ? "bg-red-500 text-white"
+                  : "bg-white/80 text-gray-700 hover:bg-red-500 hover:text-white"
+                  }`}
               >
                 <Heart
                   className={`w-4 h-4 ${wishlist.includes(product.id) ? "fill-current" : ""}`}
@@ -248,9 +245,8 @@ const Products = () => {
           <div className="p-6">
             <div className="flex items-start justify-between mb-2">
               <h3
-                className={`font-semibold text-lg line-clamp-2 ${
-                  isDark ? "text-white" : "text-gray-900"
-                }`}
+                className={`font-semibold text-lg line-clamp-2 ${isDark ? "text-white" : "text-gray-900"
+                  }`}
               >
                 {product.name}
               </h3>
@@ -260,9 +256,8 @@ const Products = () => {
             </div>
 
             <p
-              className={`text-sm mb-4 line-clamp-2 ${
-                isDark ? "text-gray-300" : "text-gray-600"
-              }`}
+              className={`text-sm mb-4 line-clamp-2 ${isDark ? "text-gray-300" : "text-gray-600"
+                }`}
             >
               {product.shortDescription || product.description}
             </p>
@@ -274,11 +269,10 @@ const Products = () => {
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
-                      className={`w-4 h-4 ${
-                        i < Math.floor(product.rating)
-                          ? "text-yellow-500 fill-current"
-                          : "text-gray-300"
-                      }`}
+                      className={`w-4 h-4 ${i < Math.floor(product.rating)
+                        ? "text-yellow-500 fill-current"
+                        : "text-gray-300"
+                        }`}
                     />
                   ))}
                 </div>
@@ -294,29 +288,26 @@ const Products = () => {
             <div className="flex items-center justify-between mb-4">
               <div>
                 <span
-                  className={`text-2xl font-bold ${
-                    isDark ? "text-white" : "text-gray-900"
-                  }`}
+                  className={`text-2xl font-bold ${isDark ? "text-white" : "text-gray-900"
+                    }`}
                 >
                   {formatPrice(product.price)}
                 </span>
                 {product.originalPrice &&
-                  product.originalPrice !== product.price && (
+                  Number(product.originalPrice) > Number(product.price) && (
                     <span
-                      className={`text-sm ml-2 line-through ${
-                        isDark ? "text-gray-500" : "text-gray-400"
-                      }`}
+                      className={`text-sm ml-2 line-through ${isDark ? "text-gray-500" : "text-gray-400"
+                        }`}
                     >
                       {formatPrice(product.originalPrice)}
                     </span>
                   )}
               </div>
               <span
-                className={`text-sm ${
-                  isDark ? "text-gray-400" : "text-gray-500"
-                }`}
+                className={`font-medium ${isOutOfStock ? "text-red-500" : "text-green-500"
+                  }`}
               >
-                Stock: {stock}
+                {isOutOfStock ? "Out of Stock" : "In Stock"}
               </span>
             </div>
 
@@ -359,13 +350,12 @@ const Products = () => {
             <button
               onClick={() => handleQuickAdd(product)}
               disabled={isOutOfStock}
-              className={`w-full py-3 px-4 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center space-x-2 ${
-                isOutOfStock
-                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                  : isDark
-                    ? "bg-blue-600 hover:bg-blue-700 text-white"
-                    : "bg-gray-900 hover:bg-blue-600 text-white"
-              }`}
+              className={`w-full py-3 px-4 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center space-x-2 ${isOutOfStock
+                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                : isDark
+                  ? "bg-blue-600 hover:bg-blue-700 text-white"
+                  : "bg-gray-900 hover:bg-blue-600 text-white"
+                }`}
             >
               <ShoppingCart className="w-5 h-5" />
               <span>{isOutOfStock ? "Out of Stock" : "Add to Cart"}</span>
@@ -393,16 +383,14 @@ const Products = () => {
               className="text-center"
             >
               <h1
-                className={`text-4xl md:text-6xl font-bold mb-6 ${
-                  isDark ? "text-white" : "text-gray-900"
-                }`}
+                className={`text-4xl md:text-6xl font-bold mb-6 ${isDark ? "text-white" : "text-gray-900"
+                  }`}
               >
                 Our Products
               </h1>
               <p
-                className={`text-xl mb-8 max-w-2xl mx-auto ${
-                  isDark ? "text-gray-300" : "text-gray-600"
-                }`}
+                className={`text-xl mb-8 max-w-2xl mx-auto ${isDark ? "text-gray-300" : "text-gray-600"
+                  }`}
               >
                 Discover our curated collection of premium clothing designed for
                 comfort, style, and durability.
@@ -415,9 +403,8 @@ const Products = () => {
         <section className="py-8">
           <div className="container mx-auto px-4">
             <div
-              className={`rounded-2xl p-6 mb-8 ${
-                isDark ? "bg-gray-800" : "bg-white"
-              } shadow-lg`}
+              className={`rounded-2xl p-6 mb-8 ${isDark ? "bg-gray-800" : "bg-white"
+                } shadow-lg`}
             >
               <div className="flex flex-wrap items-center gap-4 mb-4">
                 <div className="flex items-center space-x-2">
@@ -440,11 +427,10 @@ const Products = () => {
                     placeholder="Search products..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className={`w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500 ${
-                      isDark
-                        ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                        : "bg-white border-gray-300 text-gray-900 placeholder-gray-500"
-                    }`}
+                    className={`w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500 ${isDark
+                      ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+                      : "bg-white border-gray-300 text-gray-900 placeholder-gray-500"
+                      }`}
                   />
                 </div>
 
@@ -453,11 +439,10 @@ const Products = () => {
                   <select
                     value={selectedCategory}
                     onChange={(e) => setSelectedCategory(e.target.value)}
-                    className={`w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500 ${
-                      isDark
-                        ? "bg-gray-700 border-gray-600 text-white"
-                        : "bg-white border-gray-300 text-gray-900"
-                    }`}
+                    className={`w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500 ${isDark
+                      ? "bg-gray-700 border-gray-600 text-white"
+                      : "bg-white border-gray-300 text-gray-900"
+                      }`}
                   >
                     <option value="All">All Categories</option>
                     {CATEGORIES.map((category) => (
@@ -475,11 +460,10 @@ const Products = () => {
                       const [min, max] = e.target.value.split("-").map(Number);
                       setPriceRange({ min, max });
                     }}
-                    className={`w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500 ${
-                      isDark
-                        ? "bg-gray-700 border-gray-600 text-white"
-                        : "bg-white border-gray-300 text-gray-900"
-                    }`}
+                    className={`w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500 ${isDark
+                      ? "bg-gray-700 border-gray-600 text-white"
+                      : "bg-white border-gray-300 text-gray-900"
+                      }`}
                   >
                     <option value="0-10000">All Prices</option>
                     <option value="0-1000">Under Rs. 1,000</option>
@@ -498,11 +482,10 @@ const Products = () => {
                       setSortBy(field);
                       setSortOrder(order);
                     }}
-                    className={`w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500 ${
-                      isDark
-                        ? "bg-gray-700 border-gray-600 text-white"
-                        : "bg-white border-gray-300 text-gray-900"
-                    }`}
+                    className={`w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500 ${isDark
+                      ? "bg-gray-700 border-gray-600 text-white"
+                      : "bg-white border-gray-300 text-gray-900"
+                      }`}
                   >
                     <option value="createdAt-desc">Newest First</option>
                     <option value="createdAt-asc">Oldest First</option>
@@ -539,9 +522,8 @@ const Products = () => {
                   🛍️
                 </div>
                 <h3
-                  className={`text-2xl font-bold mb-4 ${
-                    isDark ? "text-white" : "text-gray-900"
-                  }`}
+                  className={`text-2xl font-bold mb-4 ${isDark ? "text-white" : "text-gray-900"
+                    }`}
                 >
                   No products found
                 </h3>

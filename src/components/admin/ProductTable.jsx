@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { 
-  Edit3, 
-  Trash2, 
-  Eye, 
-  EyeOff, 
-  Star, 
+import { motion } from 'framer-motion';
+import {
+  Edit3,
+  Trash2,
+  Eye,
+  EyeOff,
+  Star,
   Package,
   TrendingUp,
   ExternalLink,
@@ -13,12 +14,12 @@ import {
 } from 'lucide-react';
 import { formatPrice } from '../../utils/validation';
 
-const ProductTable = ({ 
-  products, 
-  onEdit, 
-  onDelete, 
-  onToggleVisibility, 
-  onToggleFeatured 
+const ProductTable = ({
+  products,
+  onEdit,
+  onDelete,
+  onToggleVisibility,
+  onToggleFeatured
 }) => {
   const [expandedRows, setExpandedRows] = useState(new Set());
   const [selectedProducts, setSelectedProducts] = useState(new Set());
@@ -96,8 +97,8 @@ const ProductTable = ({
                 className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
               />
             </th>
-            
-            <th 
+
+            <th
               className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
               onClick={() => handleSort('name')}
             >
@@ -108,12 +109,12 @@ const ProductTable = ({
                 )}
               </div>
             </th>
-            
+
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Category
             </th>
-            
-            <th 
+
+            <th
               className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
               onClick={() => handleSort('price')}
             >
@@ -124,8 +125,8 @@ const ProductTable = ({
                 )}
               </div>
             </th>
-            
-            <th 
+
+            <th
               className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
               onClick={() => handleSort('totalStock')}
             >
@@ -136,12 +137,12 @@ const ProductTable = ({
                 )}
               </div>
             </th>
-            
+
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Status
             </th>
-            
-            <th 
+
+            <th
               className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
               onClick={() => handleSort('views')}
             >
@@ -152,21 +153,21 @@ const ProductTable = ({
                 )}
               </div>
             </th>
-            
+
             <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
               Actions
             </th>
           </tr>
         </thead>
-        
+
         <tbody className="bg-white divide-y divide-gray-200">
           {products.map((product, index) => {
             const stockStatus = getStockStatus(product);
             const isExpanded = expandedRows.has(product.id);
             const isSelected = selectedProducts.has(product.id);
-            
+
             return (
-              <motion.tr 
+              <motion.tr
                 key={product.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -182,7 +183,7 @@ const ProductTable = ({
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
                 </td>
-                
+
                 {/* Product Info */}
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center space-x-4">
@@ -199,7 +200,7 @@ const ProductTable = ({
                         </div>
                       )}
                     </div>
-                    
+
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center space-x-2">
                         <p className="text-sm font-medium text-gray-900 truncate">
@@ -214,11 +215,11 @@ const ProductTable = ({
                           </span>
                         )}
                       </div>
-                      
+
                       <p className="text-sm text-gray-500 truncate">
                         {product.shortDescription || product.description?.substring(0, 60) + '...'}
                       </p>
-                      
+
                       {/* Expand button */}
                       <button
                         onClick={() => toggleRowExpansion(product.id)}
@@ -239,14 +240,14 @@ const ProductTable = ({
                     </div>
                   </div>
                 </td>
-                
+
                 {/* Category */}
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span className="px-2 py-1 text-sm bg-gray-100 text-gray-700 rounded-full">
                     {product.category}
                   </span>
                 </td>
-                
+
                 {/* Price */}
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm">
@@ -260,7 +261,7 @@ const ProductTable = ({
                     )}
                   </div>
                 </td>
-                
+
                 {/* Stock */}
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center space-x-2">
@@ -272,12 +273,12 @@ const ProductTable = ({
                     </span>
                   </div>
                 </td>
-                
+
                 {/* Status */}
                 <td className="px-6 py-4 whitespace-nowrap">
                   {getStatusBadge(product)}
                 </td>
-                
+
                 {/* Views */}
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   <div className="flex items-center space-x-1">
@@ -285,36 +286,34 @@ const ProductTable = ({
                     <span>{product.views || 0}</span>
                   </div>
                 </td>
-                
+
                 {/* Actions */}
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <div className="flex items-center justify-end space-x-2">
                     {/* Toggle Visibility */}
                     <button
                       onClick={() => onToggleVisibility(product)}
-                      className={`p-2 rounded-full ${
-                        product.isVisible 
-                          ? 'text-green-600 hover:bg-green-100' 
+                      className={`p-2 rounded-full ${product.isVisible
+                          ? 'text-green-600 hover:bg-green-100'
                           : 'text-gray-400 hover:bg-gray-100'
-                      }`}
+                        }`}
                       title={product.isVisible ? 'Hide from store' : 'Show in store'}
                     >
                       {product.isVisible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
                     </button>
-                    
+
                     {/* Toggle Featured */}
                     <button
                       onClick={() => onToggleFeatured(product)}
-                      className={`p-2 rounded-full ${
-                        product.isFeatured 
-                          ? 'text-yellow-500 hover:bg-yellow-100' 
+                      className={`p-2 rounded-full ${product.isFeatured
+                          ? 'text-yellow-500 hover:bg-yellow-100'
                           : 'text-gray-400 hover:bg-gray-100'
-                      }`}
+                        }`}
                       title={product.isFeatured ? 'Remove from featured' : 'Add to featured'}
                     >
                       <Star className={`w-4 h-4 ${product.isFeatured ? 'fill-current' : ''}`} />
                     </button>
-                    
+
                     {/* Edit */}
                     <button
                       onClick={() => onEdit(product)}
@@ -323,7 +322,7 @@ const ProductTable = ({
                     >
                       <Edit3 className="w-4 h-4" />
                     </button>
-                    
+
                     {/* Delete */}
                     <button
                       onClick={() => onDelete(product)}
@@ -332,7 +331,7 @@ const ProductTable = ({
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
-                    
+
                     {/* View Product */}
                     <a
                       href={`/products/${product.slug || product.id}`}
@@ -350,12 +349,12 @@ const ProductTable = ({
           })}
         </tbody>
       </table>
-      
+
       {/* Expanded Row Details */}
       {products.map((product) => {
         const isExpanded = expandedRows.has(product.id);
         if (!isExpanded) return null;
-        
+
         return (
           <motion.div
             key={`expanded-${product.id}`}
@@ -365,19 +364,12 @@ const ProductTable = ({
             className="bg-gray-50 border-t border-gray-200"
           >
             <div className="px-6 py-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Product Details */}
                 <div>
                   <h4 className="font-medium text-gray-900 mb-2">Product Details</h4>
                   <dl className="space-y-2">
-                    <div>
-                      <dt className="text-sm font-medium text-gray-500">SKU</dt>
-                      <dd className="text-sm text-gray-900">{product.sku || 'N/A'}</dd>
-                    </div>
-                    <div>
-                      <dt className="text-sm font-medium text-gray-500">Brand</dt>
-                      <dd className="text-sm text-gray-900">{product.brand || 'N/A'}</dd>
-                    </div>
+
                     <div>
                       <dt className="text-sm font-medium text-gray-500">Created</dt>
                       <dd className="text-sm text-gray-900">
@@ -386,7 +378,7 @@ const ProductTable = ({
                     </div>
                   </dl>
                 </div>
-                
+
                 {/* Variants */}
                 <div>
                   <h4 className="font-medium text-gray-900 mb-2">Variants ({product.variants?.length || 0})</h4>
@@ -403,29 +395,10 @@ const ProductTable = ({
                     )}
                   </div>
                 </div>
-                
-                {/* Performance */}
-                <div>
-                  <h4 className="font-medium text-gray-900 mb-2">Performance</h4>
-                  <dl className="space-y-2">
-                    <div>
-                      <dt className="text-sm font-medium text-gray-500">Views</dt>
-                      <dd className="text-sm text-gray-900">{product.views || 0}</dd>
-                    </div>
-                    <div>
-                      <dt className="text-sm font-medium text-gray-500">Sales</dt>
-                      <dd className="text-sm text-gray-900">{product.sales || 0}</dd>
-                    </div>
-                    <div>
-                      <dt className="text-sm font-medium text-gray-500">Rating</dt>
-                      <dd className="text-sm text-gray-900">
-                        {product.rating ? `${product.rating}/5 (${product.reviewCount || 0} reviews)` : 'No ratings'}
-                      </dd>
-                    </div>
-                  </dl>
-                </div>
+
+
               </div>
-              
+
               {/* Tags */}
               {product.tags && product.tags.length > 0 && (
                 <div className="mt-4">
@@ -446,7 +419,7 @@ const ProductTable = ({
           </motion.div>
         );
       })}
-      
+
       {products.length === 0 && (
         <div className="text-center py-8 text-gray-500">
           <Package className="w-12 h-12 mx-auto mb-4 text-gray-300" />
