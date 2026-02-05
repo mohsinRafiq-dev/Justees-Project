@@ -9,7 +9,13 @@ const Footer = () => {
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           <div>
-            <h3 className={`${isDark ? 'text-white' : 'text-gray-900'} text-xl font-bold mb-4`}>JUSTEES</h3>
+            <Link to="/" className="inline-block mb-4">
+              <img 
+                src="/justees_logo.png" 
+                alt="Justees" 
+                className="h-48 w-auto object-contain"
+              />
+            </Link>
             <p className="text-sm">Premium quality clothing for the modern lifestyle.</p>
           </div>
           <div>

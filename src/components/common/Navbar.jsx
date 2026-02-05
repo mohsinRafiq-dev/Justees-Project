@@ -15,12 +15,16 @@ const Navbar = () => {
       <motion.nav
         initial={{ y: -100 }}
         animate={{ y: 0 }}
-        className={`fixed top-0 left-0 right-0 z-50 glass ${isDark ? '' : 'glass-light'} border-b ${isDark ? 'border-gray-700' : 'border-gray-200'} overflow-visible`}
+        className={`fixed top-0 left-0 right-0 z-50 ${isDark ? 'bg-gray-900/95 backdrop-blur-md' : 'bg-white/95 backdrop-blur-md'} border-b ${isDark ? 'border-gray-700' : 'border-gray-200'} overflow-visible shadow-lg`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16 overflow-visible">
-            <Link to="/" className={`text-2xl font-bold bg-gradient-to-r from-blue-500 via-cyan-500 to-teal-500 bg-clip-text text-transparent animate-gradient`}>
-              Justees
+            <Link to="/" className="flex items-center">
+              <img 
+                src="/justees_logo.png" 
+                alt="Justees" 
+                className="h-40 w-auto object-contain"
+              />
             </Link>
 
             {/* Desktop Menu */}
