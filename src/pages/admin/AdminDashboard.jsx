@@ -19,6 +19,7 @@ import {
   Home,
   Sun,
   Moon,
+  Star,
 } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
