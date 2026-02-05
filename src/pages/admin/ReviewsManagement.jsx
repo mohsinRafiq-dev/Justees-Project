@@ -24,8 +24,8 @@ import { getAllProducts } from "../../services/products.service";
 import { useAuth } from "../../hooks/useAuth";
 import { useTheme } from "../../contexts/ThemeContext";
 import { isAdminUser } from "../../utils/validation";
-import ConfirmDialog from "../common/ConfirmDialog";
-import LoadingSpinner from "../common/LoadingSpinner";
+import ConfirmDialog from "../../components/common/ConfirmDialog";
+import LoadingSpinner from "../../components/common/LoadingSpinner";
 
 const ReviewsManagement = () => {
   const { user } = useAuth();
