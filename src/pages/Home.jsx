@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion'; // eslint-disable-line
 import { ChevronLeft, ChevronRight, ShoppingBag, Truck, Shield, Headphones, Star, Quote, TrendingUp, Award, CheckCircle, Menu, X, ArrowUp, MessageCircle, Lock, RefreshCw, Eye, ShoppingCart, Sun, Moon, Heart, Zap, Instagram } from 'lucide-react';
 import { toast } from 'react-hot-toast';
@@ -18,6 +18,7 @@ import Footer from '../components/common/Footer';
 
 const Home = () => {
   const { isDark } = useTheme();
+  const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [email, setEmail] = useState('');
@@ -581,7 +582,14 @@ const Home = () => {
             {featuredProducts.map((product, index) => (
               <TiltCard
                 key={product.id}
-                className={`group ${isDark ? 'bg-gray-700' : 'bg-gray-50'} rounded-lg overflow-hidden hover:shadow-2xl transition-all`}
+                className={`group cursor-pointer ${isDark ? 'bg-gray-700' : 'bg-gray-50'} rounded-lg overflow-hidden hover:shadow-2xl transition-all`}
+                onClick={(e) => {
+                  // Don't navigate if clicking on buttons
+                  if (e.target.closest('button')) {
+                    return;
+                  }
+                  navigate(`/products/${product.id}`);
+                }}
               >
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}

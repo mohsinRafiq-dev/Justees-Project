@@ -13,6 +13,7 @@ const GlobalCartDrawer = () => {
 // Page imports
 import Home from "../pages/Home";
 import Products from "../pages/Products";
+import ProductDetail from "../pages/ProductDetail";
 import Categories from "../pages/Categories";
 import About from "../pages/About";
 import AdminLogin from "../pages/admin/AdminLogin";
@@ -33,6 +34,7 @@ const AppRouter = () => {
             {/* Public Routes */}
             <Route path="/" element={<Home />} />
             <Route path="/products" element={<Products />} />
+            <Route path="/products/:id" element={<ProductDetail />} />
             <Route path="/categories" element={<Categories />} />
             <Route path="/about" element={<About />} />
 

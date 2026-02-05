@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
-import { X, ShoppingCart, Heart } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { X, ShoppingCart, Heart, ExternalLink } from 'lucide-react';
 import { useCart } from '../../contexts/CartContext';
 import { toast } from 'react-hot-toast';
 
 const ProductQuickView = ({ product, isOpen, onClose }) => {
   const { addToCart } = useCart();
+  const navigate = useNavigate();
   const [selectedSize, setSelectedSize] = useState('');
   const [selectedColor, setSelectedColor] = useState('');
   const [quantity, setQuantity] = useState(1);
@@ -82,7 +84,7 @@ const ProductQuickView = ({ product, isOpen, onClose }) => {
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in" onClick={onClose}>
       <div
-        className="bg-gray-800 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl animate-scale-up"
+        className="bg-gray-800 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl animate-scale-up relative"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close Button */}
@@ -299,9 +301,21 @@ const ProductQuickView = ({ product, isOpen, onClose }) => {
               })()}
             </div>
 
+            {/* View Full Details Button */}
+            <button
+              onClick={() => {
+                navigate(`/products/${product.id}`);
+                onClose();
+              }}
+              className="w-full mt-3 py-3 rounded-full font-semibold bg-gray-700 hover:bg-gray-600 text-white transition-all flex items-center justify-center gap-2"
+            >
+              <ExternalLink className="w-4 h-4" />
+              View Full Details
+            </button>
+
             {/* Additional Info */}
             <div className="mt-6 pt-6 border-t border-gray-700 space-y-2 text-sm text-gray-400">
-              <p>✓ Free shipping on orders over Rs. 1,999</p>
+              <p>✓ Free shipping on orders over Rs. 4,000</p>
               <p>✓ 30-day easy returns</p>
               <p>✓ 100% authentic products</p>
             </div>

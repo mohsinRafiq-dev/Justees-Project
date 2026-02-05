@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion"; // eslint-disable-line
 import { Heart, ShoppingCart, Eye, Filter, Star } from "lucide-react";
 import { toast } from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 import { useTheme } from "../contexts/ThemeContext";
 import { useCart } from "../contexts/CartContext";
 import { getAllProducts } from "../services/products.service";
@@ -15,6 +16,7 @@ import { formatPrice } from "../utils/validation";
 import { CATEGORIES } from "../utils/constants";
 
 const Products = () => {
+  const navigate = useNavigate();
   const { isDark } = useTheme();
   const { addToCart } = useCart();
   const [products, setProducts] = useState([]);
@@ -170,10 +172,19 @@ const Products = () => {
     const isLowStock = stock > 0 && stock <= 5;
     const imageUrl = getProductImage(product);
 
+    const handleCardClick = (e) => {
+      // Don't navigate if clicking on buttons
+      if (e.target.closest('button')) {
+        return;
+      }
+      navigate(`/products/${product.id}`);
+    };
+
     return (
       <TiltCard className="group h-full">
         <div
-          className={`relative rounded-2xl overflow-hidden h-full ${isDark ? "bg-gray-800" : "bg-white"
+          onClick={handleCardClick}
+          className={`relative rounded-2xl overflow-hidden h-full cursor-pointer ${isDark ? "bg-gray-800" : "bg-white"
             } shadow-lg hover:shadow-2xl transition-all duration-300`}
         >
           {/* Product Image */}

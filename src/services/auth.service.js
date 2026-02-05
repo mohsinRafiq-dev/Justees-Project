@@ -10,8 +10,21 @@ import {
 } from 'firebase/auth';
 import { auth } from './firebase';
 
-// Allowed admin email from environment variables
-const ALLOWED_ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL;
+// Allowed admin emails from environment variables (supports multiple emails)
+const ADMIN_EMAILS_STRING = import.meta.env.VITE_ADMIN_EMAIL;
+const ALLOWED_ADMIN_EMAILS = ADMIN_EMAILS_STRING 
+  ? ADMIN_EMAILS_STRING.split(',').map(email => email.trim().toLowerCase())
+  : [];
+
+/**
+ * Check if email is authorized as admin
+ * @param {string} email - Email to check
+ * @returns {boolean}
+ */
+const isAdminEmail = (email) => {
+  if (!email || ALLOWED_ADMIN_EMAILS.length === 0) return false;
+  return ALLOWED_ADMIN_EMAILS.includes(email.toLowerCase());
+};
 
 /**
  * Sign in admin user with Google OAuth
@@ -22,7 +35,7 @@ const ALLOWED_ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL;
 export const loginAdminWithGoogle = async () => {
   try {
     // Validate that admin email is configured
-    if (!ALLOWED_ADMIN_EMAIL) {
+    if (ALLOWED_ADMIN_EMAILS.length === 0) {
       throw new Error('Admin access is not properly configured. Please contact support.');
     }
 
@@ -37,7 +50,7 @@ export const loginAdminWithGoogle = async () => {
     const user = result.user;
 
     // Check if the email is allowed
-    if (user.email !== ALLOWED_ADMIN_EMAIL) {
+    if (!isAdminEmail(user.email)) {
       // Sign out and delete the user immediately if email doesn't match
       await signOut(auth);
 
@@ -62,18 +75,44 @@ export const loginAdminWithGoogle = async () => {
 };
 
 /**
- * Legacy email/password login - kept for backwards compatibility
- * @deprecated Use loginAdminWithGoogle instead
+ * Email/password login with admin authorization check
  */
 export const loginAdmin = async (email, password) => {
   try {
+    // Validate that admin emails are configured
+    if (ALLOWED_ADMIN_EMAILS.length === 0) {
+      throw new Error('Admin access is not properly configured. Please contact support.');
+    }
+
+    // Check if email is authorized before attempting login
+    if (!isAdminEmail(email)) {
+      throw new Error('Access denied. You are not authorized to access the admin panel.');
+    }
+
+    // Set persistence to LOCAL (survives browser restarts)
+    await setPersistence(auth, browserLocalPersistence);
+
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    
+    // Double-check authorization after successful login
+    if (!isAdminEmail(userCredential.user.email)) {
+      await signOut(auth);
+      throw new Error('Access denied. You are not authorized to access the admin panel.');
+    }
+
     return userCredential.user;
   } catch (error) {
+    console.error('Email login error:', error);
+    
+    if (error.message.includes('Access denied') || error.message.includes('not properly configured')) {
+      throw error;
+    }
+    
     if (error.code === 'auth/invalid-login-credentials' || error.code === 'auth/invalid-credential') {
       throw new Error('Invalid email or password');
     }
-    throw error;
+    
+    throw new Error(getAuthErrorMessage(error.code));
   }
 };
 
