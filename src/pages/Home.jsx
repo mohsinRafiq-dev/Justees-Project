@@ -11,6 +11,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { subscribeToNewsletter } from '../services/newsletter.service';
 import { getAllProducts, getCategories } from '../services/products.service';
 import { getRecentReviews } from '../services/reviews.service';
+import { getInstagramPosts, getInstagramProfileUrl, getInstagramHandle } from '../services/instagram.service';
 import Navbar from '../components/common/Navbar';
 import AnimatedBackground from '../components/common/AnimatedBackground';
 import AnimatedCounter from '../components/common/AnimatedCounter';
@@ -29,6 +30,7 @@ const Home = () => {
   const [wishlist, setWishlist] = useState([]);
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [reviews, setReviews] = useState([]);
+  const [instagramPosts, setInstagramPosts] = useState([]);
 
   // Hero slider images
   const heroSlides = [
@@ -114,7 +116,20 @@ const Home = () => {
 
     loadFeaturedProducts();
     loadReviews();
+    loadInstagramPosts();
   }, []);
+
+  // Load Instagram posts
+  const loadInstagramPosts = async () => {
+    try {
+      const result = await getInstagramPosts(6);
+      if (result.success && result.posts.length > 0) {
+        setInstagramPosts(result.posts);
+      }
+    } catch (error) {
+      console.error('Error loading Instagram posts:', error);
+    }
+  };
 
   // Load recent reviews
   const loadReviews = async () => {
@@ -921,9 +936,11 @@ const Home = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className={`text-4xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>Follow Us on Instagram</h2>
-            <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'} text-lg mb-6`}>@justees_official - Tag us in your photos!</p>
+            <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'} text-lg mb-6`}>
+              {getInstagramHandle()} - Tag us in your photos!
+            </p>
             <a
-              href="https://instagram.com/justees_official"
+              href={getInstagramProfileUrl()}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-block bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 text-white px-6 py-3 rounded-full font-semibold hover:opacity-90 transition-all transform hover:scale-105"
@@ -931,33 +948,29 @@ const Home = () => {
               Follow Us
             </a>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {[
-              'https://images.unsplash.com/photo-1523398002811-999ca8dec234?w=400&q=80',
-              'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400&q=80',
-              'https://images.unsplash.com/photo-1529374255404-311a2a4f1fd9?w=400&q=80',
-              'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=400&q=80',
-              'https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=400&q=80',
-              'https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?w=400&q=80',
-            ].map((image, index) => (
-              <a
-                key={index}
-                href="https://instagram.com/justees_official"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group relative aspect-square overflow-hidden rounded-lg hover:shadow-2xl transition-all"
-              >
-                <LazyImage
-                  src={image}
-                  alt={`Instagram post ${index + 1}`}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center">
-                  <MessageCircle className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-                </div>
-              </a>
-            ))}
-          </div>
+          {instagramPosts.length > 0 && (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+              {instagramPosts.map((post, index) => (
+                <a
+                  key={post.id}
+                  href={post.permalink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group relative aspect-square overflow-hidden rounded-lg hover:shadow-2xl transition-all"
+                  title={post.caption ? post.caption.substring(0, 100) : 'Instagram post'}
+                >
+                  <LazyImage
+                    src={post.media_url}
+                    alt={post.caption ? post.caption.substring(0, 50) : `Instagram post ${index + 1}`}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center">
+                    <Instagram className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </div>
+                </a>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
