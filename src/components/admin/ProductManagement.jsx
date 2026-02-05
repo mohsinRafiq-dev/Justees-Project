@@ -24,6 +24,7 @@ import {
 } from "../../services/products.service";
 import { formatPrice, isAdminUser } from "../../utils/validation";
 import { useAuth } from "../../hooks/useAuth";
+import { useTheme } from "../../contexts/ThemeContext";
 import ProductForm from "./ProductForm";
 import ProductTable from "./ProductTable";
 import ConfirmDialog from "../common/ConfirmDialog";
@@ -31,6 +32,7 @@ import LoadingSpinner from "../common/LoadingSpinner";
 
 const ProductManagement = () => {
   const { user } = useAuth();
+  const { isDark } = useTheme();
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -284,12 +286,12 @@ const ProductManagement = () => {
 
   if (!isAdminUser(user)) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">
+      <div className={`min-h-screen flex items-center justify-center ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
+        <div className={`backdrop-blur-xl rounded-2xl p-8 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white/80 border-gray-200'}`}>
+          <h1 className={`text-2xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
             Access Denied
           </h1>
-          <p className="text-gray-600">
+          <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
             You don't have permission to access this page.
           </p>
         </div>
@@ -298,16 +300,16 @@ const ProductManagement = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="w-full">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">
+              <h1 className={`text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
                 Product Management
               </h1>
-              <p className="mt-2 text-gray-600">
+              <p className={`mt-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                 Manage your product catalog, inventory, and settings
               </p>
             </div>
@@ -315,7 +317,7 @@ const ProductManagement = () => {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleCreateProduct}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold flex items-center space-x-2 transition-colors"
+              className="bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-600 hover:from-blue-700 hover:via-cyan-700 hover:to-teal-700 text-white px-6 py-3 rounded-xl font-semibold flex items-center space-x-2 shadow-lg transition-all"
             >
               <Plus className="w-5 h-5" />
               <span>Add Product</span>
@@ -326,43 +328,57 @@ const ProductManagement = () => {
         {/* Analytics Cards */}
         {analytics && (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white rounded-lg shadow p-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className={`backdrop-blur-xl rounded-2xl p-6 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white/80 border-gray-200'} shadow-lg hover:shadow-xl transition-all`}
+            >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">
+                  <p className={`text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                     Total Products
                   </p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
                     {analytics.totalProducts}
                   </p>
                 </div>
-                <div className="p-3 bg-blue-100 rounded-full">
-                  <Package className="w-6 h-6 text-blue-600" />
+                <div className="p-3 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl shadow-lg">
+                  <Package className="w-6 h-6 text-white" />
                 </div>
               </div>
-            </div>
+            </motion.div>
 
-            <div className="bg-white rounded-lg shadow p-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className={`backdrop-blur-xl rounded-2xl p-6 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white/80 border-gray-200'} shadow-lg hover:shadow-xl transition-all`}
+            >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">
+                  <p className={`text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                     Total Sales
                   </p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
                     {analytics.totalSales}
                   </p>
                 </div>
-                <div className="p-3 bg-green-100 rounded-full">
-                  <TrendingUp className="w-6 h-6 text-green-600" />
+                <div className="p-3 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl shadow-lg">
+                  <TrendingUp className="w-6 h-6 text-white" />
                 </div>
               </div>
-            </div>
+            </motion.div>
 
-            <div className="bg-white rounded-lg shadow p-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className={`backdrop-blur-xl rounded-2xl p-6 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white/80 border-gray-200'} shadow-lg hover:shadow-xl transition-all`}
+            >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Low Stock</p>
-                  <p className="text-2xl font-bold text-orange-600">
+                  <p className={`text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Low Stock</p>
+                  <p className="text-2xl font-bold text-orange-500">
                     {
                       products.filter(
                         (p) =>
@@ -371,43 +387,48 @@ const ProductManagement = () => {
                     }
                   </p>
                 </div>
-                <div className="p-3 bg-orange-100 rounded-full">
-                  <AlertTriangle className="w-6 h-6 text-orange-600" />
+                <div className="p-3 bg-gradient-to-br from-orange-500 to-amber-500 rounded-xl shadow-lg">
+                  <AlertTriangle className="w-6 h-6 text-white" />
                 </div>
               </div>
-            </div>
+            </motion.div>
 
-            <div className="bg-white rounded-lg shadow p-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className={`backdrop-blur-xl rounded-2xl p-6 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white/80 border-gray-200'} shadow-lg hover:shadow-xl transition-all`}
+            >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">
+                  <p className={`text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                     Out of Stock
                   </p>
-                  <p className="text-2xl font-bold text-red-600">
+                  <p className="text-2xl font-bold text-red-500">
                     {analytics.outOfStock}
                   </p>
                 </div>
-                <div className="p-3 bg-red-100 rounded-full">
-                  <AlertTriangle className="w-6 h-6 text-red-600" />
+                <div className="p-3 bg-gradient-to-br from-red-500 to-pink-500 rounded-xl shadow-lg">
+                  <AlertTriangle className="w-6 h-6 text-white" />
                 </div>
               </div>
-            </div>
+            </motion.div>
           </div>
         )}
 
         {/* Filters and Search */}
-        <div className="bg-white rounded-lg shadow mb-6 p-6">
+        <div className={`backdrop-blur-xl rounded-2xl mb-6 p-6 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white/80 border-gray-200'} shadow-lg`}>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             {/* Search */}
             <div className="lg:col-span-2">
               <div className="relative">
-                <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                <Search className={`absolute left-3 top-3 h-5 w-5 ${isDark ? 'text-gray-400' : 'text-gray-500'}`} />
                 <input
                   type="text"
                   placeholder="Search products..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className={`pl-10 w-full rounded-xl px-4 py-2 transition-all focus:ring-2 focus:ring-cyan-500 focus:outline-none ${isDark ? 'bg-white/5 border border-white/10 text-white placeholder-gray-400' : 'bg-white border border-gray-300 text-gray-900 placeholder-gray-500'}`}
                 />
               </div>
             </div>
@@ -417,7 +438,7 @@ const ProductManagement = () => {
               <select
                 value={categoryFilter}
                 onChange={(e) => setCategoryFilter(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className={`w-full rounded-xl px-4 py-2 transition-all focus:ring-2 focus:ring-cyan-500 focus:outline-none ${isDark ? 'bg-white/5 border border-white/10 text-white' : 'bg-white border border-gray-300 text-gray-900'}`}
               >
                 {categories.map((category) => (
                   <option key={category} value={category}>
@@ -432,7 +453,7 @@ const ProductManagement = () => {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className={`w-full rounded-xl px-4 py-2 transition-all focus:ring-2 focus:ring-cyan-500 focus:outline-none ${isDark ? 'bg-white/5 border border-white/10 text-white' : 'bg-white border border-gray-300 text-gray-900'}`}
               >
                 <option value="All">All Status</option>
                 <option value="active">Active</option>
@@ -451,7 +472,7 @@ const ProductManagement = () => {
                   setSortBy(field);
                   setSortOrder(order);
                 }}
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className={`w-full rounded-xl px-4 py-2 transition-all focus:ring-2 focus:ring-cyan-500 focus:outline-none ${isDark ? 'bg-white/5 border border-white/10 text-white' : 'bg-white border border-gray-300 text-gray-900'}`}
               >
                 <option value="createdAt-desc">Newest First</option>
                 <option value="createdAt-asc">Oldest First</option>
@@ -467,18 +488,18 @@ const ProductManagement = () => {
         </div>
 
         {/* Products Table */}
-        <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className={`backdrop-blur-xl rounded-2xl overflow-hidden border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white/80 border-gray-200'} shadow-lg`}>
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <LoadingSpinner size="large" />
             </div>
           ) : filteredProducts.length === 0 ? (
             <div className="text-center py-12">
-              <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              <Package className={`w-12 h-12 mx-auto mb-4 ${isDark ? 'text-gray-600' : 'text-gray-400'}`} />
+              <h3 className={`text-lg font-semibold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
                 No products found
               </h3>
-              <p className="text-gray-600 mb-4">
+              <p className={`mb-4 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                 {searchTerm ||
                 categoryFilter !== "All" ||
                 statusFilter !== "All"
@@ -492,7 +513,7 @@ const ProductManagement = () => {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={handleCreateProduct}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold"
+                    className="bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-600 hover:from-blue-700 hover:via-cyan-700 hover:to-teal-700 text-white px-6 py-2 rounded-xl font-semibold shadow-lg transition-all"
                   >
                     Add Your First Product
                   </motion.button>

@@ -20,6 +20,7 @@ import { toast } from "react-hot-toast";
 import { useTheme } from "../contexts/ThemeContext";
 import { useCart } from "../contexts/CartContext";
 import { getAllProducts } from "../services/products.service";
+import { getProductReviews } from "../services/reviews.service";
 import { formatPrice } from "../utils/validation";
 import { generateWhatsAppInquiryLink } from "../utils/whatsapp";
 import Navbar from "../components/common/Navbar";
@@ -37,6 +38,7 @@ const ProductDetail = () => {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [relatedProducts, setRelatedProducts] = useState([]);
+  const [productReviews, setProductReviews] = useState([]);
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
@@ -87,6 +89,22 @@ const ProductDetail = () => {
   useEffect(() => {
     loadProduct();
   }, [loadProduct]);
+
+  const loadProductReviews = useCallback(async () => {
+    if (!id) return;
+    try {
+      const result = await getProductReviews(id, 50);
+      if (result.success) {
+        setProductReviews(result.reviews);
+      }
+    } catch (error) {
+      console.error("Error loading product reviews:", error);
+    }
+  }, [id]);
+
+  useEffect(() => {
+    loadProductReviews();
+  }, [loadProductReviews]);
 
   const loadRelatedProducts = useCallback(async () => {
     if (!product) return;
@@ -1009,6 +1027,76 @@ const ProductDetail = () => {
               </div>
             </div>
           </div>
+
+          {/* Product Reviews */}
+          {productReviews.length > 0 && (
+            <div className="mt-16">
+              <h2
+                className={`text-3xl font-bold mb-8 ${isDark ? "text-white" : "text-gray-900"}`}
+              >
+                Customer Reviews
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {productReviews.map((review, index) => (
+                  <motion.div
+                    key={review.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    className={`p-6 rounded-xl border ${
+                      isDark
+                        ? "bg-gray-800 border-gray-700"
+                        : "bg-white border-gray-200"
+                    } shadow-lg hover:shadow-xl transition-all`}
+                  >
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center space-x-1">
+                        {[...Array(5)].map((_, i) => (
+                          <Star
+                            key={i}
+                            className={`w-4 h-4 ${
+                              i < Number(review.rating)
+                                ? "text-yellow-500 fill-current"
+                                : isDark
+                                ? "text-gray-600"
+                                : "text-gray-300"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                    <p
+                      className={`mb-4 ${
+                        isDark ? "text-gray-300" : "text-gray-700"
+                      }`}
+                    >
+                      {review.review}
+                    </p>
+                    <div className="flex items-center justify-between">
+                      <h4
+                        className={`font-semibold ${
+                          isDark ? "text-white" : "text-gray-900"
+                        }`}
+                      >
+                        {review.customerName}
+                      </h4>
+                      <div
+                        className={`text-xs ${
+                          isDark ? "text-gray-500" : "text-gray-400"
+                        }`}
+                      >
+                        {review.createdAt?.toDate
+                          ? new Date(
+                              review.createdAt.toDate()
+                            ).toLocaleDateString()
+                          : ""}
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Related Products */}
           {relatedProducts.length > 0 && (

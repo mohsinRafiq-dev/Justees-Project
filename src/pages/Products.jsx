@@ -9,7 +9,6 @@ import { getAllProducts } from "../services/products.service";
 import LazyImage from "../components/common/LazyImage";
 import Navbar from "../components/common/Navbar";
 import Footer from "../components/common/Footer";
-import TiltCard from "../components/common/TiltCard";
 import ProductQuickView from "../components/products/ProductQuickView";
 import LoadingSpinner from "../components/common/LoadingSpinner";
 import { formatPrice } from "../utils/validation";
@@ -181,11 +180,15 @@ const Products = () => {
     };
 
     return (
-      <TiltCard className="group h-full">
+      <motion.div
+        className="group h-full"
+        whileHover={{ y: -8, scale: 1.02 }}
+        transition={{ type: "spring", stiffness: 300, damping: 20 }}
+      >
         <div
           onClick={handleCardClick}
           className={`relative rounded-2xl overflow-hidden h-full cursor-pointer ${isDark ? "bg-gray-800" : "bg-white"
-            } shadow-lg hover:shadow-2xl transition-all duration-300`}
+            } shadow-lg hover:shadow-2xl transition-shadow duration-300`}
         >
           {/* Product Image */}
           <div className="relative aspect-square overflow-hidden">
@@ -374,7 +377,7 @@ const Products = () => {
             </button>
           </div>
         </div>
-      </TiltCard>
+      </motion.div>
     );
   };
 
@@ -559,16 +562,26 @@ const Products = () => {
             ) : (
               <motion.div
                 layout
+                initial="hidden"
+                animate="visible"
+                variants={{
+                  visible: {
+                    transition: {
+                      staggerChildren: 0.08
+                    }
+                  }
+                }}
                 className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
               >
-                {filteredProducts.map((product, index) => (
+                {filteredProducts.map((product) => (
                   <motion.div
                     key={product.id}
                     layout
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 20 }}
-                    transition={{ delay: index * 0.1 }}
+                    variants={{
+                      hidden: { opacity: 0, y: 30 },
+                      visible: { opacity: 1, y: 0 }
+                    }}
+                    transition={{ type: "spring", stiffness: 100, damping: 15 }}
                   >
                     <ProductCard product={product} />
                   </motion.div>

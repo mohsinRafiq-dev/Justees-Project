@@ -10,6 +10,7 @@ import { useCart } from '../contexts/CartContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { subscribeToNewsletter } from '../services/newsletter.service';
 import { getAllProducts, getCategories } from '../services/products.service';
+import { getRecentReviews } from '../services/reviews.service';
 import Navbar from '../components/common/Navbar';
 import AnimatedBackground from '../components/common/AnimatedBackground';
 import AnimatedCounter from '../components/common/AnimatedCounter';
@@ -27,6 +28,7 @@ const Home = () => {
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const [wishlist, setWishlist] = useState([]);
   const [featuredProducts, setFeaturedProducts] = useState([]);
+  const [reviews, setReviews] = useState([]);
 
   // Hero slider images
   const heroSlides = [
@@ -111,7 +113,20 @@ const Home = () => {
     };
 
     loadFeaturedProducts();
+    loadReviews();
   }, []);
+
+  // Load recent reviews
+  const loadReviews = async () => {
+    try {
+      const result = await getRecentReviews(6);
+      if (result.success) {
+        setReviews(result.reviews);
+      }
+    } catch (error) {
+      console.error('Error loading reviews:', error);
+    }
+  };
 
   // Categories
   const [categories, setCategories] = useState([]);
@@ -872,6 +887,70 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+      {/* Customer Reviews Section */}
+      {reviews.length > 0 && (
+        <section className={`py-20 ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <h2 className={`text-4xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                What Our  Customers Say
+              </h2>
+              <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'} text-lg`}>
+                Real reviews from real customers
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {reviews.map((review, index) => (
+                <motion.div
+                  key={review.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                  className={`p-8 rounded-2xl ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border shadow-lg hover:shadow-xl transition-all`}
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center space-x-1">
+                      {[...Array(5)].map((_, i) => (
+                        <Star
+                          key={i}
+                          className={`w-5 h-5 ${
+                            i < Number(review.rating)
+                              ? 'text-yellow-500 fill-current'
+                              : isDark ? 'text-gray-600' : 'text-gray-300'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <Quote className={`w-8 h-8 ${isDark ? 'text-gray-700' : 'text-gray-200'}`} />
+                  </div>
+                  <p className={`mb-6 ${isDark ? 'text-gray-300' : 'text-gray-700'} leading-relaxed`}>
+                    "{review.review}"
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                        {review.customerName}
+                      </h4>
+                      {review.productName && (
+                        <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                          {review.productName}
+                        </p>
+                      )}
+                    </div>
+                    <div className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                      {review.createdAt?.toDate
+                        ? new Date(review.createdAt.toDate()).toLocaleDateString()
+                        : ''}
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Instagram Feed Section */}
       <section className={`py-20 ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
