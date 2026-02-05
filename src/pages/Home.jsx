@@ -166,42 +166,6 @@ const Home = () => {
     loadCategories();
   }, []);
 
-  // Customer reviews
-  const reviews = [
-    {
-      id: 1,
-      name: 'Sarah Johnson',
-      rating: 5,
-      comment: 'Absolutely love the quality! The fabric feels premium and the fit is perfect. Will definitely order again.',
-      image: 'https://i.pravatar.cc/150?img=1',
-      product: 'Classic Black Tee',
-    },
-    {
-      id: 2,
-      name: 'Michael Chen',
-      rating: 5,
-      comment: 'Best clothing brand I have found online. Fast shipping, great customer service, and amazing products!',
-      image: 'https://i.pravatar.cc/150?img=12',
-      product: 'Denim Jacket',
-    },
-    {
-      id: 3,
-      name: 'Emma Davis',
-      rating: 5,
-      comment: 'The hoodie exceeded my expectations. Super comfortable and stylish. Worth every penny!',
-      image: 'https://i.pravatar.cc/150?img=5',
-      product: 'Casual Hoodie',
-    },
-    {
-      id: 4,
-      name: 'James Wilson',
-      rating: 5,
-      comment: 'Outstanding quality and design. These guys know what they are doing. Highly recommended!',
-      image: 'https://i.pravatar.cc/150?img=13',
-      product: 'Slim Fit Jeans',
-    },
-  ];
-
   // Stats
   const stats = [
     { icon: TrendingUp, value: '10000', label: 'Happy Customers', suffix: '+' },
