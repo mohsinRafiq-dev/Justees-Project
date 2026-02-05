@@ -1029,13 +1029,13 @@ const ProductDetail = () => {
           </div>
 
           {/* Product Reviews */}
-          {productReviews.length > 0 && (
-            <div className="mt-16">
-              <h2
-                className={`text-3xl font-bold mb-8 ${isDark ? "text-white" : "text-gray-900"}`}
-              >
-                Customer Reviews
-              </h2>
+          <div className="mt-16">
+            <h2
+              className={`text-3xl font-bold mb-8 ${isDark ? "text-white" : "text-gray-900"}`}
+            >
+              Customer Reviews {productReviews.length > 0 && `(${productReviews.length})`}
+            </h2>
+            {productReviews.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {productReviews.map((review, index) => (
                   <motion.div
@@ -1095,8 +1095,18 @@ const ProductDetail = () => {
                   </motion.div>
                 ))}
               </div>
-            </div>
-          )}
+            ) : (
+              <div className={`text-center py-12 px-6 rounded-xl border ${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"} shadow-lg`}>
+                <Star className={`w-16 h-16 mx-auto mb-4 ${isDark ? "text-gray-600" : "text-gray-300"}`} />
+                <h3 className={`text-xl font-semibold mb-2 ${isDark ? "text-white" : "text-gray-900"}`}>
+                  No Reviews Yet
+                </h3>
+                <p className={`${isDark ? "text-gray-400" : "text-gray-600"}`}>
+                  Be the first to experience this product!
+                </p>
+              </div>
+            )}
+          </div>
 
           {/* Related Products */}
           {relatedProducts.length > 0 && (
