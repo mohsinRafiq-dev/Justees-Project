@@ -281,7 +281,7 @@ const Home = () => {
             alt="Justees Hero"
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-gray-900/80 via-blue-900/50 to-gray-900/70" />
+          <div className="absolute inset-0 bg-gradient-to-r from-gray-900/80 via-gray-800/50 to-gray-900/70" />
         </div>
 
         <div className="relative h-full flex items-center">
@@ -298,7 +298,7 @@ const Home = () => {
                 transition={{ delay: 0.2, duration: 0.8 }}
                 className="text-6xl md:text-8xl font-bold text-white mb-6 leading-tight"
               >
-                Welcome to <span className="bg-gradient-to-r from-blue-400 via-cyan-400 to-teal-400 bg-clip-text text-transparent">Justees</span>
+                Welcome to <span style={{ color: '#d3d1ce', fontFamily: 'Cookie, cursive' }}>Justees</span>
               </motion.h1>
               <motion.p
                 initial={{ opacity: 0, y: 20 }}
@@ -316,15 +316,10 @@ const Home = () => {
               >
                 <Link
                   to="/products"
-                  className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-8 py-4 rounded-full text-lg font-semibold hover:shadow-2xl hover:shadow-cyan-500/50 transition-all transform hover:scale-105"
+                  style={{ backgroundColor: '#d3d1ce' }}
+                  className="text-gray-900 px-8 py-4 rounded-full text-lg font-semibold hover:shadow-2xl transition-all transform hover:scale-105"
                 >
                   Shop Now
-                </Link>
-                <Link
-                  to="/about"
-                  className="border-2 border-white text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-white hover:text-gray-900 transition-all transform hover:scale-105"
-                >
-                  Learn More
                 </Link>
               </motion.div>
             </motion.div>
@@ -335,18 +330,18 @@ const Home = () => {
       {/* Moving Volume Name Ticker */}
       <div className="relative overflow-hidden py-3" style={{ backgroundColor: '#FFFFE3' }}>
         <div className="animate-marquee whitespace-nowrap">
-          <span className="text-gray-900 text-lg font-bold mx-12">Volume 1: The Debut</span>
-          <span className="text-gray-900 text-lg font-bold mx-12">Volume 1: The Debut</span>
-          <span className="text-gray-900 text-lg font-bold mx-12">Volume 1: The Debut</span>
-          <span className="text-gray-900 text-lg font-bold mx-12">Volume 1: The Debut</span>
-          <span className="text-gray-900 text-lg font-bold mx-12">Volume 1: The Debut</span>
-          <span className="text-gray-900 text-lg font-bold mx-12">Volume 1: The Debut</span>
-          <span className="text-gray-900 text-lg font-bold mx-12">Volume 1: The Debut</span>
-          <span className="text-gray-900 text-lg font-bold mx-12">Volume 1: The Debut</span>
-          <span className="text-gray-900 text-lg font-bold mx-12">Volume 1: The Debut</span>
-          <span className="text-gray-900 text-lg font-bold mx-12">Volume 1: The Debut</span>
-          <span className="text-gray-900 text-lg font-bold mx-12">Volume 1: The Debut</span>
-          <span className="text-gray-900 text-lg font-bold mx-12">Volume 1: The Debut</span>
+          <span className="text-gray-900 text-3xl font-bold mx-12" style={{ fontFamily: 'Cookie, cursive' }}>Volume 1: The Debut</span>
+          <span className="text-gray-900 text-3xl font-bold mx-12" style={{ fontFamily: 'Cookie, cursive' }}>Volume 1: The Debut</span>
+          <span className="text-gray-900 text-3xl font-bold mx-12" style={{ fontFamily: 'Cookie, cursive' }}>Volume 1: The Debut</span>
+          <span className="text-gray-900 text-3xl font-bold mx-12" style={{ fontFamily: 'Cookie, cursive' }}>Volume 1: The Debut</span>
+          <span className="text-gray-900 text-3xl font-bold mx-12" style={{ fontFamily: 'Cookie, cursive' }}>Volume 1: The Debut</span>
+          <span className="text-gray-900 text-3xl font-bold mx-12" style={{ fontFamily: 'Cookie, cursive' }}>Volume 1: The Debut</span>
+          <span className="text-gray-900 text-3xl font-bold mx-12" style={{ fontFamily: 'Cookie, cursive' }}>Volume 1: The Debut</span>
+          <span className="text-gray-900 text-3xl font-bold mx-12" style={{ fontFamily: 'Cookie, cursive' }}>Volume 1: The Debut</span>
+          <span className="text-gray-900 text-3xl font-bold mx-12" style={{ fontFamily: 'Cookie, cursive' }}>Volume 1: The Debut</span>
+          <span className="text-gray-900 text-3xl font-bold mx-12" style={{ fontFamily: 'Cookie, cursive' }}>Volume 1: The Debut</span>
+          <span className="text-gray-900 text-3xl font-bold mx-12" style={{ fontFamily: 'Cookie, cursive' }}>Volume 1: The Debut</span>
+          <span className="text-gray-900 text-3xl font-bold mx-12" style={{ fontFamily: 'Cookie, cursive' }}>Volume 1: The Debut</span>
         </div>
       </div>
 
@@ -367,7 +362,7 @@ const Home = () => {
                   className="absolute inset-0 bg-cover bg-center"
                   style={{ backgroundImage: `url(${slide.image})` }}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-r from-gray-900/90 via-blue-900/40 to-gray-900/50" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-gray-900/90 via-gray-800/40 to-gray-900/50" />
                 </div>
                 <div className="relative h-full flex items-center">
                   <div className="container mx-auto px-4">
@@ -418,7 +413,8 @@ const Home = () => {
                       >
                         <Link
                           to="/products"
-                          className="inline-block bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-8 py-4 rounded-full font-semibold hover:shadow-2xl hover:shadow-cyan-500/50 transition-all transform hover:scale-105"
+                          style={{ backgroundColor: '#d3d1ce' }}
+                          className="inline-block text-gray-900 px-8 py-4 rounded-full font-semibold hover:shadow-2xl transition-all transform hover:scale-105"
                         >
                           Explore Collection
                         </Link>
@@ -481,7 +477,7 @@ const Home = () => {
                 whileHover={{ y: -10, scale: 1.05 }}
                 className={`text-center p-6 rounded-lg ${isDark ? 'bg-gray-700/50 hover:bg-gray-700' : 'bg-white hover:shadow-lg'} transition-all cursor-pointer`}
               >
-                <feature.icon className={`w-12 h-12 mx-auto mb-4 ${isDark ? 'text-white' : 'text-blue-600'}`} />
+                <feature.icon className="w-12 h-12 mx-auto mb-4" style={{ color: isDark ? 'white' : '#d3d1ce' }} />
                 <h3 className={`text-lg font-semibold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>{feature.title}</h3>
                 <p className={isDark ? 'text-gray-400' : 'text-gray-600'}>{feature.desc}</p>
               </motion.div>
@@ -522,7 +518,7 @@ const Home = () => {
             viewport={{ once: true }}
             className="text-center mb-12"
           >
-            <h2 className={`text-4xl font-bold mb-4 bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-600 bg-clip-text text-transparent`}>
+            <h2 className="text-4xl font-bold mb-4" style={{ color: '#d3d1ce' }}>
               Shop by Category
             </h2>
             <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'} text-lg`}>Discover your perfect style</p>
@@ -567,7 +563,7 @@ const Home = () => {
             viewport={{ once: true }}
             className="text-center mb-12"
           >
-            <h2 className={`text-4xl font-bold mb-4 bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-600 bg-clip-text text-transparent`}>
+            <h2 className="text-4xl font-bold mb-4" style={{ color: '#d3d1ce' }}>
               Featured Products
             </h2>
             <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'} text-lg`}>Our best-selling items</p>
@@ -603,8 +599,9 @@ const Home = () => {
                       <motion.span
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
+                        style={product.badge === 'New' ? { backgroundColor: '#d3d1ce', color: '#1f2937' } : {}}
                         className={`absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-bold text-white z-10 ${product.badge === 'Sale' ? 'bg-red-500' :
-                          product.badge === 'New' ? 'bg-blue-500' :
+                          product.badge === 'New' ? '' :
                             product.badge === 'Limited' ? 'bg-purple-500' :
                               product.badge === 'Hot' ? 'bg-orange-500' :
                                 product.badge === 'Featured' ? 'bg-yellow-500' :
@@ -644,7 +641,8 @@ const Home = () => {
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={() => openQuickView(product)}
-                        className="bg-white text-gray-900 px-4 py-2 rounded-full font-semibold hover:shadow-lg transition-all flex items-center gap-2"
+                        style={{ backgroundColor: '#d3d1ce' }}
+                        className="text-gray-900 px-4 py-2 rounded-full font-semibold hover:shadow-lg transition-all flex items-center gap-2"
                       >
                         <Eye className="w-4 h-4" />
                         Quick View
@@ -654,9 +652,10 @@ const Home = () => {
                         whileTap={{ scale: 0.95 }}
                         onClick={() => handleQuickAdd(product)}
                         disabled={getProductStock(product) === 0}
+                        style={getProductStock(product) === 0 ? {} : { backgroundColor: '#d3d1ce' }}
                         className={`px-4 py-2 rounded-full font-semibold hover:shadow-lg transition-all flex items-center gap-2 ${getProductStock(product) === 0
                           ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                          : 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white'
+                          : 'text-gray-900'
                           }`}
                       >
                         <ShoppingCart className="w-4 h-4" />
@@ -708,7 +707,8 @@ const Home = () => {
           >
             <Link
               to="/products"
-              className="inline-block bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-8 py-4 rounded-full font-semibold hover:shadow-2xl hover:shadow-cyan-500/50 transition-all transform hover:scale-105"
+              style={{ backgroundColor: '#d3d1ce' }}
+              className="inline-block text-gray-900 px-8 py-4 rounded-full font-semibold hover:shadow-2xl transition-all transform hover:scale-105"
             >
               View All Products
             </Link>
@@ -730,8 +730,8 @@ const Home = () => {
                 whileHover={{ scale: 1.05 }}
                 className="text-center"
               >
-                <stat.icon className={`w-12 h-12 mx-auto mb-4 ${isDark ? 'text-white' : 'text-blue-600'}`} />
-                <h3 className={`text-4xl font-bold mb-2 bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-600 bg-clip-text text-transparent`}>
+                <stat.icon className="w-12 h-12 mx-auto mb-4" style={{ color: isDark ? 'white' : '#d3d1ce' }} />
+                <h3 className="text-4xl font-bold mb-2" style={{ color: '#d3d1ce' }}>
                   <AnimatedCounter end={stat.value} suffix={stat.suffix} />
                 </h3>
                 <p className={isDark ? 'text-gray-400' : 'text-gray-600'}>{stat.label}</p>
@@ -750,7 +750,7 @@ const Home = () => {
             viewport={{ once: true }}
             className="text-center mb-12"
           >
-            <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-600 bg-clip-text text-transparent">
+            <h2 className="text-4xl font-bold mb-4" style={{ color: '#d3d1ce' }}>
               What Our Customers Say
             </h2>
             <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'} text-lg`}>Real reviews from real customers</p>
@@ -826,7 +826,8 @@ const Home = () => {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={scrollToTop}
-            className={`fixed bottom-24 right-6 ${isDark ? 'bg-gray-700 hover:bg-gray-600' : 'bg-blue-600 hover:bg-blue-700'} text-white p-3 rounded-full shadow-lg transition-all z-50`}
+            style={{ backgroundColor: isDark ? '#374151' : '#d3d1ce' }}
+            className="fixed bottom-24 right-6 text-gray-900 p-3 rounded-full shadow-lg transition-all z-50 hover:opacity-90"
             aria-label="Scroll to top"
           >
             <ArrowUp className="w-5 h-5" />
@@ -843,21 +844,21 @@ const Home = () => {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             <div className={`text-center p-8 ${isDark ? 'bg-gray-800 hover:bg-gray-700' : 'bg-white hover:shadow-lg'} rounded-lg transition-all transform hover:-translate-y-2`}>
-              <Award className={`w-16 h-16 mx-auto mb-4 ${isDark ? 'text-white' : 'text-blue-600'}`} />
+              <Award className="w-16 h-16 mx-auto mb-4" style={{ color: isDark ? 'white' : '#d3d1ce' }} />
               <h3 className={`text-xl font-bold mb-3 ${isDark ? 'text-white' : 'text-gray-900'}`}>Premium Quality</h3>
               <p className={isDark ? 'text-gray-400' : 'text-gray-600'}>
                 We use only the finest materials to ensure durability and comfort in every piece.
               </p>
             </div>
             <div className={`text-center p-8 ${isDark ? 'bg-gray-800 hover:bg-gray-700' : 'bg-white hover:shadow-lg'} rounded-lg transition-all transform hover:-translate-y-2`}>
-              <Truck className={`w-16 h-16 mx-auto mb-4 ${isDark ? 'text-white' : 'text-blue-600'}`} />
+              <Truck className="w-16 h-16 mx-auto mb-4" style={{ color: isDark ? 'white' : '#d3d1ce' }} />
               <h3 className={`text-xl font-bold mb-3 ${isDark ? 'text-white' : 'text-gray-900'}`}>Fast Delivery</h3>
               <p className={isDark ? 'text-gray-400' : 'text-gray-600'}>
                 Quick and reliable shipping to get your orders to you as fast as possible.
               </p>
             </div>
             <div className={`text-center p-8 ${isDark ? 'bg-gray-800 hover:bg-gray-700' : 'bg-white hover:shadow-lg'} rounded-lg transition-all transform hover:-translate-y-2`}>
-              <CheckCircle className={`w-16 h-16 mx-auto mb-4 ${isDark ? 'text-white' : 'text-blue-600'}`} />
+              <CheckCircle className="w-16 h-16 mx-auto mb-4" style={{ color: isDark ? 'white' : '#d3d1ce' }} />
               <h3 className={`text-xl font-bold mb-3 ${isDark ? 'text-white' : 'text-gray-900'}`}>100% Satisfaction</h3>
               <p className={isDark ? 'text-gray-400' : 'text-gray-600'}>
                 Not happy? We offer easy returns and exchanges within 30 days.
@@ -943,7 +944,8 @@ const Home = () => {
               href={getInstagramProfileUrl()}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 text-white px-6 py-3 rounded-full font-semibold hover:opacity-90 transition-all transform hover:scale-105"
+              style={{ backgroundColor: '#d3d1ce' }}
+              className="inline-block text-gray-900 px-6 py-3 rounded-full font-semibold hover:opacity-90 transition-all transform hover:scale-105"
             >
               Follow Us
             </a>
@@ -989,12 +991,14 @@ const Home = () => {
               placeholder="Enter your email"
               required
               disabled={newsletterStatus === 'loading'}
-              className={`flex-1 px-6 py-4 rounded-full ${isDark ? 'bg-gray-800 text-white border-gray-700' : 'bg-white text-gray-900 border-gray-300'} border focus:outline-none focus:border-blue-500 transition-colors disabled:opacity-50`}
+              className={`flex-1 px-6 py-4 rounded-full ${isDark ? 'bg-gray-800 text-white border-gray-700' : 'bg-white text-gray-900 border-gray-300'} border focus:outline-none transition-colors disabled:opacity-50`}
+              style={{ focusBorderColor: '#d3d1ce' }}
             />
             <button
               type="submit"
               disabled={newsletterStatus === 'loading'}
-              className={`${isDark ? 'bg-white text-gray-900 hover:bg-gray-200' : 'bg-blue-600 text-white hover:bg-blue-700'} px-8 py-4 rounded-full font-semibold transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2`}
+              style={{ backgroundColor: '#d3d1ce' }}
+              className="text-gray-900 hover:opacity-90 px-8 py-4 rounded-full font-semibold transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {newsletterStatus === 'loading' ? (
                 <>

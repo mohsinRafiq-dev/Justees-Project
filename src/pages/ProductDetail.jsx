@@ -260,7 +260,8 @@ const ProductDetail = () => {
             <h2 className="text-2xl font-bold mb-4">Product not found</h2>
             <Link
               to="/products"
-              className="text-blue-600 hover:underline"
+              className="hover:underline"
+              style={{ color: '#d3d1ce' }}
             >
               Return to products
             </Link>
@@ -492,9 +493,17 @@ const ProductDetail = () => {
                       onClick={handleShare}
                       className={`p-2 rounded-full transition-colors ${
                         isDark
-                          ? "bg-gray-800 text-gray-300 hover:bg-blue-500 hover:text-white"
-                          : "bg-gray-100 text-gray-600 hover:bg-blue-500 hover:text-white"
-                      }`}
+                          ? "bg-gray-800 text-gray-300"
+                          : "bg-gray-100 text-gray-600"
+                      }
+                      style={selectedVariant?.id === variant.id ? { ring: '4px solid #d3d1ce' } : {}}
+                      onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#d3d1ce'; e.currentTarget.style.color = 'white'; }}
+                      onMouseLeave={(e) => { 
+                        if (selectedVariant?.id !== variant.id) {
+                          e.currentTarget.style.backgroundColor = isDark ? '#1f2937' : '#f3f4f6';
+                          e.currentTarget.style.color = isDark ? '#d1d5db' : '#4b5563';
+                        }
+                      }}`}
                     >
                       <Share2 className="w-5 h-5" />
                     </button>
@@ -695,8 +704,9 @@ const ProductDetail = () => {
                   className={`w-full py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-300 flex items-center justify-center space-x-2 ${
                     outOfStock
                       ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                      : "bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl"
-                  }`}
+                      : ""
+                  }
+                  style={!isOutOfStock && !isAddingToCart ? { backgroundColor: '#d3d1ce', color: 'white' } : {}}`}
                 >
                   <ShoppingCart className="w-6 h-6" />
                   <span>{outOfStock ? "Out of Stock" : "Add to Cart"}</span>

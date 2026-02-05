@@ -116,7 +116,8 @@ const Navbar = () => {
 
               <Link
                 to="/products"
-                className="hidden md:inline-block bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-6 py-2 rounded-full font-semibold hover:shadow-lg hover:shadow-cyan-500/50 transition-all transform hover:scale-105"
+                style={{ backgroundColor: '#d3d1ce' }}
+                className="hidden md:inline-block text-gray-900 px-6 py-2 rounded-full font-semibold hover:shadow-lg transition-all transform hover:scale-105"
               >
                 Shop Now
               </Link>
@@ -154,7 +155,7 @@ const Navbar = () => {
                 {/* Add other links similarly */}
               </div>
 
-              <Link to="/products" className="block bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-6 py-3 rounded-full font-semibold text-center hover:shadow-lg transition-all" onClick={() => setMobileMenuOpen(false)}>Shop Now</Link>
+              <Link to="/products" style={{ backgroundColor: '#d3d1ce' }} className="block text-gray-900 px-6 py-3 rounded-full font-semibold text-center hover:shadow-lg transition-all" onClick={() => setMobileMenuOpen(false)}>Shop Now</Link>
             </div>
           </div>
         )}
