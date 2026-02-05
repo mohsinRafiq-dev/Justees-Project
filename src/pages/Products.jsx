@@ -25,7 +25,7 @@ const Products = () => {
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const [wishlist, setWishlist] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const [priceRange, setPriceRange] = useState({ min: 0, max: 10000 });
+  const [priceRange, setPriceRange] = useState({ min: 0, max: 1000000 });
   const [sortBy, setSortBy] = useState("createdAt");
   const [sortOrder, setSortOrder] = useState("desc");
   const [searchTerm, setSearchTerm] = useState("");
@@ -480,11 +480,11 @@ const Products = () => {
                       : "bg-white border-gray-300 text-gray-900"
                       }`}
                   >
-                    <option value="0-10000">All Prices</option>
+                    <option value="0-1000000">All Prices</option>
                     <option value="0-1000">Under Rs. 1,000</option>
                     <option value="1000-2500">Rs. 1,000 - 2,500</option>
                     <option value="2500-5000">Rs. 2,500 - 5,000</option>
-                    <option value="5000-10000">Above Rs. 5,000</option>
+                    <option value="5000-1000000">Above Rs. 5,000</option>
                   </select>
                 </div>
 
@@ -551,7 +551,7 @@ const Products = () => {
                 <button
                   onClick={() => {
                     setSelectedCategory("All");
-                    setPriceRange({ min: 0, max: 10000 });
+                    setPriceRange({ min: 0, max: 1000000 });
                     setSearchTerm("");
                   }}
                   className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors"
