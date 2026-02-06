@@ -36,7 +36,10 @@ const AdminDashboard = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const { isDark, toggleTheme } = useTheme();
-  const [activeTab, setActiveTab] = useState("dashboard");
+  // Initialize activeTab from localStorage or default to "dashboard"
+  const [activeTab, setActiveTab] = useState(() => {
+    return localStorage.getItem('adminActiveTab') || "dashboard";
+  });
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [stats, setStats] = useState({
@@ -52,6 +55,12 @@ const AdminDashboard = () => {
   useEffect(() => {
     loadDashboardData();
   }, []);
+
+  // Function to handle tab changes and persist to localStorage
+  const handleTabChange = (tabId) => {
+    setActiveTab(tabId);
+    localStorage.setItem('adminActiveTab', tabId);
+  };
 
   const loadDashboardData = async () => {
     try {
@@ -108,14 +117,14 @@ const AdminDashboard = () => {
       description: "Create new product",
       icon: Plus,
       color: "blue",
-      action: () => setActiveTab("products"),
+      action: () => handleTabChange("products"),
     },
     {
       title: "View Orders",
       description: "Manage orders",
       icon: Eye,
       color: "green",
-      action: () => setActiveTab("orders"),
+      action: () => handleTabChange("orders"),
     },
     {
       title: "Analytics",
@@ -335,7 +344,7 @@ const AdminDashboard = () => {
                     whileHover={{ scale: 1.02, x: 4 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => {
-                      setActiveTab(item.id);
+                      handleTabChange(item.id);
                       setMobileMenuOpen(false);
                     }}
                     className={`w-full flex items-center px-4 py-3 text-left transition-all rounded-xl ${
