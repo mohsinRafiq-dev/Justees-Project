@@ -11,6 +11,7 @@ import {
   Calendar,
   Package,
   X,
+  Shield,
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 import {
@@ -139,6 +140,7 @@ const ReviewsManagement = () => {
       const reviewData = {
         ...formData,
         rating: Number(formData.rating),
+        source: 'admin', // Mark as admin-created review
       };
 
       let result;
@@ -376,6 +378,9 @@ const ReviewsManagement = () => {
                       Review
                     </th>
                     <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                      Source
+                    </th>
+                    <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
                       Date
                     </th>
                     <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
@@ -400,9 +405,16 @@ const ReviewsManagement = () => {
                           <div className={`p-2 rounded-full ${isDark ? 'bg-white/10' : 'bg-gray-100'}`}>
                             <User className={`w-5 h-5 ${isDark ? 'text-gray-400' : 'text-gray-600'}`} />
                           </div>
-                          <span className={`ml-3 text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                            {review.customerName}
-                          </span>
+                          <div className="ml-3">
+                            <span className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                              {review.customerName}
+                            </span>
+                            {review.email && (
+                              <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                                {review.email}
+                              </p>
+                            )}
+                          </div>
                         </div>
                       </td>
                       <td className="px-6 py-4">
@@ -442,6 +454,19 @@ const ReviewsManagement = () => {
                         <p className={`text-sm line-clamp-2 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
                           {review.review}
                         </p>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {review.source === 'visitor' ? (
+                          <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-600 flex items-center gap-1">
+                            <User className="w-3 h-3" />
+                            Visitor
+                          </span>
+                        ) : (
+                          <span className="px-2 py-1 text-xs rounded-full bg-purple-100 text-purple-600 flex items-center gap-1">
+                            <Shield className="w-3 h-3" />
+                            Admin
+                          </span>
+                        )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">

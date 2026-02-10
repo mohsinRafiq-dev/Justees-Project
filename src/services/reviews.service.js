@@ -170,24 +170,66 @@ export const getProductReviews = async (productId, limitCount = 50) => {
  */
 export const getRecentReviews = async (limitCount = 6) => {
   try {
-    const q = query(
-      collection(db, REVIEWS_COLLECTION),
-      where("isVisible", "==", true),
-      orderBy("createdAt", "desc"),
-      limit(limitCount)
-    );
+    console.log('[reviews] getRecentReviews called, limit:', limitCount);
 
-    const querySnapshot = await getDocs(q);
-    const reviews = [];
+    // Try composite query first
+    try {
+      const q = query(
+        collection(db, REVIEWS_COLLECTION),
+        where("isVisible", "==", true),
+        orderBy("createdAt", "desc"),
+        limit(limitCount)
+      );
 
-    querySnapshot.forEach((doc) => {
-      reviews.push({
-        id: doc.id,
-        ...doc.data(),
+      const querySnapshot = await getDocs(q);
+      const reviews = [];
+
+      querySnapshot.forEach((doc) => {
+        reviews.push({
+          id: doc.id,
+          ...doc.data(),
+        });
       });
-    });
 
-    return { success: true, reviews };
+      console.log('[reviews] Composite query successful:', reviews);
+      return { success: true, reviews };
+    } catch (indexError) {
+      console.log('[reviews] Composite index not ready, trying fallback query:', indexError.message);
+      
+      // Fallback: Get all reviews and filter/sort in memory
+      try {
+        const fallbackQuery = query(
+          collection(db, REVIEWS_COLLECTION),
+          limit(50) // Get more to ensure we have enough visible ones
+        );
+        
+        const querySnapshot = await getDocs(fallbackQuery);
+        const allReviews = [];
+        
+        querySnapshot.forEach((doc) => {
+          allReviews.push({
+            id: doc.id,
+            ...doc.data(),
+          });
+        });
+        
+        // Filter visible reviews and sort by creation date
+        const visibleReviews = allReviews
+          .filter(review => review.isVisible === true)
+          .sort((a, b) => {
+            const dateA = a.createdAt?.toDate?.() || new Date(0);
+            const dateB = b.createdAt?.toDate?.() || new Date(0);
+            return dateB - dateA; // Sort descending (newest first)
+          })
+          .slice(0, limitCount);
+        
+        console.log('[reviews] Fallback query successful:', visibleReviews);
+        return { success: true, reviews: visibleReviews };
+      } catch (fallbackError) {
+        console.error('[reviews] Fallback query also failed:', fallbackError);
+        return { success: false, error: fallbackError.message, reviews: [] };
+      }
+    }
   } catch (error) {
     console.error("Error getting recent reviews:", error);
     return { success: false, error: error.message, reviews: [] };

@@ -10,7 +10,7 @@ import { useCart } from '../contexts/CartContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { subscribeToNewsletter } from '../services/newsletter.service';
 import { getAllProducts, getCategories } from '../services/products.service';
-import { getRecentReviews } from '../services/reviews.service';
+import { getRecentReviews, addReview } from '../services/reviews.service';
 import { getInstagramPosts, getInstagramProfileUrl, getInstagramHandle } from '../services/instagram.service';
 import { getSlidesForHome } from '../services/slides.service';
 import Navbar from '../components/common/Navbar';
@@ -32,6 +32,16 @@ const Home = () => {
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [instagramPosts, setInstagramPosts] = useState([]);
+  
+  // Review form state
+  const [reviewForm, setReviewForm] = useState({
+    customerName: '',
+    email: '',
+    rating: 5,
+    review: '',
+    productName: ''
+  });
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
 
   // Hero slides (loaded from Firestore). Start empty — no hardcoded dummy slides.
   const [heroSlides, setHeroSlides] = useState([]);
@@ -289,6 +299,56 @@ const Home = () => {
 
   const handleQuickAdd = (product) => {
     openQuickView(product);
+  };
+
+  const handleReviewSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!reviewForm.customerName || !reviewForm.email || !reviewForm.review || !reviewForm.rating) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+    
+    if (reviewForm.rating < 1 || reviewForm.rating > 5) {
+      toast.error('Rating must be between 1 and 5');
+      return;
+    }
+    
+    setReviewSubmitting(true);
+    
+    try {
+      const reviewData = {
+        customerName: reviewForm.customerName.trim(),
+        email: reviewForm.email.trim(),
+        rating: Number(reviewForm.rating),
+        review: reviewForm.review.trim(),
+        productName: reviewForm.productName.trim() || 'General Review',
+        isVisible: false, // Default to hidden - admin needs to approve
+        source: 'visitor', // Mark as visitor-submitted
+        image: `https://ui-avatars.com/api/?name=${encodeURIComponent(reviewForm.customerName)}&background=d3d1ce&color=000000&size=128`
+      };
+      
+      const result = await addReview(reviewData);
+      
+      if (result.success) {
+        toast.success('Thank you! Your review has been submitted and will be visible after approval.');
+        // Reset form
+        setReviewForm({
+          customerName: '',
+          email: '',
+          rating: 5,
+          review: '',
+          productName: ''
+        });
+      } else {
+        toast.error(result.error || 'Failed to submit review. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error submitting review:', error);
+      toast.error('Failed to submit review. Please try again.');
+    } finally {
+      setReviewSubmitting(false);
+    }
   };
 
   return (
@@ -1050,6 +1110,131 @@ const Home = () => {
           {newsletterStatus === 'error' && (
             <p className="mt-4 text-red-400 animate-fade-in">✗ Please enter a valid email address.</p>
           )}
+        </div>
+      </section>
+
+      {/* Visitor Review Submission */}
+      <section className={`py-20 ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
+        <div className="container mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-12"
+          >
+            <h2 className="text-4xl font-bold mb-4" style={{ color: '#d3d1ce' }}>
+              Share Your Experience
+            </h2>
+            <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'} text-lg`}>We'd love to hear about your experience with our products</p>
+          </motion.div>
+          
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.2 }}
+            className="max-w-2xl mx-auto"
+          >
+            <div className={`${isDark ? 'bg-gray-700' : 'bg-gray-50'} rounded-2xl p-8 shadow-xl border ${isDark ? 'border-gray-600' : 'border-gray-200'}`}>
+              <form onSubmit={handleReviewSubmit} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Your Name *</label>
+                    <input
+                      type="text"
+                      required
+                      value={reviewForm.customerName}
+                      onChange={(e) => setReviewForm({...reviewForm, customerName: e.target.value})}
+                      className={`w-full px-4 py-3 rounded-lg border ${isDark ? 'bg-gray-600 border-gray-500 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'} focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all`}
+                      placeholder="Enter your full name"
+                    />
+                  </div>
+                  <div>
+                    <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Email Address *</label>
+                    <input
+                      type="email"
+                      required
+                      value={reviewForm.email}
+                      onChange={(e) => setReviewForm({...reviewForm, email: e.target.value})}
+                      className={`w-full px-4 py-3 rounded-lg border ${isDark ? 'bg-gray-600 border-gray-500 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'} focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all`}
+                      placeholder="Enter your email"
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Product (Optional)</label>
+                  <input
+                    type="text"
+                    value={reviewForm.productName}
+                    onChange={(e) => setReviewForm({...reviewForm, productName: e.target.value})}
+                    className={`w-full px-4 py-3 rounded-lg border ${isDark ? 'bg-gray-600 border-gray-500 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'} focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all`}
+                    placeholder="Which product are you reviewing?"
+                  />
+                </div>
+                
+                <div>
+                  <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Rating *</label>
+                  <div className="flex items-center space-x-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => setReviewForm({...reviewForm, rating: star})}
+                        className="focus:outline-none"
+                      >
+                        <Star
+                          className={`w-8 h-8 transition-colors ${
+                            star <= reviewForm.rating
+                              ? 'text-yellow-400 fill-yellow-400'
+                              : isDark ? 'text-gray-500' : 'text-gray-300'
+                          }`}
+                        />
+                      </button>
+                    ))}
+                    <span className={`ml-2 text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                      ({reviewForm.rating} {reviewForm.rating === 1 ? 'star' : 'stars'})
+                    </span>
+                  </div>
+                </div>
+                
+                <div>
+                  <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Your Review *</label>
+                  <textarea
+                    required
+                    rows={4}
+                    value={reviewForm.review}
+                    onChange={(e) => setReviewForm({...reviewForm, review: e.target.value})}
+                    className={`w-full px-4 py-3 rounded-lg border ${isDark ? 'bg-gray-600 border-gray-500 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'} focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none`}
+                    placeholder="Tell us about your experience with our product or service..."
+                  />
+                </div>
+                
+                <div className="text-center">
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    type="submit"
+                    disabled={reviewSubmitting}
+                    style={{ backgroundColor: '#d3d1ce' }}
+                    className={`px-8 py-4 rounded-full font-semibold text-gray-900 hover:shadow-2xl transition-all transform hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center mx-auto`}
+                  >
+                    {reviewSubmitting ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-gray-600 border-t-transparent rounded-full animate-spin mr-2" />
+                        Submitting...
+                      </>
+                    ) : (
+                      <>
+                        <Star className="w-5 h-5 mr-2" />
+                        Submit Review
+                      </>
+                    )}
+                  </motion.button>
+                </div>
+              </form>
+            </div>
+          </motion.div>
         </div>
       </section>
 
