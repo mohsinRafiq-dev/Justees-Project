@@ -20,6 +20,7 @@ import {
   Sun,
   Moon,
   Star,
+  Image,
 } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
@@ -31,6 +32,7 @@ import CategoriesManagement from "./CategoriesManagement";
 import SizesManagement from "./SizesManagement";
 import OrdersManagement from "./OrdersManagement";
 import ReviewsManagement from "./ReviewsManagement";
+import SlidesManagement from "./SlidesManagement";
 
 const AdminDashboard = () => {
   const { user, logout } = useAuth();
@@ -105,6 +107,7 @@ const AdminDashboard = () => {
     { id: "products", name: "Products", icon: Package },
     { id: "categories", name: "Categories", icon: Tag },
     { id: "sizes", name: "Sizes & Colors", icon: Layers },
+    { id: "slides", name: "Slides", icon: Image },
     { id: "orders", name: "Orders", icon: ShoppingBag },
     { id: "reviews", name: "Reviews", icon: Star },
     { id: "users", name: "Users", icon: Users },
@@ -125,6 +128,13 @@ const AdminDashboard = () => {
       icon: Eye,
       color: "green",
       action: () => handleTabChange("orders"),
+    },
+    {
+      title: "Manage Slides",
+      description: "Add images & videos",
+      icon: Image,
+      color: "yellow",
+      action: () => handleTabChange("slides"),
     },
     {
       title: "Analytics",
@@ -654,6 +664,17 @@ const AdminDashboard = () => {
               exit={{ opacity: 0, x: -20 }}
             >
               <ReviewsManagement />
+            </motion.div>
+          )}
+
+          {activeTab === "slides" && (
+            <motion.div
+              key="slides"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+            >
+              <SlidesManagement />
             </motion.div>
           )}
 

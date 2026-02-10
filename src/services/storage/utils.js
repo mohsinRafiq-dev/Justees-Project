@@ -64,4 +64,33 @@ export const validateImage = (file) => {
   return { valid: true };
 };
 
+/**
+ * Validate media (images or videos) for slides and other places
+ */
+export const validateMedia = (file, options = {}) => {
+  const { allowImages = true, allowVideos = true } = options;
+
+  const imageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+  const videoTypes = ['video/mp4', 'video/webm', 'video/quicktime']; // quicktime allows .mov
+
+  const maxImageSize = 5 * 1024 * 1024; // 5MB
+  const maxVideoSize = 80 * 1024 * 1024; // 80MB
+
+  if (allowImages && imageTypes.includes(file.type)) {
+    if (file.size > maxImageSize) {
+      return { valid: false, error: 'Image size too large. Maximum is 5MB.' };
+    }
+    return { valid: true, type: 'image' };
+  }
+
+  if (allowVideos && videoTypes.includes(file.type)) {
+    if (file.size > maxVideoSize) {
+      return { valid: false, error: 'Video size too large. Maximum is 80MB.' };
+    }
+    return { valid: true, type: 'video' };
+  }
+
+  return { valid: false, error: 'Invalid media type. Allowed images: JPG/PNG/WebP. Allowed videos: MP4/WebM/MOV.' };
+};
+
 export { ref, uploadBytes, getDownloadURL };

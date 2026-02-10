@@ -12,6 +12,7 @@ import { subscribeToNewsletter } from '../services/newsletter.service';
 import { getAllProducts, getCategories } from '../services/products.service';
 import { getRecentReviews } from '../services/reviews.service';
 import { getInstagramPosts, getInstagramProfileUrl, getInstagramHandle } from '../services/instagram.service';
+import { getSlidesForHome } from '../services/slides.service';
 import Navbar from '../components/common/Navbar';
 import AnimatedBackground from '../components/common/AnimatedBackground';
 import AnimatedCounter from '../components/common/AnimatedCounter';
@@ -32,30 +33,8 @@ const Home = () => {
   const [reviews, setReviews] = useState([]);
   const [instagramPosts, setInstagramPosts] = useState([]);
 
-  // Hero slider images
-  const heroSlides = [
-    {
-      id: 1,
-      title: 'Premium Quality',
-      subtitle: 'Elevate Your Style',
-      description: 'Discover our exclusive collection of premium clothing',
-      image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200&q=80',
-    },
-    {
-      id: 2,
-      title: 'New Arrivals',
-      subtitle: 'Fresh & Trendy',
-      description: 'Stay ahead with our latest fashion trends',
-      image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?w=1200&q=80',
-    },
-    {
-      id: 3,
-      title: 'Limited Edition',
-      subtitle: 'Exclusive Designs',
-      description: 'Get your hands on our limited edition pieces',
-      image: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=1200&q=80',
-    },
-  ];
+  // Hero slides (loaded from Firestore). Start empty — no hardcoded dummy slides.
+  const [heroSlides, setHeroSlides] = useState([]);
 
   // Helper function to format price in Indian format
   const formatPrice = (price) => {
@@ -117,7 +96,39 @@ const Home = () => {
     loadFeaturedProducts();
     loadReviews();
     loadInstagramPosts();
+    loadSlides();
   }, []);
+
+  // Load slides from Firestore
+  const loadSlides = async () => {
+    try {
+      console.log('[Home] Loading slides...');
+      const res = await getSlidesForHome(10);
+      console.log('[Home] Slides result:', res);
+      
+      if (res.success && res.slides.length > 0) {
+        // Normalize slides to expected props (url, type, title...)
+        const sorted = res.slides.sort((a, b) => (a.order || 0) - (b.order || 0));
+        const normalized = sorted.map((s, idx) => ({ 
+          id: s.id || idx, 
+          title: s.title || '', 
+          subtitle: s.subtitle || '', 
+          description: s.description || '', 
+          url: s.url || '', 
+          type: s.type || 'image', 
+          order: s.order || idx 
+        }));
+        console.log('[Home] Setting normalized slides:', normalized);
+        setHeroSlides(normalized);
+      } else {
+        console.log('[Home] No slides found or query failed');
+        setHeroSlides([]);
+      }
+    } catch (error) {
+      console.error('[Home] Error loading slides:', error);
+      setHeroSlides([]);
+    }
+  };
 
   // Load Instagram posts
   const loadInstagramPosts = async () => {
@@ -189,13 +200,26 @@ const Home = () => {
     { icon: CheckCircle, value: '100', label: 'Satisfaction', suffix: '%' },
   ];
 
-  // Auto-slide effect
+  // Auto-slide effect (only when we have multiple slides)
   useEffect(() => {
+    if (heroSlides.length <= 1) {
+      setCurrentSlide(0);
+      return;
+    }
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
     }, 5000);
     return () => clearInterval(timer);
   }, [heroSlides.length]);
+
+  // Keep currentSlide valid when slides change
+  useEffect(() => {
+    if (heroSlides.length === 0) {
+      setCurrentSlide(0);
+    } else if (currentSlide >= heroSlides.length) {
+      setCurrentSlide(0);
+    }
+  }, [heroSlides.length, currentSlide]);
 
   // Scroll detection for scroll-to-top button
   useEffect(() => {
@@ -209,10 +233,12 @@ const Home = () => {
   // Mobile menu is closed by default, no need for effect
 
   const nextSlide = () => {
+    if (heroSlides.length === 0) return;
     setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
   };
 
   const prevSlide = () => {
+    if (heroSlides.length === 0) return;
     setCurrentSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length);
   };
 
@@ -345,118 +371,126 @@ const Home = () => {
         </div>
       </div>
 
-      {/* Hero Slider Section */}
-      <section className="relative h-screen overflow-hidden">
-        <AnimatePresence mode="wait">
-          {heroSlides.map((slide, index) =>
-            index === currentSlide && (
-              <motion.div
-                key={slide.id}
-                initial={{ opacity: 0, scale: 1.1 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 1 }}
-                className="absolute inset-0"
-              >
-                <div
-                  className="absolute inset-0 bg-cover bg-center"
-                  style={{ backgroundImage: `url(${slide.image})` }}
+      {/* Hero Slider Section - Only show if slides exist */}
+      {heroSlides.length > 0 && (
+        <section className="relative h-screen overflow-hidden">
+          <AnimatePresence mode="wait">
+            {heroSlides.map((slide, index) =>
+              index === currentSlide && (
+                <motion.div
+                  key={slide.id}
+                  initial={{ opacity: 0, scale: 1.1 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ duration: 1 }}
+                  className="absolute inset-0"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-r from-gray-900/90 via-gray-800/40 to-gray-900/50" />
-                </div>
-                <div className="relative h-full flex items-center">
-                  <div className="container mx-auto px-4">
-                    <motion.div
-                      initial={{ x: -100, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      transition={{ delay: 0.3, duration: 0.8 }}
-                      className="max-w-2xl"
-                    >
-                      <motion.p
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.5 }}
-                        className={`${isDark ? 'text-gray-300' : 'text-gray-100'} text-lg mb-2 font-medium`}
-                      >
-                        {slide.subtitle}
-                      </motion.p>
-                      <motion.h1
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.6 }}
-                        className="text-6xl md:text-7xl font-bold text-white mb-4 leading-tight"
-                      >
-                        {slide.title.split(' ').map((word, i) => (
-                          <motion.span
-                            key={i}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.7 + i * 0.1 }}
-                            className="inline-block mr-4"
-                          >
-                            {word}
-                          </motion.span>
-                        ))}
-                      </motion.h1>
-                      <motion.p
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 1 }}
-                        className="text-xl text-gray-300 mb-8"
-                      >
-                        {slide.description}
-                      </motion.p>
-                      <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 1.2 }}
-                      >
-                        <Link
-                          to="/products"
-                          style={{ backgroundColor: '#d3d1ce' }}
-                          className="inline-block text-gray-900 px-8 py-4 rounded-full font-semibold hover:shadow-2xl transition-all transform hover:scale-105"
-                        >
-                          Explore Collection
-                        </Link>
-                      </motion.div>
-                    </motion.div>
+                  <div className="absolute inset-0">
+                    {slide.type === 'video' ? (
+                      <video className="w-full h-full object-cover" src={slide.url} autoPlay muted loop playsInline />
+                    ) : (
+                      <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${slide.url})` }} />
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-r from-gray-900/90 via-gray-800/40 to-gray-900/50" />
                   </div>
-                </div>
-              </motion.div>
-            )
+                  <div className="relative h-full flex items-center">
+                    <div className="container mx-auto px-4">
+                      <motion.div
+                        initial={{ x: -100, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        transition={{ delay: 0.3, duration: 0.8 }}
+                        className="max-w-2xl"
+                      >
+                        <motion.p
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ delay: 0.5 }}
+                          className={`${isDark ? 'text-gray-300' : 'text-gray-100'} text-lg mb-2 font-medium`}
+                        >
+                          {slide.subtitle}
+                        </motion.p>
+                        <motion.h1
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.6 }}
+                          className="text-6xl md:text-7xl font-bold text-white mb-4 leading-tight"
+                        >
+                          {slide.title.split(' ').map((word, i) => (
+                            <motion.span
+                              key={i}
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: 0.7 + i * 0.1 }}
+                              className="inline-block mr-4"
+                            >
+                              {word}
+                            </motion.span>
+                          ))}
+                        </motion.h1>
+                        <motion.p
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ delay: 1 }}
+                          className="text-xl text-gray-300 mb-8"
+                        >
+                          {slide.description}
+                        </motion.p>
+                        <motion.div
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 1.2 }}
+                        >
+                          <Link
+                            to="/products"
+                            style={{ backgroundColor: '#d3d1ce' }}
+                            className="inline-block text-gray-900 px-8 py-4 rounded-full font-semibold hover:shadow-2xl transition-all transform hover:scale-105"
+                          >
+                            Explore Collection
+                          </Link>
+                        </motion.div>
+                      </motion.div>
+                    </div>
+                  </div>
+                </motion.div>
+              )
+            )}
+          </AnimatePresence>
+
+          {/* Slider Controls - Only show if multiple slides */}
+          {heroSlides.length > 1 && (
+            <>
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={prevSlide}
+                className="absolute left-4 top-1/2 -translate-y-1/2 glass p-3 rounded-full hover:bg-white/30 transition-all z-10"
+              >
+                <ChevronLeft className="w-6 h-6 text-white" />
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={nextSlide}
+                className="absolute right-4 top-1/2 -translate-y-1/2 glass p-3 rounded-full hover:bg-white/30 transition-all z-10"
+              >
+                <ChevronRight className="w-6 h-6 text-white" />
+              </motion.button>
+
+              {/* Slider Indicators */}
+              <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex space-x-2 z-10">
+                {heroSlides.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentSlide(index)}
+                    className={`h-2 rounded-full transition-all ${index === currentSlide ? 'w-8 bg-white' : 'w-2 bg-white/50'
+                      }`}
+                  />
+                ))}
+              </div>
+            </>
           )}
-        </AnimatePresence>
-
-        {/* Slider Controls */}
-        <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          onClick={prevSlide}
-          className="absolute left-4 top-1/2 -translate-y-1/2 glass p-3 rounded-full hover:bg-white/30 transition-all z-10"
-        >
-          <ChevronLeft className="w-6 h-6 text-white" />
-        </motion.button>
-        <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          onClick={nextSlide}
-          className="absolute right-4 top-1/2 -translate-y-1/2 glass p-3 rounded-full hover:bg-white/30 transition-all z-10"
-        >
-          <ChevronRight className="w-6 h-6 text-white" />
-        </motion.button>
-
-        {/* Slider Indicators */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex space-x-2 z-10">
-          {heroSlides.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentSlide(index)}
-              className={`h-2 rounded-full transition-all ${index === currentSlide ? 'w-8 bg-white' : 'w-2 bg-white/50'
-                }`}
-            />
-          ))}
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Features */}
       <section className={`py-16 ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-gray-100 border-gray-200'} border-t`}>

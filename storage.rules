@@ -17,5 +17,14 @@ service firebase.storage {
       allow read: if true;
       allow write: if request.auth != null;
     }
+
+    // Slides images/videos folder
+    match /slides/{allPaths=**} {
+      // Anyone can read slides
+      allow read: if true;
+      
+      // Only authenticated users can upload/update/delete slides
+      allow write: if request.auth != null;
+    }
   }
 }
