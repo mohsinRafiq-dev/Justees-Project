@@ -835,61 +835,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Reviews Section */}
-      <section className={`py-20 ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
-        <div className="container mx-auto px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-12"
-          >
-            <h2 className="text-4xl font-bold mb-4" style={{ color: '#d3d1ce' }}>
-              What Our Customers Say
-            </h2>
-            <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'} text-lg`}>Real reviews from real customers</p>
-          </motion.div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {reviews.map((review, index) => (
-              <motion.div
-                key={review.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                whileHover={{ y: -10 }}
-                className={`${isDark ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-50 hover:bg-gray-100'} p-6 rounded-lg transition-all`}
-              >
-                <div className="flex mb-3">
-                  {[...Array(review.rating)].map((_, i) => (
-                    <motion.div
-                      key={i}
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      transition={{ delay: i * 0.1 }}
-                    >
-                      <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" />
-                    </motion.div>
-                  ))}
-                </div>
-                <p className={`${isDark ? 'text-gray-300' : 'text-gray-700'} mb-6 italic`}>&quot;{review.comment}&quot;</p>
-                <div className="flex items-center">
-                  <img
-                    src={review.image}
-                    alt={review.name}
-                    className={`w-12 h-12 rounded-full mr-4 border-2 ${isDark ? 'border-gray-600' : 'border-gray-300'}`}
-                  />
-                  <div>
-                    <h4 className={`${isDark ? 'text-white' : 'text-gray-900'} font-semibold`}>{review.name}</h4>
-                    <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'} text-sm`}>{review.product}</p>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* WhatsApp Floating Button */}
       <motion.button
         initial={{ scale: 0 }}
@@ -968,7 +913,7 @@ const Home = () => {
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
               <h2 className={`text-4xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                What Our  Customers Say
+                What Our Customers Say
               </h2>
               <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'} text-lg`}>
                 Real reviews from real customers
