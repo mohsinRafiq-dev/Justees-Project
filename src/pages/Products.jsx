@@ -2,23 +2,24 @@ import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion"; // eslint-disable-line
 import { Heart, ShoppingCart, Eye, Filter, Star } from "lucide-react";
 import { toast } from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTheme } from "../contexts/ThemeContext";
 import { useCart } from "../contexts/CartContext";
-import { getAllProducts } from "../services/products.service";
+import { getAllProducts, getCategories } from "../services/products.service";
 import LazyImage from "../components/common/LazyImage";
 import Navbar from "../components/common/Navbar";
 import Footer from "../components/common/Footer";
 import ProductQuickView from "../components/products/ProductQuickView";
 import LoadingSpinner from "../components/common/LoadingSpinner";
 import { formatPrice } from "../utils/validation";
-import { CATEGORIES } from "../utils/constants";
 
 const Products = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { isDark } = useTheme();
   const { addToCart } = useCart();
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -30,10 +31,45 @@ const Products = () => {
   const [sortOrder, setSortOrder] = useState("desc");
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Load products
+  // Load products and categories
   useEffect(() => {
-    loadProducts();
-  }, []);
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const [productsRes, categoriesRes] = await Promise.all([
+          getAllProducts({
+            status: "active",
+            isVisible: true,
+            orderByField: "createdAt",
+            orderDirection: "desc",
+            limitCount: 100,
+          }),
+          getCategories()
+        ]);
+
+        if (productsRes.success) {
+          setProducts(productsRes.products);
+        }
+
+        if (categoriesRes.success) {
+          setCategories(categoriesRes.categories || []);
+        }
+
+        // Handle category from URL search params
+        const categoryParam = searchParams.get("category");
+        if (categoryParam) {
+          setSelectedCategory(categoryParam);
+        }
+      } catch (error) {
+        console.error("Error loading products/categories:", error);
+        toast.error("Error loading data");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [searchParams]);
 
   const filterAndSortProducts = useCallback(() => {
     let filtered = [...products];
@@ -84,30 +120,6 @@ const Products = () => {
     filterAndSortProducts();
   }, [filterAndSortProducts]);
 
-  const loadProducts = async () => {
-    try {
-      setLoading(true);
-      const result = await getAllProducts({
-        status: "active",
-        isVisible: true,
-        orderByField: "createdAt",
-        orderDirection: "desc",
-        limitCount: 100,
-      });
-
-      if (result.success) {
-        setProducts(result.products);
-      } else {
-        toast.error("Failed to load products");
-        console.error("Error loading products:", result.error);
-      }
-    } catch (error) {
-      console.error("Error loading products:", error);
-      toast.error("Error loading products");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const toggleWishlist = (productId) => {
     setWishlist((prev) => {
@@ -460,9 +472,9 @@ const Products = () => {
                       }`}
                   >
                     <option value="All">All Categories</option>
-                    {CATEGORIES.map((category) => (
-                      <option key={category} value={category}>
-                        {category}
+                    {categories.map((category) => (
+                      <option key={category.id} value={category.name}>
+                        {category.name}
                       </option>
                     ))}
                   </select>
