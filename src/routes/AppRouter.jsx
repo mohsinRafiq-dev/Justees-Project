@@ -29,16 +29,34 @@ import AdminDashboard from "../pages/admin/AdminDashboard";
 
 const AppContent = () => {
   const { isDark } = useTheme();
-
+  
   return (
     <BrowserRouter>
+      <AppLayout isDark={isDark} />
+    </BrowserRouter>
+  );
+};
+
+// Extracted inner component to use useLocation hook (which requires being inside BrowserRouter)
+import { useLocation } from 'react-router-dom';
+
+const AppLayout = ({ isDark }) => {
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith('/admin');
+
+  return (
+    <>
       <ScrollToTop />
       <div
         className={`flex flex-col min-h-screen transition-colors duration-300 ${isDark ? "bg-gray-900" : "bg-gray-50"}`}
       >
-        <Navbar />
-        <CartDrawer />
-        <WishlistDrawer />
+        {!isAdminRoute && (
+          <>
+            <Navbar />
+            <CartDrawer />
+            <WishlistDrawer />
+          </>
+        )}
         <main className="flex-grow">
           <Routes>
             {/* Public Routes */}
@@ -69,9 +87,9 @@ const AppContent = () => {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
-        <Footer />
+        {!isAdminRoute && <Footer />}
       </div>
-    </BrowserRouter>
+    </>
   );
 };
 
