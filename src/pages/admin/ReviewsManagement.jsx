@@ -39,6 +39,8 @@ const ReviewsManagement = () => {
   const [formLoading, setFormLoading] = useState(false);
   const [reviewToDelete, setReviewToDelete] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [productSearch, setProductSearch] = useState("");
+  const [showProductDropdown, setShowProductDropdown] = useState(false);
 
   // Form states
   const [formData, setFormData] = useState({
@@ -105,6 +107,7 @@ const ReviewsManagement = () => {
       productName: "",
       isVisible: true,
     });
+    setProductSearch("");
     setShowForm(true);
   };
 
@@ -118,6 +121,7 @@ const ReviewsManagement = () => {
       productName: review.productName || "",
       isVisible: review.isVisible ?? true,
     });
+    setProductSearch("");
     setShowForm(true);
   };
 
@@ -323,9 +327,9 @@ const ReviewsManagement = () => {
                 <p className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
                   {reviews.length > 0
                     ? (
-                        reviews.reduce((sum, r) => sum + (r.rating || 0), 0) /
-                        reviews.length
-                      ).toFixed(1)
+                      reviews.reduce((sum, r) => sum + (r.rating || 0), 0) /
+                      reviews.length
+                    ).toFixed(1)
                     : "0.0"}
                 </p>
               </div>
@@ -438,11 +442,10 @@ const ReviewsManagement = () => {
                           {[...Array(5)].map((_, i) => (
                             <Star
                               key={i}
-                              className={`w-4 h-4 ${
-                                i < review.rating
-                                  ? "text-yellow-500 fill-current"
-                                  : isDark ? "text-gray-600" : "text-gray-300"
-                              }`}
+                              className={`w-4 h-4 ${i < review.rating
+                                ? "text-yellow-500 fill-current"
+                                : isDark ? "text-gray-600" : "text-gray-300"
+                                }`}
                             />
                           ))}
                           <span className={`ml-2 text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
@@ -493,13 +496,12 @@ const ReviewsManagement = () => {
                         <div className="flex items-center justify-end space-x-2">
                           <button
                             onClick={() => handleToggleVisibility(review)}
-                            className={`p-2 rounded-lg transition-colors ${
-                              review.isVisible
-                                ? "text-green-600 hover:bg-green-500/10"
-                                : isDark
+                            className={`p-2 rounded-lg transition-colors ${review.isVisible
+                              ? "text-green-600 hover:bg-green-500/10"
+                              : isDark
                                 ? "text-gray-600 hover:bg-white/5"
                                 : "text-gray-400 hover:bg-gray-100"
-                            }`}
+                              }`}
                             title={review.isVisible ? "Hide review" : "Show review"}
                           >
                             {review.isVisible ? (
@@ -593,22 +595,127 @@ const ReviewsManagement = () => {
                     </div>
                   </div>
 
-                  <div>
+                  <div className="relative">
                     <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                      Product (Optional)
+                      Product (Search to Link)
                     </label>
-                    <select
-                      value={formData.productId}
-                      onChange={handleProductChange}
-                      className={`w-full px-4 py-2 rounded-xl border transition-all focus:ring-2 focus:ring-cyan-500 focus:outline-none ${isDark ? 'bg-white/5 border-white/10 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
-                    >
-                      <option value="">General Review (No specific product)</option>
-                      {products.map((product) => (
-                        <option key={product.id} value={product.id}>
-                          {product.name}
-                        </option>
-                      ))}
-                    </select>
+                    <div className="relative">
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={productSearch}
+                          onFocus={() => setShowProductDropdown(true)}
+                          onBlur={() => setTimeout(() => setShowProductDropdown(false), 200)}
+                          onChange={(e) => {
+                            setProductSearch(e.target.value);
+                            setShowProductDropdown(true);
+                          }}
+                          placeholder={formData.productName || "Search products..."}
+                          className={`w-full px-4 py-2 rounded-xl border transition-all focus:ring-2 focus:ring-cyan-500 focus:outline-none ${isDark ? 'bg-white/5 border-white/10 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'}`}
+                        />
+                        {formData.productId && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setFormData({ ...formData, productId: "", productName: "" });
+                              setProductSearch("");
+                            }}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 transition-colors"
+                          >
+                            ×
+                          </button>
+                        )}
+                      </div>
+
+                      <AnimatePresence>
+                        {showProductDropdown && (
+                          <motion.div
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            className={`absolute z-50 w-full mt-2 rounded-xl border shadow-2xl overflow-hidden ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+                              }`}
+                          >
+                            <div className="max-h-60 overflow-y-auto">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setFormData({ ...formData, productId: "", productName: "" });
+                                  setProductSearch("");
+                                  setShowProductDropdown(false);
+                                }}
+                                className={`w-full px-4 py-3 text-left text-sm transition-colors border-b ${isDark
+                                  ? 'border-gray-700 hover:bg-white/5 text-gray-300'
+                                  : 'border-gray-100 hover:bg-gray-50 text-gray-600'
+                                  }`}
+                              >
+                                General Review (No specific product)
+                              </button>
+
+                              {products
+                                .filter((p) =>
+                                  p.name.toLowerCase().includes(productSearch.toLowerCase())
+                                )
+                                .map((product) => (
+                                  <button
+                                    key={product.id}
+                                    type="button"
+                                    onClick={() => {
+                                      setFormData({
+                                        ...formData,
+                                        productId: product.id,
+                                        productName: product.name,
+                                      });
+                                      setProductSearch(product.name);
+                                      setShowProductDropdown(false);
+                                    }}
+                                    className={`w-full px-4 py-3 text-left text-sm transition-colors ${isDark
+                                      ? 'hover:bg-white/5 text-white'
+                                      : 'hover:bg-gray-50 text-gray-900'
+                                      } ${formData.productId === product.id ? (isDark ? 'bg-cyan-500/10' : 'bg-cyan-50') : ''}`}
+                                  >
+                                    <div className="font-medium">{product.name}</div>
+                                    <div className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                                      ID: {product.id}
+                                    </div>
+                                  </button>
+                                ))}
+
+                              {products.filter((p) =>
+                                p.name.toLowerCase().includes(productSearch.toLowerCase())
+                              ).length === 0 && (
+                                  <div className={`px-4 py-8 text-center text-sm ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                                    No products found matching "{productSearch}"
+                                  </div>
+                                )}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+
+                    <AnimatePresence>
+                      {formData.productId && (
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          className={`mt-3 p-3 rounded-xl border flex items-center gap-3 ${isDark ? 'bg-cyan-500/5 border-cyan-500/20' : 'bg-cyan-50 border-cyan-200'
+                            }`}
+                        >
+                          <div className={`p-2 rounded-lg ${isDark ? 'bg-cyan-500/20' : 'bg-cyan-100'}`}>
+                            <Package className={`w-4 h-4 ${isDark ? 'text-cyan-400' : 'text-cyan-600'}`} />
+                          </div>
+                          <div>
+                            <div className={`text-xs font-semibold uppercase tracking-wider ${isDark ? 'text-cyan-400/70' : 'text-cyan-600/70'}`}>
+                              Linked Product
+                            </div>
+                            <div className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                              {formData.productName}
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
 
                   <div>
