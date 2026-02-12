@@ -15,6 +15,8 @@ import {
   Minus,
   Plus,
   Package,
+  MessageCircle,
+  MessageCircleQuestion,
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { useTheme } from "../contexts/ThemeContext";
@@ -200,15 +202,15 @@ const ProductDetail = () => {
   };
 
   const isOutOfStock = () => {
-    const stock = getAvailableStock();
+    const stock = Number(getAvailableStock());
     return (
       product?.stockStatus === "out_of_stock" ||
-      (product?.trackInventory && stock === 0)
+      stock === 0
     );
   };
 
   const handleAddToCart = () => {
-    if (!product) return;
+    if (!product || isOutOfStock()) return;
 
     // Check if variants are required but not selected
     if (product.variants && product.variants.length > 0) {
@@ -218,17 +220,17 @@ const ProductDetail = () => {
       }
 
       const variant = getSelectedVariant();
-      if (!variant || variant.stock < quantity) {
+      const variantStock = variant ? Number(variant.stock || 0) : 0;
+      
+      if (!variant || variantStock < quantity || variantStock === 0) {
         toast.error("Selected variant is not available");
         return;
       }
     }
 
-    addToCart({
-      ...product,
-      selectedVariant: getSelectedVariant(),
-      selectedSize,
-      selectedColor,
+    addToCart(product, {
+      size: selectedSize,
+      color: selectedColor,
       quantity,
     });
 
@@ -237,19 +239,15 @@ const ProductDetail = () => {
     });
   };
 
-  const handleBuyNow = () => {
-    handleAddToCart();
-    navigate("/");
-    // The cart drawer will open automatically from the cart context
-    setTimeout(() => {
-      const cartButton = document.querySelector('[data-cart-button]');
-      if (cartButton) cartButton.click();
-    }, 100);
-  };
 
   const handleWhatsAppInquiry = () => {
-    const message = `Hi, I'm interested in ${product.name}${selectedSize ? ` (Size: ${selectedSize})` : ""
-      }${selectedColor ? ` (Color: ${selectedColor})` : ""}. Price: ${formatPrice(product.price)}`;
+    let message = '';
+    if (isOutOfStock()) {
+      message = `Hi, I'm interested in ${product.name}, but it's currently out of stock. When will it be restocked?`;
+    } else {
+      message = `Hi, I'm interested in ${product.name}${selectedSize ? ` (Size: ${selectedSize})` : ""
+        }${selectedColor ? ` (Color: ${selectedColor})` : ""}. Price: ${formatPrice(product.price)}`;
+    }
 
     const whatsappLink = generateWhatsAppInquiryLink(message);
     window.open(whatsappLink, "_blank");
@@ -754,83 +752,67 @@ const ProductDetail = () => {
               )}
 
               {/* Quantity Selection */}
-              <div>
-                <label
-                  className={`block text-sm font-medium mb-3 ${isDark ? "text-gray-300" : "text-gray-700"}`}
-                >
-                  Quantity
-                </label>
-                <div className="flex items-center space-x-4">
-                  <div className="flex items-center border-2 border-gray-300 dark:border-gray-600 rounded-lg">
-                    <button
+              {/* Action Buttons */}
+            <div className="flex flex-col gap-4 mt-8">
+              {!isOutOfStock() && (
+                <div className="flex items-center gap-6 p-4 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-white/5">
+                  <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Quantity</span>
+                  <div className="flex items-center gap-4">
+                    <motion.button
+                      whileTap={{ scale: 0.9 }}
                       onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      className={`p-3 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${isDark ? "text-gray-300" : "text-gray-700"}`}
+                      className="w-10 h-10 rounded-xl bg-white dark:bg-gray-700 shadow-sm flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
                     >
-                      <Minus className="w-4 h-4" />
-                    </button>
-                    <span
-                      className={`px-6 py-2 min-w-[60px] text-center font-medium ${isDark ? "text-white" : "text-gray-900"}`}
-                    >
-                      {quantity}
-                    </span>
-                    <button
-                      onClick={() =>
-                        setQuantity(Math.min(stock, quantity + 1))
-                      }
-                      disabled={quantity >= stock}
-                      className={`p-3 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${isDark ? "text-gray-300" : "text-gray-700"} disabled:opacity-50 disabled:cursor-not-allowed`}
+                      <Minus className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+                    </motion.button>
+                    <span className="text-xl font-bold w-12 text-center text-gray-900 dark:text-white font-mono">{quantity}</span>
+                    <motion.button
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => {
+                        const currentStock = getAvailableStock();
+                        if (quantity < currentStock) {
+                          setQuantity(quantity + 1);
+                        } else {
+                          toast.error(`Only ${currentStock} items in stock`);
+                        }
+                      }}
+                      className={`w-10 h-10 rounded-xl shadow-sm flex items-center justify-center transition-colors ${quantity >= getAvailableStock()
+                        ? "bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed"
+                        : "bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300"
+                        }`}
                     >
                       <Plus className="w-4 h-4" />
-                    </button>
+                    </motion.button>
                   </div>
-                  {stock > 0 && (
-                    <span
-                      className={`text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}
-                    >
-                      {stock} available
-                    </span>
-                  )}
                 </div>
-              </div>
+              )}
 
-              {/* Add to Cart Buttons */}
-              <div className="space-y-3 pt-4">
-                <button
+              <div className="flex gap-4">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={handleAddToCart}
-                  disabled={outOfStock}
-                  className={`w-full py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-300 flex items-center justify-center space-x-2 ${outOfStock
-                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                    : ""
-                    }
-                  style={!isOutOfStock && !isAddingToCart ? { backgroundColor: '#d3d1ce', color: 'white' } : {}}`}
+                  disabled={isOutOfStock()}
+                  className={`flex-1 py-4 px-8 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 shadow-lg shadow-blue-500/20 ${isOutOfStock()
+                    ? "bg-gray-200 dark:bg-gray-800 text-gray-400 cursor-not-allowed"
+                    : "bg-blue-600 hover:bg-blue-700 text-white"
+                    }`}
                 >
                   <ShoppingCart className="w-6 h-6" />
-                  <span>{outOfStock ? "Out of Stock" : "Add to Cart"}</span>
-                </button>
+                  {isOutOfStock() ? "Out of Stock" : "Add to Cart"}
+                </motion.button>
 
-                <button
-                  onClick={handleBuyNow}
-                  disabled={outOfStock}
-                  className={`w-full py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-300 ${outOfStock
-                    ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                    : isDark
-                      ? "bg-gray-800 hover:bg-gray-700 text-white"
-                      : "bg-gray-900 hover:bg-gray-800 text-white"
-                    }`}
-                >
-                  Buy Now
-                </button>
-
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={handleWhatsAppInquiry}
-                  className={`w-full py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-300 border-2 ${isDark
-                    ? "border-gray-600 text-gray-300 hover:bg-green-600 hover:text-white hover:border-green-600"
-                    : "border-gray-300 text-gray-700 hover:bg-green-600 hover:text-white hover:border-green-600"
-                    }`}
+                  className="px-6 rounded-2xl border-2 border-green-500 text-green-600 dark:text-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 font-bold transition-colors"
+                  title="Chat on WhatsApp"
                 >
-                  Inquire on WhatsApp
-                </button>
+                  {isOutOfStock() ? <MessageCircleQuestion className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}
+                </motion.button>
               </div>
+            </div>
 
               {/* Features */}
               <div
@@ -1495,7 +1477,7 @@ const RelatedProductCard = ({ product, isDark }) => {
         ? product.images[0].url
         : product.images[0];
     }
-    return `/api/placeholder/400/400?text=${encodeURIComponent(product.name || 'Product')}`;
+    return `https://placehold.co/400x400?text=${encodeURIComponent(product.name || 'Product')}`;
   };
 
   return (

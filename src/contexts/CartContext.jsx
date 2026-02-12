@@ -31,27 +31,36 @@ export const CartProvider = ({ children }) => {
   const toggleCart = () => setIsCartOpen((prev) => !prev);
 
   const addToCart = (product, options = {}) => {
-    const { size = 'M', color = 'Black', quantity = 1 } = options;
+    const { size, color, quantity = 1 } = options;
+
+    // Use selected values or fall back to product defaults if available
+    const finalSize = size || (product.variants && product.variants.length > 0 ? product.variants[0].size : 'M');
+    const finalColor = color || (product.variants && product.variants.length > 0 ? product.variants[0].color : 'Black');
 
     // Determine the correct image based on selected color
     let selectedImage = product.image;
+    
+    // Check product.images array (could be strings or objects {url, color})
     if (product.images && product.images.length > 0) {
       const colorImage = product.images.find(
-        (img) => img.color && img.color.toLowerCase() === color.toLowerCase()
+        (img) => typeof img === 'object' && img.color && img.color.toLowerCase() === finalColor.toLowerCase()
       );
-      // Use color-specific image if found, otherwise use first image
+      
       const imageObj = colorImage || product.images[0];
       selectedImage = typeof imageObj === "object" ? imageObj.url : imageObj;
     }
 
+    // Generate unique ID based on product and variant options
+    const variantId = `${product.id}-${finalSize}-${finalColor}`;
+
     const cartItem = {
-      id: `${product.id}-${size}-${color}`,
+      id: variantId,
       productId: product.id,
       name: product.name,
       price: product.price,
-      image: selectedImage || '/api/placeholder/400/400',
-      size,
-      color,
+      image: selectedImage || 'https://placehold.co/400x400?text=No+Image',
+      size: finalSize,
+      color: finalColor,
       quantity,
     };
 
@@ -66,6 +75,9 @@ export const CartProvider = ({ children }) => {
       }
       return [...prev, cartItem];
     });
+
+    // Automatically open cart drawer
+    setIsCartOpen(true);
   };
 
   const removeFromCart = (itemId) => {

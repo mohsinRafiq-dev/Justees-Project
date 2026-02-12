@@ -132,6 +132,14 @@ const Products = () => {
   };
 
   const handleQuickAdd = (product) => {
+    const stock = Number(getProductStock(product));
+    const isOutOfStock = product.stockStatus === 'out_of_stock' || stock === 0;
+    
+    if (isOutOfStock) {
+      toast.error("This product is out of stock");
+      return;
+    }
+
     // If product has variants, open quick view to select options
     if (product.variants && product.variants.length > 0) {
       openQuickView(product);
@@ -160,7 +168,8 @@ const Products = () => {
 
   const getProductStock = (product) => {
     if (product.variants && product.variants.length > 0) {
-      return product.totalStock || 0;
+      if (typeof product.totalStock === 'number') return product.totalStock;
+      return product.variants.reduce((sum, v) => sum + (v.stock || 0), 0);
     }
     return product.stock || 0;
   };
@@ -172,12 +181,12 @@ const Products = () => {
         : product.images[0];
     }
     // Return placeholder instead of external URL
-    return `/api/placeholder/400/400?text=${encodeURIComponent(product.name || 'Product')}`;
+    return `https://placehold.co/400x400?text=${encodeURIComponent(product.name || 'Product')}`;
   };
 
   const ProductCard = ({ product }) => {
     const stock = getProductStock(product);
-    const isOutOfStock = product.stockStatus === 'out_of_stock' || (product.trackInventory && stock === 0);
+    const isOutOfStock = product.stockStatus === 'out_of_stock' || stock === 0;
     const isLowStock = stock > 0 && stock <= 5;
     const imageUrl = getProductImage(product);
 
@@ -224,11 +233,6 @@ const Products = () => {
                   {product.badge}
                 </span>
               )}
-              {isOutOfStock && (
-                <span className="bg-gray-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
-                  Out of Stock
-                </span>
-              )}
               {isLowStock && !isOutOfStock && (
                 <span className="bg-orange-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
                   Low Stock
@@ -259,8 +263,10 @@ const Products = () => {
 
             {/* Overlay for out of stock */}
             {isOutOfStock && (
-              <div className="absolute inset-0 bg-gray-900/50 flex items-center justify-center">
-                <span className="text-white font-semibold">Out of Stock</span>
+              <div className="absolute inset-0 bg-gray-900/50 flex items-center justify-center z-20 pointer-events-none">
+                <span className="text-white font-bold text-xl uppercase tracking-widest border-2 border-white px-4 py-2 rounded-lg transform -rotate-12 shadow-2xl">
+                  Out of Stock
+                </span>
               </div>
             )}
           </div>

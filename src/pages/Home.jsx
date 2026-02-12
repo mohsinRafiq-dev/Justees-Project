@@ -53,13 +53,14 @@ const Home = () => {
         : product.images[0];
     }
     // Return placeholder for products without images instead of external URL
-    return `/api/placeholder/400/400?text=${encodeURIComponent(product.name || 'Product')}`;
+    return `https://placehold.co/400x400?text=${encodeURIComponent(product.name || 'Product')}`;
   };
 
   // Helper function to get product stock
   const getProductStock = (product) => {
     if (product.variants && product.variants.length > 0) {
-      return product.totalStock || 0;
+      if (typeof product.totalStock === 'number') return product.totalStock;
+      return product.variants.reduce((sum, v) => sum + (v.stock || 0), 0);
     }
     return product.stock || 0;
   };
@@ -315,6 +316,13 @@ const Home = () => {
   };
 
   const handleQuickAdd = (product) => {
+    const stock = Number(getProductStock(product));
+    const isOutOfStock = product.stockStatus === 'out_of_stock' || stock === 0;
+    
+    if (isOutOfStock) {
+      toast.error("This product is out of stock");
+      return;
+    }
     openQuickView(product);
   };
 
@@ -694,16 +702,6 @@ const Home = () => {
                       </motion.span>
                     )}
 
-                    {/* Stock Status Badge - only show if no other badge and out of stock */}
-                    {!product.badge && getProductStock(product) === 0 && (
-                      <motion.span
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        className="absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-bold text-white bg-gray-500 z-10"
-                      >
-                        Out of Stock
-                      </motion.span>
-                    )}
 
                     {/* Wishlist Button */}
                     <motion.button
@@ -717,33 +715,39 @@ const Home = () => {
                       />
                     </motion.button>
 
-                    {/* Hover Actions */}
-                    <div className="absolute inset-0 bg-gray-900/0 group-hover:bg-gray-900/60 transition-all flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => openQuickView(product)}
-                        style={{ backgroundColor: '#d3d1ce' }}
-                        className="text-gray-900 px-4 py-2 rounded-full font-semibold hover:shadow-lg transition-all flex items-center gap-2"
-                      >
-                        <Eye className="w-4 h-4" />
-                        Quick View
-                      </motion.button>
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => handleQuickAdd(product)}
-                        disabled={getProductStock(product) === 0}
-                        style={getProductStock(product) === 0 ? {} : { backgroundColor: '#d3d1ce' }}
-                        className={`px-4 py-2 rounded-full font-semibold hover:shadow-lg transition-all flex items-center gap-2 ${getProductStock(product) === 0
-                          ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                          : 'text-gray-900'
-                          }`}
-                      >
-                        <ShoppingCart className="w-4 h-4" />
-                        {getProductStock(product) === 0 ? 'Out of Stock' : 'Add'}
-                      </motion.button>
-                    </div>
+                    {/* Hover Actions - Only show if in stock */}
+                    {getProductStock(product) > 0 && (
+                      <div className="absolute inset-0 bg-gray-900/0 group-hover:bg-gray-900/60 transition-all flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => openQuickView(product)}
+                          style={{ backgroundColor: '#d3d1ce' }}
+                          className="text-gray-900 px-4 py-2 rounded-full font-semibold hover:shadow-lg transition-all flex items-center gap-2"
+                        >
+                          <Eye className="w-4 h-4" />
+                          Quick View
+                        </motion.button>
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => handleQuickAdd(product)}
+                          className={`h-10 px-4 rounded-full font-semibold hover:shadow-lg transition-all flex items-center gap-2 whitespace-nowrap text-gray-900 bg-[#d3d1ce]`}
+                        >
+                          <ShoppingCart className="w-4 h-4 flex-shrink-0" />
+                          <span className="text-sm">Add</span>
+                        </motion.button>
+                      </div>
+                    )}
+
+                    {/* Overlay for out of stock */}
+                    {getProductStock(product) === 0 && (
+                      <div className="absolute inset-0 bg-gray-900/50 flex items-center justify-center z-20 pointer-events-none">
+                        <span className="text-white font-bold text-xl uppercase tracking-widest border-2 border-white px-4 py-2 rounded-lg transform -rotate-12 shadow-2xl">
+                          Out of Stock
+                        </span>
+                      </div>
+                    )}
 
                     {/* Stock Warning */}
                     {getProductStock(product) > 0 && getProductStock(product) <= 5 && (

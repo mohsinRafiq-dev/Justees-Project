@@ -32,7 +32,7 @@ const ProductQuickView = ({ product, isOpen, onClose }) => {
       const firstImage = product.images[0];
       return typeof firstImage === "object" ? firstImage.url : firstImage;
     }
-    return `/api/placeholder/400/400?text=${encodeURIComponent(product?.name || 'Product')}`;
+    return `https://placehold.co/400x400?text=${encodeURIComponent(product?.name || 'Product')}`;
   };
 
   // Helper function to get all images for selected color (for potential image gallery)
@@ -70,12 +70,25 @@ const ProductQuickView = ({ product, isOpen, onClose }) => {
   };
 
   const handleOrder = () => {
+    const isManuallyOutOfStock = product.stockStatus === 'out_of_stock';
+    const currentStock = getSelectedVariantStock();
+    
+    if (isManuallyOutOfStock || currentStock === 0) {
+      toast.error('This item is out of stock');
+      return;
+    }
+
+    if (quantity > currentStock) {
+      toast.error(`Only ${currentStock} units available`);
+      return;
+    }
+
     addToCart(product, {
       size: selectedSize,
       color: selectedColor,
       quantity
     });
-    toast.success('Added to cart!');
+    // Removed toast here as it's now handled by CartContext or we can keep it for consistency
     onClose();
   };
 
@@ -95,13 +108,13 @@ const ProductQuickView = ({ product, isOpen, onClose }) => {
           <X className="w-5 h-5" />
         </button>
 
-        <div className="grid md:grid-cols-2 gap-8 p-8">
+        <div className="grid md:grid-cols-2 gap-6 p-6">
           {/* Product Image */}
           <div className="relative">
             <img
               src={getProductImage()}
               alt={`${product.name} - ${selectedColor || 'Default'}`}
-              className="w-full h-[400px] object-cover rounded-lg transition-all duration-300"
+              className="w-full h-[300px] md:h-[400px] object-cover rounded-lg transition-all duration-300"
               key={`${selectedColor}-main`} // Force re-render when color changes
             />
 
@@ -141,24 +154,24 @@ const ProductQuickView = ({ product, isOpen, onClose }) => {
 
           {/* Product Details */}
           <div className="flex flex-col">
-            <div className="mb-6">
-              <p className="text-gray-400 text-sm mb-2">{product.category}</p>
-              <h2 className="text-3xl font-bold text-white mb-3">{product.name}</h2>
-              <div className="flex items-center gap-4 mb-4">
-                <span className="text-3xl font-bold text-white">{formatPrice(product.price)}</span>
+            <div className="mb-4">
+              <p className="text-gray-400 text-sm mb-1">{product.category}</p>
+              <h2 className="text-2xl font-bold text-white mb-2">{product.name}</h2>
+              <div className="flex items-center gap-3 mb-3">
+                <span className="text-2xl font-bold text-white">{formatPrice(product.price)}</span>
                 {product.originalPrice && Number(product.originalPrice) > Number(product.price) && (
-                  <span className="text-xl text-gray-400 line-through">{formatPrice(product.originalPrice)}</span>
+                  <span className="text-lg text-gray-400 line-through">{formatPrice(product.originalPrice)}</span>
                 )}
               </div>
-              <p className="text-gray-300 leading-relaxed">
+              <p className="text-gray-300 leading-relaxed text-sm">
                 {product.shortDescription || product.description || 'Premium quality clothing made with the finest materials. Comfortable, stylish, and built to last.'}
               </p>
             </div>
 
             {/* Size Selection */}
             {availableSizes.length > 0 && (
-              <div className="mb-6">
-                <label className="text-white font-semibold mb-3 block">Select Size</label>
+              <div className="mb-4">
+                <label className="text-white font-semibold mb-2 block text-sm">Select Size</label>
                 <div className="grid grid-cols-6 gap-2">
                   {availableSizes.map((size) => {
                     // Check if this size has any stock across all colors
@@ -168,7 +181,7 @@ const ProductQuickView = ({ product, isOpen, onClose }) => {
                         key={size}
                         onClick={() => setSelectedSize(size)}
                         disabled={!hasStock}
-                        className={`py-2 px-4 rounded-lg border-2 transition-all ${selectedSize === size
+                        className={`py-1.5 px-3 rounded-lg border text-sm transition-all ${selectedSize === size
                           ? 'border-white bg-white text-gray-900 font-semibold'
                           : hasStock
                             ? 'border-gray-600 text-gray-300 hover:border-gray-400'
@@ -185,9 +198,9 @@ const ProductQuickView = ({ product, isOpen, onClose }) => {
 
             {/* Color Selection */}
             {availableColors.length > 0 && (
-              <div className="mb-6">
-                <label className="text-white font-semibold mb-3 block">Select Color</label>
-                <div className="flex gap-3 flex-wrap">
+              <div className="mb-4">
+                <label className="text-white font-semibold mb-2 block text-sm">Select Color</label>
+                <div className="flex gap-2 flex-wrap">
                   {availableColors.map((color) => {
                     // Check if this color has any stock in the selected size
                     const hasStock = selectedSize ?
@@ -200,7 +213,7 @@ const ProductQuickView = ({ product, isOpen, onClose }) => {
                         onClick={() => setSelectedColor(color)}
                         disabled={!hasStock}
                         title={color}
-                        className={`w-10 h-10 rounded-full border-2 transition-all flex items-center justify-center relative ${selectedColor === color
+                        className={`w-8 h-8 rounded-full border-2 transition-all flex items-center justify-center relative ${selectedColor === color
                           ? 'border-white scale-110 ring-2 ring-blue-500 ring-offset-2 ring-offset-gray-900'
                           : hasStock
                             ? 'border-gray-600 hover:scale-110 hover:border-gray-400'
@@ -215,7 +228,7 @@ const ProductQuickView = ({ product, isOpen, onClose }) => {
                         )}
                         {selectedColor === color && (
                           <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="w-2 h-2 bg-white rounded-full shadow-sm"></div>
+                            <div className="w-1.5 h-1.5 bg-white rounded-full shadow-sm"></div>
                           </div>
                         )}
                       </button>
@@ -225,38 +238,40 @@ const ProductQuickView = ({ product, isOpen, onClose }) => {
               </div>
             )}
 
-            {/* Quantity */}
-            <div className="mb-6">
-              <label className="text-white font-semibold mb-3 block">Quantity</label>
-              <div className="flex items-center gap-4">
-                <button
-                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="bg-gray-700 hover:bg-gray-600 text-white w-10 h-10 rounded-lg font-bold transition-colors"
-                >
-                  -
-                </button>
-                <span className="text-white text-xl font-semibold w-12 text-center">{quantity}</span>
-                <button
-                  onClick={() => {
-                    const maxStock = getSelectedVariantStock();
-                    setQuantity(Math.min(maxStock || 10, quantity + 1));
-                  }}
-                  className="bg-gray-700 hover:bg-gray-600 text-white w-10 h-10 rounded-lg font-bold transition-colors"
-                >
-                  +
-                </button>
-              </div>
-              {selectedSize && selectedColor && (
-                <p className={`text-sm mt-2 font-medium ${product.stockStatus === 'out_of_stock' || getSelectedVariantStock() === 0
-                  ? "text-red-500"
-                  : "text-green-500"
-                  }`}>
-                  {product.stockStatus === 'out_of_stock' || getSelectedVariantStock() === 0
-                    ? "Out of Stock"
-                    : "In Stock"}
-                </p>
-              )}
-            </div>
+            {/* Quantity - Only show if stock available */}
+            {(() => {
+                const isManuallyOutOfStock = product.stockStatus === 'out_of_stock';
+                const hasVariantStock = selectedSize && selectedColor && getSelectedVariantStock() > 0;
+                // If strictly out of stock, hide quantity
+                if (isManuallyOutOfStock || (selectedSize && selectedColor && !hasVariantStock)) {
+                   return null;
+                }
+                
+                return (
+                   <div className="mb-4">
+                    <label className="text-white font-semibold mb-2 block text-sm">Quantity</label>
+                    <div className="flex items-center gap-4">
+                        <button
+                        onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                        className="bg-gray-700 hover:bg-gray-600 text-white w-8 h-8 rounded-lg font-bold transition-colors flex items-center justify-center"
+                        >
+                        -
+                        </button>
+                        <span className="text-white text-lg font-semibold w-8 text-center">{quantity}</span>
+                        <button
+                        onClick={() => {
+                            const maxStock = getSelectedVariantStock();
+                            setQuantity(Math.min(maxStock || 10, quantity + 1));
+                        }}
+                        className="bg-gray-700 hover:bg-gray-600 text-white w-8 h-8 rounded-lg font-bold transition-colors flex items-center justify-center"
+                        >
+                        +
+                        </button>
+                    </div>
+                   </div>
+                );
+            })()}
+
 
             {/* Stock Info */}
             {(() => {
@@ -268,8 +283,8 @@ const ProductQuickView = ({ product, isOpen, onClose }) => {
               const stockCount = selectedSize && selectedColor ? selectedStock : totalStock;
 
               return showWarning ? (
-                <div className="mb-6 bg-red-500/10 border border-red-500/30 rounded-lg p-3">
-                  <p className="text-red-400 text-sm font-semibold">
+                <div className="mb-4 bg-red-500/10 border border-red-500/30 rounded-lg p-2">
+                  <p className="text-red-400 text-xs font-semibold">
                     ⚡ Only {stockCount} left in stock - Order soon!
                   </p>
                 </div>
@@ -277,25 +292,26 @@ const ProductQuickView = ({ product, isOpen, onClose }) => {
             })()}
 
             {/* Action Buttons */}
-            <div className="flex gap-4 mt-auto">
+            <div className="flex gap-3 mt-auto">
               {(() => {
                 const isManuallyOutOfStock = product.stockStatus === 'out_of_stock';
                 const hasVariantStock = selectedSize && selectedColor && getSelectedVariantStock() > 0;
                 const canOrder = !isManuallyOutOfStock && hasVariantStock;
+                const isVariantOutOfStock = selectedSize && selectedColor && getSelectedVariantStock() === 0;
 
                 return (
                   <button
                     onClick={handleOrder}
                     disabled={!canOrder}
-                    className={`flex-1 py-4 rounded-full font-semibold transition-all transform hover:scale-105 flex items-center justify-center gap-2 ${canOrder
-                      ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                      : 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                    className={`flex-1 py-3 rounded-full font-semibold transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2 ${canOrder
+                      ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20'
+                      : 'bg-gray-700 text-gray-500 cursor-not-allowed'
                       }`}
                   >
-                    <ShoppingCart className="w-5 h-5" />
+                    <ShoppingCart className="w-4 h-4" />
                     {isManuallyOutOfStock ? 'Out of Stock' :
                       !selectedSize || !selectedColor ? 'Select Options' :
-                        getSelectedVariantStock() === 0 ? 'Out of Stock' : 'Add to Cart'}
+                        isVariantOutOfStock ? 'Out of Stock' : 'Add to Cart'}
                   </button>
                 );
               })()}
@@ -307,14 +323,14 @@ const ProductQuickView = ({ product, isOpen, onClose }) => {
                 navigate(`/products/${product.id}`);
                 onClose();
               }}
-              className="w-full mt-3 py-3 rounded-full font-semibold bg-gray-700 hover:bg-gray-600 text-white transition-all flex items-center justify-center gap-2"
+              className="w-full mt-3 py-3 rounded-full font-semibold bg-gray-700 hover:bg-gray-600 text-white transition-all flex items-center justify-center gap-2 text-sm"
             >
               <ExternalLink className="w-4 h-4" />
               View Full Details
             </button>
 
             {/* Additional Info */}
-            <div className="mt-6 pt-6 border-t border-gray-700 space-y-2 text-sm text-gray-400">
+            <div className="mt-4 pt-4 border-t border-gray-700 space-y-1.5 text-xs text-gray-400">
               <p>✓ Free shipping on orders over Rs. 4,000</p>
               <p>✓ 30-day easy returns</p>
               <p>✓ 100% authentic products</p>
