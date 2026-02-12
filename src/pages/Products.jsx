@@ -5,6 +5,7 @@ import { toast } from "react-hot-toast";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTheme } from "../contexts/ThemeContext";
 import { useCart } from "../contexts/CartContext";
+import { useWishlist } from "../contexts/WishlistContext";
 import { getAllProducts, getCategories } from "../services/products.service";
 import LazyImage from "../components/common/LazyImage";
 import Navbar from "../components/common/Navbar";
@@ -23,7 +24,6 @@ const Products = () => {
   const [loading, setLoading] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
-  const [wishlist, setWishlist] = useState([]);
   const selectedCategory = searchParams.get("category") || "All";
   const [priceRange, setPriceRange] = useState({ min: 0, max: 1000000 });
   const [sortBy, setSortBy] = useState("createdAt");
@@ -119,17 +119,7 @@ const Products = () => {
   }, [products, selectedCategory, priceRange, sortBy, sortOrder, searchTerm]);
 
 
-  const toggleWishlist = (productId) => {
-    setWishlist((prev) => {
-      if (prev.includes(productId)) {
-        toast.error("Removed from wishlist");
-        return prev.filter((id) => id !== productId);
-      } else {
-        toast.success("Added to wishlist! ❤️");
-        return [...prev, productId];
-      }
-    });
-  };
+  const { isInWishlist, toggleWishlist } = useWishlist();
 
   const handleQuickAdd = (product) => {
     const stock = Number(getProductStock(product));
@@ -207,10 +197,10 @@ const Products = () => {
         <div
           onClick={handleCardClick}
           className={`relative rounded-2xl overflow-hidden h-full cursor-pointer ${isDark ? "bg-gray-800" : "bg-white"
-            } shadow-lg hover:shadow-2xl transition-shadow duration-300`}
+            } shadow-lg hover:shadow-2xl transition-shadow duration-300 flex flex-col`}
         >
           {/* Product Image */}
-          <div className="relative aspect-square overflow-hidden">
+          <div className="relative aspect-square overflow-hidden shrink-0">
             <LazyImage
               src={imageUrl}
               alt={product.name}
@@ -240,17 +230,16 @@ const Products = () => {
               )}
             </div>
 
-            {/* Quick Actions */}
-            <div className="absolute top-4 right-4 flex flex-col space-y-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <div className="absolute top-4 right-4 flex flex-col space-y-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-30">
               <button
-                onClick={() => toggleWishlist(product.id)}
-                className={`p-2 rounded-full backdrop-blur-sm transition-colors ${wishlist.includes(product.id)
+                onClick={() => toggleWishlist(product)}
+                className={`p-2 rounded-full backdrop-blur-sm transition-colors ${isInWishlist(product.id)
                   ? "bg-red-500 text-white"
                   : "bg-white/80 text-gray-700 hover:bg-red-500 hover:text-white"
                   }`}
               >
                 <Heart
-                  className={`w-4 h-4 ${wishlist.includes(product.id) ? "fill-current" : ""}`}
+                  className={`w-4 h-4 ${isInWishlist(product.id) ? "fill-current" : ""}`}
                 />
               </button>
               <button
@@ -272,7 +261,7 @@ const Products = () => {
           </div>
 
           {/* Product Info */}
-          <div className="p-6">
+          <div className="p-6 flex flex-col flex-grow">
             <div className="flex items-start justify-between mb-2">
               <h3
                 className={`font-semibold text-lg line-clamp-2 ${isDark ? "text-white" : "text-gray-900"
@@ -381,7 +370,7 @@ const Products = () => {
             <button
               onClick={() => handleQuickAdd(product)}
               disabled={isOutOfStock}
-              className={`w-full py-3 px-4 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center space-x-2 ${isOutOfStock
+              className={`w-full py-3 px-4 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center space-x-2 mt-auto ${isOutOfStock
                 ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                 : isDark
                   ? "bg-blue-600 hover:bg-blue-700 text-white"

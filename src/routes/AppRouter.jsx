@@ -1,15 +1,16 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider } from "../contexts/AuthContext.jsx";
-import { CartProvider, useCart } from "../contexts/CartContext.jsx";
-import ProtectedRoute from "./ProtectedRoute";
+import Navbar from "../components/common/Navbar";
+import Footer from "../components/common/Footer";
 import CartDrawer from "../components/common/CartDrawer";
+import WishlistDrawer from "../components/layout/WishlistDrawer";
 import ScrollToTop from "../components/common/ScrollToTop";
+import ProtectedRoute from "./ProtectedRoute";
 
-// Wrapper to use context
-const GlobalCartDrawer = () => {
-  const { isCartOpen, closeCart } = useCart();
-  return <CartDrawer isOpen={isCartOpen} onClose={closeCart} />;
-};
+// Context Imports
+import { AuthProvider } from "../contexts/AuthContext.jsx";
+import { CartProvider } from "../contexts/CartContext.jsx";
+import { WishlistProvider } from "../contexts/WishlistContext";
+import { ThemeProvider, useTheme } from "../contexts/ThemeContext";
 
 // Page imports
 import Home from "../pages/Home";
@@ -23,15 +24,22 @@ import AdminDashboard from "../pages/admin/AdminDashboard";
 /**
  * Main Application Router
  * Defines all routes and their access control
+ * Also handles the main layout structure
  */
 
-const AppRouter = () => {
+const AppContent = () => {
+  const { isDark } = useTheme();
+
   return (
     <BrowserRouter>
       <ScrollToTop />
-      <AuthProvider>
-        <CartProvider>
-          <GlobalCartDrawer />
+      <div
+        className={`flex flex-col min-h-screen transition-colors duration-300 ${isDark ? "bg-gray-900" : "bg-gray-50"}`}
+      >
+        <Navbar />
+        <CartDrawer />
+        <WishlistDrawer />
+        <main className="flex-grow">
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<Home />} />
@@ -60,9 +68,24 @@ const AppRouter = () => {
             {/* 404 - Redirect to home */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
+        </main>
+        <Footer />
+      </div>
+    </BrowserRouter>
+  );
+};
+
+const AppRouter = () => {
+  return (
+    <ThemeProvider>
+      <AuthProvider>
+        <CartProvider>
+          <WishlistProvider>
+            <AppContent />
+          </WishlistProvider>
         </CartProvider>
       </AuthProvider>
-    </BrowserRouter>
+    </ThemeProvider>
   );
 };
 

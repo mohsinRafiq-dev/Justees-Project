@@ -4,8 +4,15 @@ import { useCart } from '../../contexts/CartContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { formatPrice } from '../../utils/validation';
 
-const CartDrawer = ({ isOpen, onClose }) => {
-    const { cartItems, updateQuantity, removeFromCart, getCartTotal } = useCart();
+const CartDrawer = () => {
+    const { 
+        cartItems, 
+        updateQuantity, 
+        removeFromCart, 
+        getCartTotal, 
+        isCartOpen, 
+        closeCart 
+    } = useCart();
     const { isDark } = useTheme();
 
     // WhatsApp Order Handler
@@ -34,14 +41,14 @@ const CartDrawer = ({ isOpen, onClose }) => {
 
     return (
         <AnimatePresence>
-            {isOpen && (
+            {isCartOpen && (
                 <>
                     {/* Backdrop */}
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        onClick={onClose}
+                        onClick={closeCart}
                         className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60]"
                     />
 
@@ -61,7 +68,7 @@ const CartDrawer = ({ isOpen, onClose }) => {
                                 <h2 className="text-lg font-bold">Your Cart ({cartItems.length})</h2>
                             </div>
                             <button
-                                onClick={onClose}
+                                onClick={closeCart}
                                 className={`p-2 rounded-full hover:bg-gray-100 ${isDark ? 'hover:bg-gray-800' : ''}`}
                             >
                                 <X className="w-5 h-5" />

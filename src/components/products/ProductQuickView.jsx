@@ -1,15 +1,22 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { X, ShoppingCart, Heart, ExternalLink } from 'lucide-react';
-import { useCart } from '../../contexts/CartContext';
+import { X, ShoppingCart, Heart, ChevronLeft, ChevronRight, Minus, Plus, Check, Star, ExternalLink } from "lucide-react";
+import { useCart } from "../../contexts/CartContext";
+import { useWishlist } from "../../contexts/WishlistContext";
+import { useTheme } from "../../contexts/ThemeContext";
+import LazyImage from "../common/LazyImage";
+import { formatPrice } from "../../utils/validation";
 import { toast } from 'react-hot-toast';
 
 const ProductQuickView = ({ product, isOpen, onClose }) => {
   const { addToCart } = useCart();
+  const { isInWishlist, toggleWishlist } = useWishlist();
+  const { isDark } = useTheme();
   const navigate = useNavigate();
-  const [selectedSize, setSelectedSize] = useState('');
-  const [selectedColor, setSelectedColor] = useState('');
+  const [selectedSize, setSelectedSize] = useState("");
+  const [selectedColor, setSelectedColor] = useState("");
   const [quantity, setQuantity] = useState(1);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   // Get unique sizes and colors from product variants
   const availableSizes = product?.variants ? [...new Set(product.variants.map(v => v.size))] : [];
@@ -140,8 +147,15 @@ const ProductQuickView = ({ product, isOpen, onClose }) => {
                 {product.badge}
               </span>
             )}
-            <button className="absolute top-4 right-4 bg-white/90 hover:bg-white text-red-500 p-2 rounded-full transition-colors z-10">
-              <Heart className="w-5 h-5" />
+            <button 
+              onClick={() => toggleWishlist(product)}
+              className={`absolute top-4 right-4 p-2 rounded-full transition-colors z-10 ${
+                isInWishlist(product.id)
+                  ? 'bg-red-500 text-white'
+                  : 'bg-white/90 hover:bg-white text-gray-700 hover:text-red-500'
+              }`}
+            >
+              <Heart className={`w-5 h-5 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
             </button>
 
             {/* Color-specific badge */}
@@ -241,9 +255,19 @@ const ProductQuickView = ({ product, isOpen, onClose }) => {
             {/* Quantity - Only show if stock available */}
             {(() => {
                 const isManuallyOutOfStock = product.stockStatus === 'out_of_stock';
-                const hasVariantStock = selectedSize && selectedColor && getSelectedVariantStock() > 0;
+                
+                // Determine effective stock based on whether product has variants or is simple
+                let effectiveStock = 0;
+                if (product.variants && product.variants.length > 0) {
+                    effectiveStock = getSelectedVariantStock();
+                } else {
+                    effectiveStock = product.stock || 0;
+                }
+
+                const isOutOfStock = isManuallyOutOfStock || effectiveStock === 0;
+                
                 // If strictly out of stock, hide quantity
-                if (isManuallyOutOfStock || (selectedSize && selectedColor && !hasVariantStock)) {
+                if (isOutOfStock) {
                    return null;
                 }
                 
@@ -253,17 +277,22 @@ const ProductQuickView = ({ product, isOpen, onClose }) => {
                     <div className="flex items-center gap-4">
                         <button
                         onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                        className="bg-gray-700 hover:bg-gray-600 text-white w-8 h-8 rounded-lg font-bold transition-colors flex items-center justify-center"
+                        disabled={isOutOfStock || quantity <= 1}
+                        className={`w-8 h-8 rounded-lg font-bold transition-colors flex items-center justify-center ${isOutOfStock || quantity <= 1 ? 'bg-gray-800 text-gray-600 cursor-not-allowed' : 'bg-gray-700 hover:bg-gray-600 text-white'}`}
                         >
                         -
                         </button>
                         <span className="text-white text-lg font-semibold w-8 text-center">{quantity}</span>
                         <button
                         onClick={() => {
-                            const maxStock = getSelectedVariantStock();
-                            setQuantity(Math.min(maxStock || 10, quantity + 1));
+                            // Cap at effectiveStock
+                            const limit = effectiveStock > 0 ? effectiveStock : 10;
+                            if (quantity < limit) {
+                                setQuantity(quantity + 1);
+                            }
                         }}
-                        className="bg-gray-700 hover:bg-gray-600 text-white w-8 h-8 rounded-lg font-bold transition-colors flex items-center justify-center"
+                        disabled={isOutOfStock || (effectiveStock > 0 && quantity >= effectiveStock)}
+                        className={`w-8 h-8 rounded-lg font-bold transition-colors flex items-center justify-center ${isOutOfStock || (effectiveStock > 0 && quantity >= effectiveStock) ? 'bg-gray-800 text-gray-600 cursor-not-allowed' : 'bg-gray-700 hover:bg-gray-600 text-white'}`}
                         >
                         +
                         </button>

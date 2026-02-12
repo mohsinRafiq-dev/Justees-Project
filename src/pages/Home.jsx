@@ -8,6 +8,7 @@ import ProductQuickView from '../components/products/ProductQuickView';
 import LazyImage from '../components/common/LazyImage';
 import { useCart } from '../contexts/CartContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { useWishlist } from '../contexts/WishlistContext';
 import { subscribeToNewsletter } from '../services/newsletter.service';
 import { getAllProducts, getCategories } from '../services/products.service';
 import { getRecentReviews } from '../services/reviews.service';
@@ -28,7 +29,6 @@ const Home = () => {
   const [newsletterStatus, setNewsletterStatus] = useState(''); // 'loading', 'success', 'error'
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
-  const [wishlist, setWishlist] = useState([]);
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [currentReviewSlide, setCurrentReviewSlide] = useState(0);
@@ -303,17 +303,7 @@ const Home = () => {
     setTimeout(() => setSelectedProduct(null), 300);
   };
 
-  const toggleWishlist = (productId) => {
-    setWishlist(prev => {
-      if (prev.includes(productId)) {
-        toast.error('Removed from wishlist');
-        return prev.filter(id => id !== productId);
-      } else {
-        toast.success('Added to wishlist! ❤️');
-        return [...prev, productId];
-      }
-    });
-  };
+  const { isInWishlist, toggleWishlist } = useWishlist();
 
   const handleQuickAdd = (product) => {
     const stock = Number(getProductStock(product));
@@ -704,16 +694,15 @@ const Home = () => {
 
 
                     {/* Wishlist Button */}
-                    <motion.button
-                      whileHover={{ scale: 1.2 }}
-                      whileTap={{ scale: 0.8 }}
-                      onClick={() => toggleWishlist(product.id)}
-                      className={`absolute top-4 right-4 p-2 rounded-full ${isDark ? 'bg-gray-800/80' : 'bg-white/80'} backdrop-blur-sm transition-all`}
-                    >
-                      <Heart
-                        className={`w-5 h-5 ${wishlist.includes(product.id) ? 'fill-red-500 text-red-500' : isDark ? 'text-white' : 'text-gray-700'}`}
-                      />
-                    </motion.button>
+                  <button
+                    onClick={() => toggleWishlist(product)}
+                    className={`absolute top-4 right-4 p-2 rounded-full backdrop-blur-sm transition-colors z-30 ${isInWishlist(product.id)
+                      ? 'bg-red-500 text-white'
+                      : 'bg-white/80 text-gray-700 hover:bg-red-500 hover:text-white'
+                      }`}
+                  >
+                    <Heart className={`w-5 h-5 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
+                  </button>
 
                     {/* Hover Actions - Only show if in stock */}
                     {getProductStock(product) > 0 && (

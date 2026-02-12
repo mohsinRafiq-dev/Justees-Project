@@ -1,14 +1,17 @@
 import { useState } from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion'; // eslint-disable-line
-import { ShoppingCart, Sun, Moon, Menu, X, Instagram } from 'lucide-react';
+import { ShoppingCart, Sun, Moon, Menu, X, Instagram, Heart } from 'lucide-react';
 import { useCart } from '../../contexts/CartContext';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useWishlist } from '../../contexts/WishlistContext';
 
 const Navbar = () => {
   const { getCartCount, openCart } = useCart();
   const { isDark, toggleTheme } = useTheme();
+  const { wishlist, toggleWishlistDrawer } = useWishlist();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <>
@@ -52,16 +55,16 @@ const Navbar = () => {
               ))}
             </div>
 
-            <div className="flex items-center space-x-4">
-              {/* Social Media Links */}
-              <div className="hidden md:flex items-center space-x-3">
+            <div className="flex items-center space-x-1">
+              {/* Social Media Links - Hidden on smaller screens to save space */}
+              <div className="hidden lg:flex items-center space-x-1">
                 <motion.a
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                   href="https://wa.me/1234567890"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`${isDark ? 'text-gray-300 hover:text-green-400' : 'text-gray-700 hover:text-green-600'} transition-colors`}
+                  className={`p-2 rounded-full ${isDark ? 'text-gray-300 hover:text-green-400' : 'text-gray-700 hover:text-green-600'} transition-colors`}
                   aria-label="WhatsApp"
                 >
                   <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -74,23 +77,10 @@ const Navbar = () => {
                   href="https://instagram.com/justees"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`${isDark ? 'text-gray-300 hover:text-pink-400' : 'text-gray-700 hover:text-pink-600'} transition-colors`}
+                  className={`p-2 rounded-full ${isDark ? 'text-gray-300 hover:text-pink-400' : 'text-gray-700 hover:text-pink-600'} transition-colors`}
                   aria-label="Instagram"
                 >
                   <Instagram className="w-6 h-6" />
-                </motion.a>
-                <motion.a
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  href="https://tiktok.com/@justees"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`${isDark ? 'text-gray-300 hover:text-cyan-400' : 'text-gray-700 hover:text-cyan-600'} transition-colors`}
-                  aria-label="TikTok"
-                >
-                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />
-                  </svg>
                 </motion.a>
               </div>
 
@@ -104,19 +94,38 @@ const Navbar = () => {
                 {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
               </motion.button>
 
+              {/* Wishlist Icon */}
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={toggleWishlistDrawer}
+                className={`relative p-2 rounded-full ${isDark ? 'text-gray-300 hover:text-red-400' : 'text-gray-700 hover:text-red-500'} transition-colors`}
+              >
+                <Heart className="w-6 h-6" />
+                {wishlist.length > 0 && (
+                  <motion.span
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="absolute top-0 right-0 bg-red-500 text-white text-xs font-semibold rounded-full w-5 h-5 flex items-center justify-center"
+                  >
+                    {wishlist.length}
+                  </motion.span>
+                )}
+              </motion.button>
+
               {/* Cart Icon */}
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={openCart}
-                className={`relative ${isDark ? 'text-white hover:text-gray-300' : 'text-gray-700 hover:text-gray-900'} transition-colors`}
+                className={`relative p-2 rounded-full ${isDark ? 'text-white hover:text-gray-300' : 'text-gray-700 hover:text-gray-900'} transition-colors`}
               >
                 <ShoppingCart className="w-6 h-6" />
                 {getCartCount() > 0 && (
                   <motion.span
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center"
+                    className="absolute top-0 right-0 bg-red-500 text-white text-xs font-semibold rounded-full w-5 h-5 flex items-center justify-center"
                   >
                     {getCartCount()}
                   </motion.span>

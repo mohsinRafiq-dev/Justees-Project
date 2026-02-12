@@ -21,6 +21,7 @@ import {
 import { toast } from "react-hot-toast";
 import { useTheme } from "../contexts/ThemeContext";
 import { useCart } from "../contexts/CartContext";
+import { useWishlist } from "../contexts/WishlistContext";
 import { getAllProducts } from "../services/products.service";
 import { getProductReviews, addReview } from "../services/reviews.service";
 import { formatPrice } from "../utils/validation";
@@ -46,7 +47,6 @@ const ProductDetail = () => {
   const [selectedColor, setSelectedColor] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
-  const [isWishlist, setIsWishlist] = useState(false);
   const [activeTab, setActiveTab] = useState("description");
 
   // Review form state
@@ -253,6 +253,23 @@ const ProductDetail = () => {
     window.open(whatsappLink, "_blank");
   };
 
+  const { 
+    wishlist, 
+    addToWishlist, 
+    removeFromWishlist, 
+    isInWishlist 
+  } = useWishlist();
+
+  const isWishlisted = product ? isInWishlist(product.id) : false;
+
+  const handleToggleWishlist = () => {
+    if (!product) return;
+    if (isWishlisted) {
+      removeFromWishlist(product.id);
+    } else {
+      addToWishlist(product);
+    }
+  };
   const handleShare = () => {
     const shareUrl = window.location.href;
     if (navigator.share) {
@@ -572,11 +589,11 @@ const ProductDetail = () => {
                     </span>
                   </div>
 
-                  {/* Action Buttons */}
+                    {/* Action Buttons */}
                   <div className="flex items-center space-x-2">
                     <button
-                      onClick={() => setIsWishlist(!isWishlist)}
-                      className={`p-2 rounded-full transition-colors ${isWishlist
+                      onClick={handleToggleWishlist}
+                      className={`p-2 rounded-full transition-colors ${isWishlisted
                         ? "bg-red-500 text-white"
                         : isDark
                           ? "bg-gray-800 text-gray-300 hover:bg-red-500 hover:text-white"
@@ -584,7 +601,7 @@ const ProductDetail = () => {
                         }`}
                     >
                       <Heart
-                        className={`w-5 h-5 ${isWishlist ? "fill-current" : ""}`}
+                        className={`w-5 h-5 ${isWishlisted ? "fill-current" : ""}`}
                       />
                     </button>
                     <button
