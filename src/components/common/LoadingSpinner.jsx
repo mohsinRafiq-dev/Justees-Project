@@ -1,4 +1,7 @@
+import { useTheme } from '../../contexts/ThemeContext';
+
 const LoadingSpinner = ({ size = 'medium', color = 'blue' }) => {
+  const { isDark } = useTheme();
   const sizeClasses = {
     small: 'w-4 h-4',
     medium: 'w-8 h-8',
@@ -19,7 +22,7 @@ const LoadingSpinner = ({ size = 'medium', color = 'blue' }) => {
         className={`
           ${sizeClasses[size]} 
           border-2 
-          border-gray-200 
+          ${isDark ? "border-white/10" : "border-gray-200"}
           ${colorClasses[color]}
           border-t-transparent 
           rounded-full 

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion'; // eslint-disable-line
 import { ShoppingCart, Sun, Moon, Menu, X, Instagram } from 'lucide-react';
 import { useCart } from '../../contexts/CartContext';
@@ -29,18 +29,27 @@ const Navbar = () => {
 
             {/* Desktop Menu */}
             <div className="hidden md:flex items-center space-x-8">
-              <Link to="/" className={`${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'} transition-colors font-medium`}>
-                Home
-              </Link>
-              <Link to="/products" className={`${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'} transition-colors font-medium`}>
-                Products
-              </Link>
-              <Link to="/categories" className={`${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'} transition-colors font-medium`}>
-                Categories
-              </Link>
-              <Link to="/about" className={`${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'} transition-colors font-medium`}>
-                About
-              </Link>
+              {[
+                { name: 'Home', path: '/' },
+                { name: 'Products', path: '/products' },
+                { name: 'Categories', path: '/categories' },
+                { name: 'About', path: '/about' },
+              ].map((item) => (
+                <NavLink
+                  key={item.path}
+                   to={item.path}
+                   end={item.path === '/'}
+                  className={({ isActive }) => 
+                    `relative transition-all duration-300 font-medium pb-1 ${
+                      isActive 
+                        ? 'text-blue-500 after:content-[""] after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-blue-500 after:rounded-full' 
+                        : isDark ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'
+                    }`
+                  }
+                >
+                  {item.name}
+                </NavLink>
+              ))}
             </div>
 
             <div className="flex items-center space-x-4">
@@ -139,10 +148,28 @@ const Navbar = () => {
         {mobileMenuOpen && (
           <div className={`md:hidden ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-t max-h-[calc(100vh-64px)] overflow-y-auto`}>
             <div className="px-4 py-4 space-y-4">
-              <Link to="/" className={`block ${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'} transition-colors py-2`} onClick={() => setMobileMenuOpen(false)}>Home</Link>
-              <Link to="/products" className={`block ${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'} transition-colors py-2`} onClick={() => setMobileMenuOpen(false)}>Products</Link>
-              <Link to="/categories" className={`block ${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'} transition-colors py-2`} onClick={() => setMobileMenuOpen(false)}>Categories</Link>
-              <Link to="/about" className={`block ${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'} transition-colors py-2`} onClick={() => setMobileMenuOpen(false)}>About</Link>
+              {[
+                { name: 'Home', path: '/' },
+                { name: 'Products', path: '/products' },
+                { name: 'Categories', path: '/categories' },
+                { name: 'About', path: '/about' },
+              ].map((item) => (
+                <NavLink
+                  key={item.path}
+                   to={item.path}
+                   end={item.path === '/'}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={({ isActive }) => 
+                    `block py-2 transition-all duration-300 font-medium ${
+                      isActive 
+                        ? 'text-blue-500 pl-4 border-l-4 border-blue-500 bg-blue-500/10' 
+                        : isDark ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'
+                    }`
+                  }
+                >
+                  {item.name}
+                </NavLink>
+              ))}
 
               {/* Mobile Social Links */}
               <div className={`flex items-center justify-center space-x-6 py-4 border-t border-b ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>

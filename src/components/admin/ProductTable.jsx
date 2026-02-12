@@ -68,22 +68,34 @@ const ProductTable = ({
     const minStock = product.minStockLevel || 5;
 
     if (totalStock === 0) {
-      return { status: 'out-of-stock', label: 'Out of Stock', color: 'text-red-600 bg-red-100' };
+      return { 
+        status: 'out-of-stock', 
+        label: 'Out of Stock', 
+        color: isDark ? 'text-red-400 bg-red-400/10 border-red-400/20' : 'text-red-600 bg-red-100 border-red-200' 
+      };
     } else if (totalStock <= minStock) {
-      return { status: 'low-stock', label: 'Low Stock', color: 'text-orange-600 bg-orange-100' };
+      return { 
+        status: 'low-stock', 
+        label: 'Low Stock', 
+        color: isDark ? 'text-orange-400 bg-orange-400/10 border-orange-400/20' : 'text-orange-600 bg-orange-100 border-orange-200' 
+      };
     } else {
-      return { status: 'in-stock', label: 'In Stock', color: 'text-green-600 bg-green-100' };
+      return { 
+        status: 'in-stock', 
+        label: 'In Stock', 
+        color: isDark ? 'text-green-400 bg-green-400/10 border-green-400/20' : 'text-green-600 bg-green-100 border-green-200' 
+      };
     }
   };
 
   const getStatusBadge = (product) => {
     if (!product.isVisible) {
-      return <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-600">Hidden</span>;
+      return <span className={`px-2 py-1 text-xs rounded-full border ${isDark ? 'bg-white/5 text-gray-400 border-white/10' : 'bg-gray-100 text-gray-600 border-gray-200'}`}>Hidden</span>;
     }
     if (product.status === 'inactive') {
-      return <span className="px-2 py-1 text-xs rounded-full bg-red-100 text-red-600">Inactive</span>;
+      return <span className={`px-2 py-1 text-xs rounded-full border ${isDark ? 'bg-red-400/10 text-red-400 border-red-400/20' : 'bg-red-100 text-red-600 border-red-200'}`}>Inactive</span>;
     }
-    return <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-600">Active</span>;
+    return <span className={`px-2 py-1 text-xs rounded-full border ${isDark ? 'bg-green-400/10 text-green-400 border-green-400/20' : 'bg-green-100 text-green-600 border-green-200'}`}>Active</span>;
   };
 
   return (
@@ -266,7 +278,7 @@ const ProductTable = ({
                       <span className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
                         {product.totalStock || 0}
                       </span>
-                      <span className={`px-2 py-1 text-xs rounded-full ${stockStatus.color}`}>
+                      <span className={`px-2 py-1 text-xs rounded-full border ${stockStatus.color}`}>
                         {stockStatus.label}
                       </span>
                     </div>

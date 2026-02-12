@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { Plus, Trash2 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
+import { useTheme } from '../../contexts/ThemeContext';
 import { isAdminUser } from '../../utils/validation';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ConfirmDialog from '../../components/common/ConfirmDialog';
@@ -19,6 +20,7 @@ import { generateSlug } from '../../utils/validation';
 
 const SizesManagement = () => {
   const { user } = useAuth();
+  const { isDark } = useTheme();
   const [sizes, setSizes] = useState([]);
   const [colors, setColors] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -164,10 +166,10 @@ const SizesManagement = () => {
 
   if (!isAdminUser(user)) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className={`min-h-screen flex items-center justify-center ${isDark ? "bg-gray-900" : "bg-white"}`}>
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900">Access Denied</h2>
-          <p className="text-gray-600">You do not have permission to view this page.</p>
+          <h2 className={`text-2xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}>Access Denied</h2>
+          <p className={`${isDark ? "text-gray-400" : "text-gray-600"}`}>You do not have permission to view this page.</p>
         </div>
       </div>
     );
@@ -176,49 +178,57 @@ const SizesManagement = () => {
   return (
     <div className="p-8">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">Sizes & Colors</h2>
-        <p className="text-gray-600">Manage product sizes and available colors</p>
+        <h2 className={`text-2xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}>Sizes & Colors</h2>
+        <p className={`${isDark ? "text-gray-400" : "text-gray-600"}`}>Manage product sizes and available colors</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-medium text-gray-900">Sizes</h3>
+        <div className={`rounded-xl shadow-lg border p-6 ${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"}`}>
+          <div className="flex items-center justify-between mb-6">
+            <h3 className={`font-bold ${isDark ? "text-white" : "text-gray-900"}`}>Sizes</h3>
             <div className="flex items-center space-x-2">
               <input
                 value={newSize}
                 onChange={(e) => setNewSize(e.target.value)}
-                className="border rounded px-3 py-2"
+                className={`rounded px-3 py-2 outline-none border transition-all ${
+                  isDark ? "bg-gray-900 border-gray-700 text-white focus:ring-blue-500/50" : "bg-white border-gray-300 focus:ring-blue-500 text-gray-900"
+                } focus:ring-2`}
                 placeholder="e.g. XS"
               />
-              <button onClick={handleAddSize} className="bg-blue-600 text-white px-3 py-2 rounded flex items-center space-x-2">
+              <button onClick={handleAddSize} className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-blue-700 transition-colors">
                 <Plus className="w-4 h-4" /> <span>Add</span>
               </button>
             </div>
           </div>
 
           {loading ? (
-            <LoadingSpinner />
+            <div className="py-8"><LoadingSpinner /></div>
           ) : sizes.length === 0 ? (
-            <p className="text-gray-600">No sizes defined.</p>
+            <p className={`${isDark ? "text-gray-500" : "text-gray-600"}`}>No sizes defined.</p>
           ) : (
-            <ul className="space-y-2">
+            <ul className={`divide-y ${isDark ? "divide-gray-700" : "divide-gray-100"}`}>
               {sizes.map((s) => (
-                <li key={s.id} className="flex items-center justify-between border-b py-2">
+                <li key={s.id} className="flex items-center justify-between py-3">
                   {editingItem && editingItem.type === 'size' && editingItem.id === s.id ? (
                     <div className="flex items-center gap-2 w-full">
-                      <input className="border rounded px-2 py-1 w-full" value={editingItem.name} onChange={(e) => setEditingItem(prev => ({ ...prev, name: e.target.value }))} />
+                      <input 
+                        className={`rounded px-3 py-1 w-full outline-none border transition-all ${
+                          isDark ? "bg-gray-900 border-gray-700 text-white" : "bg-white border-gray-300"
+                        }`} 
+                        value={editingItem.name} 
+                        onChange={(e) => setEditingItem(prev => ({ ...prev, name: e.target.value }))} 
+                      />
                       <div className="ml-auto flex gap-2">
-                        <button onClick={saveEdit} className="bg-green-600 text-white px-3 py-1 rounded">Save</button>
-                        <button onClick={cancelEdit} className="bg-gray-200 px-3 py-1 rounded">Cancel</button>
+                        <button onClick={saveEdit} className="bg-green-600 text-white px-3 py-1 rounded-lg hover:bg-green-700">Save</button>
+                        <button onClick={cancelEdit} className={`px-3 py-1 rounded-lg ${isDark ? "bg-gray-700 text-gray-300" : "bg-gray-100 text-gray-600"}`}>Cancel</button>
                       </div>
                     </div>
                   ) : (
                     <>
-                      <span>{s.name}</span>
+                      <span className={`${isDark ? "text-gray-200" : "text-gray-800"}`}>{s.name}</span>
                       <div className="flex gap-2">
-                        <button onClick={() => startEdit(s, 'size')} className="text-blue-600">Edit</button>
-                        <button onClick={() => handleDelete(s.id, 'size')} className="text-red-600 flex items-center">
+                        <button onClick={() => startEdit(s, 'size')} className="text-blue-500 hover:underline">Edit</button>
+                        <button onClick={() => handleDelete(s.id, 'size')} className="text-red-500 hover:text-red-400 flex items-center">
                           <Trash2 className="w-4 h-4 mr-1" /> Delete
                         </button>
                       </div>
@@ -230,44 +240,52 @@ const SizesManagement = () => {
           )}
         </div>
 
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-medium text-gray-900">Colors</h3>
+        <div className={`rounded-xl shadow-lg border p-6 ${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"}`}>
+          <div className="flex items-center justify-between mb-6">
+            <h3 className={`font-bold ${isDark ? "text-white" : "text-gray-900"}`}>Colors</h3>
             <div className="flex items-center space-x-2">
               <input
                 value={newColor}
                 onChange={(e) => setNewColor(e.target.value)}
-                className="border rounded px-3 py-2"
+                className={`rounded px-3 py-2 outline-none border transition-all ${
+                  isDark ? "bg-gray-900 border-gray-700 text-white focus:ring-blue-500/50" : "bg-white border-gray-300 focus:ring-blue-500 text-gray-900"
+                } focus:ring-2`}
                 placeholder="e.g. Burgundy"
               />
-              <button onClick={handleAddColor} className="bg-blue-600 text-white px-3 py-2 rounded flex items-center space-x-2">
+              <button onClick={handleAddColor} className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-blue-700 transition-colors">
                 <Plus className="w-4 h-4" /> <span>Add</span>
               </button>
             </div>
           </div>
 
           {loading ? (
-            <LoadingSpinner />
+            <div className="py-8"><LoadingSpinner /></div>
           ) : colors.length === 0 ? (
-            <p className="text-gray-600">No colors defined.</p>
+            <p className={`${isDark ? "text-gray-500" : "text-gray-600"}`}>No colors defined.</p>
           ) : (
-            <ul className="space-y-2">
+            <ul className={`divide-y ${isDark ? "divide-gray-700" : "divide-gray-100"}`}>
               {colors.map((c) => (
-                <li key={c.id} className="flex items-center justify-between border-b py-2">
+                <li key={c.id} className="flex items-center justify-between py-3">
                   {editingItem && editingItem.type === 'color' && editingItem.id === c.id ? (
                     <div className="flex items-center gap-2 w-full">
-                      <input className="border rounded px-2 py-1 w-full" value={editingItem.name} onChange={(e) => setEditingItem(prev => ({ ...prev, name: e.target.value }))} />
+                      <input 
+                        className={`rounded px-3 py-1 w-full outline-none border transition-all ${
+                          isDark ? "bg-gray-900 border-gray-700 text-white" : "bg-white border-gray-300"
+                        }`} 
+                        value={editingItem.name} 
+                        onChange={(e) => setEditingItem(prev => ({ ...prev, name: e.target.value }))} 
+                      />
                       <div className="ml-auto flex gap-2">
-                        <button onClick={saveEdit} className="bg-green-600 text-white px-3 py-1 rounded">Save</button>
-                        <button onClick={cancelEdit} className="bg-gray-200 px-3 py-1 rounded">Cancel</button>
+                        <button onClick={saveEdit} className="bg-green-600 text-white px-3 py-1 rounded-lg hover:bg-green-700">Save</button>
+                        <button onClick={cancelEdit} className={`px-3 py-1 rounded-lg ${isDark ? "bg-gray-700 text-gray-300" : "bg-gray-100 text-gray-600"}`}>Cancel</button>
                       </div>
                     </div>
                   ) : (
                     <>
-                      <span>{c.name}</span>
+                      <span className={`${isDark ? "text-gray-200" : "text-gray-800"}`}>{c.name}</span>
                       <div className="flex gap-2">
-                        <button onClick={() => startEdit(c, 'color')} className="text-blue-600">Edit</button>
-                        <button onClick={() => handleDelete(c.id, 'color')} className="text-red-600 flex items-center">
+                        <button onClick={() => startEdit(c, 'color')} className="text-blue-500 hover:underline">Edit</button>
+                        <button onClick={() => handleDelete(c.id, 'color')} className="text-red-500 hover:text-red-400 flex items-center">
                           <Trash2 className="w-4 h-4 mr-1" /> Delete
                         </button>
                       </div>

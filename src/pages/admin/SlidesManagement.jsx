@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 import { Plus, Trash2, Upload, X, Edit3, Image, Film } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
+import { useTheme } from '../../contexts/ThemeContext';
 import { isAdminUser } from '../../utils/validation';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ConfirmDialog from '../../components/common/ConfirmDialog';
@@ -17,6 +18,7 @@ import { uploadSlideMedia } from '../../services/storage/upload';
 
 const SlidesManagement = () => {
   const { user } = useAuth();
+  const { isDark } = useTheme();
   const [slides, setSlides] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -213,10 +215,10 @@ const SlidesManagement = () => {
 
   if (!isAdminUser(user)) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className={`min-h-screen flex items-center justify-center ${isDark ? "bg-gray-900" : "bg-white"}`}>
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900">Access Denied</h2>
-          <p className="text-gray-600">You do not have permission to view this page.</p>
+          <h2 className={`text-2xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}>Access Denied</h2>
+          <p className={`${isDark ? "text-gray-400" : "text-gray-600"}`}>You do not have permission to view this page.</p>
         </div>
       </div>
     );
@@ -226,8 +228,8 @@ const SlidesManagement = () => {
     <div className="p-8">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Slides</h2>
-          <p className="text-gray-600">Add and manage hero slides (images/videos)</p>
+          <h2 className={`text-2xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}>Slides</h2>
+          <p className={`${isDark ? "text-gray-400" : "text-gray-600"}`}>Add and manage hero slides (images/videos)</p>
         </div>
         <div className="flex items-center space-x-2">
           <button
@@ -242,19 +244,19 @@ const SlidesManagement = () => {
 
       {/* Add/Edit Slide Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl my-8">
-            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 rounded-t-2xl z-10">
-              <h3 className="text-xl font-bold text-gray-900">{editingId ? 'Edit Slide' : 'Add New Slide'}</h3>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+          <div className={`${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"} rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl my-8 border`}>
+            <div className={`sticky top-0 border-b px-6 py-4 rounded-t-2xl z-10 ${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"}`}>
+              <h3 className={`text-xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}>{editingId ? 'Edit Slide' : 'Add New Slide'}</h3>
             </div>
 
             <div className="p-6 space-y-6">
               {/* Media Upload */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Image / Video</label>
+                <label className={`block text-sm font-medium mb-2 ${isDark ? "text-gray-300" : "text-gray-700"}`}>Image / Video</label>
                 <div className="flex items-center justify-center w-full">
                   {previewUrl ? (
-                    <div className="relative w-full h-48 rounded-lg overflow-hidden border border-gray-200">
+                    <div className={`relative w-full h-48 rounded-lg overflow-hidden border ${isDark ? "border-gray-700" : "border-gray-200"}`}>
                       {formData.type === 'video' || (selectedFile && selectedFile.type.startsWith('video/')) ? (
                         <video src={previewUrl} className="w-full h-full object-cover" controls />
                       ) : (
@@ -265,11 +267,15 @@ const SlidesManagement = () => {
                       </button>
                     </div>
                   ) : (
-                    <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors">
+                    <label className={`flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer transition-colors ${
+                      isDark 
+                        ? "border-gray-700 bg-gray-900/50 hover:bg-gray-900" 
+                        : "border-gray-300 bg-gray-50 hover:bg-gray-100"
+                    }`}>
                       <div className="flex flex-col items-center justify-center pt-5 pb-6">
                         <Upload className="w-10 h-10 mb-3 text-gray-400" />
-                        <p className="text-sm text-gray-500 font-semibold">Click to upload image or video</p>
-                        <p className="text-xs text-gray-500 mt-1">Images (JPG/PNG/WebP) max 5MB, Videos (MP4/WebM/MOV) max ~80MB</p>
+                        <p className={`text-sm font-semibold ${isDark ? "text-gray-400" : "text-gray-500"}`}>Click to upload image or video</p>
+                        <p className={`text-xs mt-1 ${isDark ? "text-gray-500" : "text-gray-500"}`}>Images (JPG/PNG/WebP) max 5MB, Videos (MP4/WebM/MOV) max ~80MB</p>
                       </div>
                       <input type="file" className="hidden" accept="image/*,video/*" onChange={handleFileChange} />
                     </label>
@@ -279,10 +285,14 @@ const SlidesManagement = () => {
 
               {/* Category (Title) Select */}
               <div className="relative">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Category (Title) <span className="text-gray-400 font-normal">(Optional)</span></label>
+                <label className={`block text-sm font-medium mb-2 ${isDark ? "text-gray-300" : "text-gray-700"}`}>Category (Title) <span className="text-gray-400 font-normal">(Optional)</span></label>
                 <div className="relative">
                   <input
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                    className={`w-full rounded-lg px-4 py-2 outline-none transition-all ${
+                      isDark 
+                        ? "bg-gray-900 border-gray-700 text-white focus:ring-blue-500/50" 
+                        : "bg-white border-gray-300 focus:ring-blue-500"
+                    } border focus:ring-2`}
                     placeholder="Search and select category..."
                     value={categorySearch}
                     onFocus={() => setShowCategoryDropdown(true)}
@@ -295,7 +305,9 @@ const SlidesManagement = () => {
                   
                   <AnimatePresence>
                     {showCategoryDropdown && (
-                      <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-xl overflow-hidden max-h-48 overflow-y-auto">
+                      <div className={`absolute z-50 w-full mt-1 border rounded-lg shadow-xl overflow-hidden max-h-48 overflow-y-auto ${
+                        isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
+                      }`}>
                         {categories
                           .filter(c => c.name.toLowerCase().includes(categorySearch.toLowerCase()))
                           .map(category => (
@@ -307,7 +319,11 @@ const SlidesManagement = () => {
                                 setCategorySearch(category.name);
                                 setShowCategoryDropdown(false);
                               }}
-                              className="w-full px-4 py-2 text-left hover:bg-gray-50 transition-colors text-sm text-gray-700 border-b last:border-0 border-gray-100"
+                              className={`w-full px-4 py-2 text-left transition-colors text-sm border-b last:border-0 ${
+                                isDark 
+                                  ? "text-gray-300 hover:bg-gray-700 border-gray-700" 
+                                  : "text-gray-700 hover:bg-gray-50 border-gray-100"
+                              }`}
                             >
                               {category.name}
                             </button>
@@ -342,9 +358,13 @@ const SlidesManagement = () => {
 
               {/* Subtitle */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Subtitle <span className="text-gray-400 font-normal">(Optional)</span></label>
+                <label className={`block text-sm font-medium mb-2 ${isDark ? "text-gray-300" : "text-gray-700"}`}>Subtitle <span className="text-gray-400 font-normal">(Optional)</span></label>
                 <input 
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" 
+                  className={`w-full rounded-lg px-4 py-2 outline-none transition-all ${
+                    isDark 
+                      ? "bg-gray-900 border-gray-700 text-white focus:ring-blue-500/50" 
+                      : "bg-white border-gray-300 focus:ring-blue-500"
+                  } border focus:ring-2`}
                   placeholder="e.g., Elevate Your Style"
                   value={formData.subtitle} 
                   onChange={(e) => setFormData({...formData, subtitle: e.target.value})} 
@@ -353,9 +373,13 @@ const SlidesManagement = () => {
 
               {/* Description */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Description <span className="text-gray-400 font-normal">(Optional)</span></label>
+                <label className={`block text-sm font-medium mb-2 ${isDark ? "text-gray-300" : "text-gray-700"}`}>Description <span className="text-gray-400 font-normal">(Optional)</span></label>
                 <textarea 
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none" 
+                  className={`w-full rounded-lg px-4 py-2 outline-none transition-all resize-none ${
+                    isDark 
+                      ? "bg-gray-900 border-gray-700 text-white focus:ring-blue-500/50" 
+                      : "bg-white border-gray-300 focus:ring-blue-500"
+                  } border focus:ring-2`}
                   placeholder="Brief description for the slide..."
                   rows={3} 
                   value={formData.description} 
@@ -365,27 +389,31 @@ const SlidesManagement = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Order</label>
+                  <label className={`block text-sm font-medium mb-2 ${isDark ? "text-gray-300" : "text-gray-700"}`}>Order</label>
                   <input 
                     type="number" 
                     min="0"
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" 
+                    className={`w-full rounded-lg px-4 py-2 outline-none transition-all ${
+                      isDark 
+                        ? "bg-gray-900 border-gray-700 text-white focus:ring-blue-500/50" 
+                        : "bg-white border-gray-300 focus:ring-blue-500"
+                    } border focus:ring-2`}
                     placeholder="0"
                     value={formData.order} 
                     onChange={(e) => setFormData({...formData, order: e.target.value})} 
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Visible</label>
+                  <label className={`block text-sm font-medium mb-2 ${isDark ? "text-gray-300" : "text-gray-700"}`}>Visible</label>
                   <div className="mt-2">
                     <label className="flex items-center gap-2">
                       <input 
                         type="checkbox" 
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        className={`rounded focus:ring-blue-500 ${isDark ? "bg-gray-900 border-gray-700 text-blue-500" : "border-gray-300 text-blue-600"}`}
                         checked={formData.isVisible} 
                         onChange={(e) => setFormData({...formData, isVisible: e.target.checked})} 
                       />
-                      <span className="text-sm text-gray-600">Show on homepage</span>
+                      <span className={`text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}>Show on homepage</span>
                     </label>
                   </div>
                 </div>
@@ -393,9 +421,15 @@ const SlidesManagement = () => {
             </div>
 
             {/* Actions - Sticky bottom */}
-            <div className="sticky bottom-0 bg-white border-t border-gray-200 px-6 py-4 rounded-b-2xl">
+            <div className={`sticky bottom-0 border-t px-6 py-4 rounded-b-2xl ${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"}`}>
               <div className="flex justify-end gap-3">
-                <button onClick={closeModal} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors" disabled={loading}>
+                <button 
+                  onClick={closeModal} 
+                  className={`px-4 py-2 rounded-lg transition-colors ${
+                    isDark ? "text-gray-400 hover:bg-gray-700 hover:text-white" : "text-gray-600 hover:bg-gray-100"
+                  }`} 
+                  disabled={loading}
+                >
                   Cancel
                 </button>
                 <button onClick={handleSave} disabled={loading || (!formData.title.trim() && !previewUrl)} className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-70 transition-colors">
@@ -417,17 +451,19 @@ const SlidesManagement = () => {
         </div>
       )}
 
-      <div className="bg-white rounded-lg shadow p-4">
+      <div className={`rounded-xl shadow-lg border ${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"}`}>
         {loading && !isModalOpen ? (
-          <LoadingSpinner />
+          <div className="p-12"><LoadingSpinner /></div>
         ) : slides.length === 0 ? (
-          <p className="text-gray-600">No slides found.</p>
+          <div className="p-12 text-center">
+            <p className={`${isDark ? "text-gray-400" : "text-gray-600"}`}>No slides found.</p>
+          </div>
         ) : (
-          <ul className="space-y-2">
+          <ul className={`divide-y ${isDark ? "divide-gray-700" : "divide-gray-100"}`}>
             {slides.map((s) => (
-              <li key={s.id} className="flex items-center justify-between border-b py-3 last:border-0 hover:bg-gray-50 px-2 rounded transition-colors">
+              <li key={s.id} className={`flex items-center justify-between py-4 hover:bg-black/5 px-6 transition-colors`}>
                 <div className="flex items-center gap-4 flex-1">
-                  <div className="w-20 h-12 rounded overflow-hidden bg-gray-100 border">
+                  <div className={`w-20 h-12 rounded overflow-hidden border ${isDark ? "bg-gray-900 border-gray-700" : "bg-gray-100 border-gray-200"}`}>
                     {s.type === 'video' ? (
                       <video src={s.url} className="w-full h-full object-cover" />
                     ) : (
@@ -435,14 +471,14 @@ const SlidesManagement = () => {
                     )}
                   </div>
                   <div>
-                    <h3 className="text-gray-900 font-medium">{s.title || 'Untitled'}</h3>
-                    <p className="text-gray-500 text-sm line-clamp-1">{s.subtitle}</p>
-                    <p className="text-gray-400 text-xs">Order: {s.order ?? 0} • {s.type}</p>
+                    <h3 className={`font-medium ${isDark ? "text-gray-100" : "text-gray-900"}`}>{s.title || 'Untitled'}</h3>
+                    <p className={`text-sm line-clamp-1 ${isDark ? "text-gray-400" : "text-gray-500"}`}>{s.subtitle}</p>
+                    <p className={`text-xs ${isDark ? "text-gray-500" : "text-gray-400"}`}>Order: {s.order ?? 0} • {s.type}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <button onClick={() => openModal(s)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-full" title="Edit"><Edit3 className="w-4 h-4" /></button>
-                  <button onClick={() => handleDelete(s.id)} className="p-2 text-red-600 hover:bg-red-50 rounded-full" title="Delete"><Trash2 className="w-4 h-4" /></button>
+                  <button onClick={() => openModal(s)} className={`p-2 rounded-full transition-colors ${isDark ? "text-blue-400 hover:bg-blue-500/10" : "text-blue-600 hover:bg-blue-50"}`} title="Edit"><Edit3 className="w-4 h-4" /></button>
+                  <button onClick={() => handleDelete(s.id)} className={`p-2 rounded-full transition-colors ${isDark ? "text-red-400 hover:bg-red-500/10" : "text-red-600 hover:bg-red-50"}`} title="Delete"><Trash2 className="w-4 h-4" /></button>
                 </div>
               </li>
             ))}

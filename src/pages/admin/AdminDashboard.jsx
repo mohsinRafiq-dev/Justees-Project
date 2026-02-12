@@ -36,6 +36,7 @@ import ProductManagement from "../../components/admin/ProductManagement";
 import CategoriesManagement from "./CategoriesManagement";
 import ReviewsManagement from "./ReviewsManagement";
 import SlidesManagement from "./SlidesManagement";
+import SizesManagement from "./SizesManagement";
 
 const AdminDashboard = () => {
   const { user, logout } = useAuth();
@@ -109,6 +110,7 @@ const AdminDashboard = () => {
     { id: "products", name: "Products", icon: Package },
     { id: "categories", name: "Categories", icon: Tag },
     { id: "slides", name: "Slides", icon: Image },
+    { id: "sizes", name: "Sizes & Colors", icon: Layers },
     { id: "reviews", name: "Reviews", icon: Star },
     { id: "settings", name: "Settings", icon: Settings },
   ];
@@ -670,6 +672,17 @@ const AdminDashboard = () => {
               exit={{ opacity: 0, x: -20 }}
             >
               <SlidesManagement />
+            </motion.div>
+          )}
+
+          {activeTab === "sizes" && (
+            <motion.div
+              key="sizes"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+            >
+              <SizesManagement />
             </motion.div>
           )}
 
