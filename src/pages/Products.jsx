@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
-import { motion } from "framer-motion"; // eslint-disable-line
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { motion } from "framer-motion";
 import { Heart, ShoppingCart, Eye, Filter, Star } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -20,18 +20,17 @@ const Products = () => {
   const { addToCart } = useCart();
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const [wishlist, setWishlist] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState("All");
+  const selectedCategory = searchParams.get("category") || "All";
   const [priceRange, setPriceRange] = useState({ min: 0, max: 1000000 });
   const [sortBy, setSortBy] = useState("createdAt");
   const [sortOrder, setSortOrder] = useState("desc");
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Load products and categories
+  // Load products and categories once on mount
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -54,12 +53,6 @@ const Products = () => {
         if (categoriesRes.success) {
           setCategories(categoriesRes.categories || []);
         }
-
-        // Handle category from URL search params
-        const categoryParam = searchParams.get("category");
-        if (categoryParam) {
-          setSelectedCategory(categoryParam);
-        }
       } catch (error) {
         console.error("Error loading products/categories:", error);
         toast.error("Error loading data");
@@ -69,9 +62,19 @@ const Products = () => {
     };
 
     fetchData();
-  }, [searchParams]);
+  }, []);
 
-  const filterAndSortProducts = useCallback(() => {
+  const handleCategoryChange = (category) => {
+    const newParams = new URLSearchParams(searchParams);
+    if (category === "All") {
+      newParams.delete("category");
+    } else {
+      newParams.set("category", category);
+    }
+    navigate(`/products?${newParams.toString()}`, { replace: true });
+  };
+
+  const filteredProducts = useMemo(() => {
     let filtered = [...products];
 
     // Category filter
@@ -112,13 +115,8 @@ const Products = () => {
       }
     });
 
-    setFilteredProducts(filtered);
+    return filtered;
   }, [products, selectedCategory, priceRange, sortBy, sortOrder, searchTerm]);
-
-  // Filter and sort products when dependencies change
-  useEffect(() => {
-    filterAndSortProducts();
-  }, [filterAndSortProducts]);
 
 
   const toggleWishlist = (productId) => {
@@ -465,7 +463,7 @@ const Products = () => {
                 <div>
                   <select
                     value={selectedCategory}
-                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    onChange={(e) => handleCategoryChange(e.target.value)}
                     className={`w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500 ${isDark
                       ? "bg-gray-700 border-gray-600 text-white"
                       : "bg-white border-gray-300 text-gray-900"
@@ -538,7 +536,7 @@ const Products = () => {
 
             {/* Products Grid */}
             {loading ? (
-              <div className="flex items-center justify-center py-20">
+              <div key="loading" className="flex items-center justify-center py-20">
                 <LoadingSpinner size="large" />
               </div>
             ) : filteredProducts.length === 0 ? (
@@ -562,7 +560,7 @@ const Products = () => {
                 </p>
                 <button
                   onClick={() => {
-                    setSelectedCategory("All");
+                    handleCategoryChange("All");
                     setPriceRange({ min: 0, max: 1000000 });
                     setSearchTerm("");
                   }}
@@ -572,33 +570,18 @@ const Products = () => {
                 </button>
               </div>
             ) : (
-              <motion.div
-                layout
-                initial="hidden"
-                animate="visible"
-                variants={{
-                  visible: {
-                    transition: {
-                      staggerChildren: 0.08
-                    }
-                  }
-                }}
-                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
-              >
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                 {filteredProducts.map((product) => (
                   <motion.div
                     key={product.id}
-                    layout
-                    variants={{
-                      hidden: { opacity: 0, y: 30 },
-                      visible: { opacity: 1, y: 0 }
-                    }}
-                    transition={{ type: "spring", stiffness: 100, damping: 15 }}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
                   >
                     <ProductCard product={product} />
                   </motion.div>
                 ))}
-              </motion.div>
+              </div>
             )}
           </div>
         </section>

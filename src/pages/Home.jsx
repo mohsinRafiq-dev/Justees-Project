@@ -210,11 +210,16 @@ const Home = () => {
       setCurrentSlide(0);
       return;
     }
+
+    // If current slide is a video, we don't auto-slide based on time
+    // Instead we wait for 'onEnded' event from the video element
+    if (heroSlides[currentSlide]?.type === 'video') return;
+
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
     }, 5000);
     return () => clearInterval(timer);
-  }, [heroSlides.length]);
+  }, [heroSlides, currentSlide]);
 
   // Auto-slide reviews
   useEffect(() => {
@@ -403,7 +408,14 @@ const Home = () => {
                 >
                   <div className="absolute inset-0">
                     {slide.type === 'video' ? (
-                      <video className="w-full h-full object-cover" src={slide.url} autoPlay muted loop playsInline />
+                      <video 
+                        className="w-full h-full object-cover" 
+                        src={slide.url} 
+                        autoPlay 
+                        muted 
+                        playsInline 
+                        onEnded={nextSlide}
+                      />
                     ) : (
                       <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${slide.url})` }} />
                     )}
@@ -411,60 +423,73 @@ const Home = () => {
                   </div>
                   <div className="relative h-full flex items-center">
                     <div className="container mx-auto px-4">
-                      <motion.div
-                        initial={{ x: -100, opacity: 0 }}
-                        animate={{ x: 0, opacity: 1 }}
-                        transition={{ delay: 0.3, duration: 0.8 }}
-                        className="max-w-2xl"
-                      >
-                        <motion.p
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ delay: 0.5 }}
-                          className={`${isDark ? 'text-gray-300' : 'text-gray-100'} text-lg mb-2 font-medium`}
+                      {(slide.title || slide.subtitle || slide.description) && (
+                        <motion.div
+                          initial={{ x: -100, opacity: 0 }}
+                          animate={{ x: 0, opacity: 1 }}
+                          transition={{ delay: 0.3, duration: 0.8 }}
+                          className="max-w-2xl"
                         >
-                          {slide.subtitle}
-                        </motion.p>
-                        <motion.h1
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.6 }}
-                          className="text-6xl md:text-7xl font-bold text-white mb-4 leading-tight"
-                        >
-                          {slide.title.split(' ').map((word, i) => (
-                            <motion.span
-                              key={i}
+                          {slide.subtitle && (
+                            <motion.p
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              transition={{ delay: 0.5 }}
+                              className={`${isDark ? 'text-gray-300' : 'text-gray-100'} text-lg mb-2 font-medium`}
+                            >
+                              {slide.subtitle}
+                            </motion.p>
+                          )}
+                          
+                          {slide.title && (
+                            <motion.h1
                               initial={{ opacity: 0, y: 20 }}
                               animate={{ opacity: 1, y: 0 }}
-                              transition={{ delay: 0.7 + i * 0.1 }}
-                              className="inline-block mr-4"
+                              transition={{ delay: 0.6 }}
+                              className="text-6xl md:text-7xl font-bold text-white mb-4 leading-tight"
                             >
-                              {word}
-                            </motion.span>
-                          ))}
-                        </motion.h1>
-                        <motion.p
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ delay: 1 }}
-                          className="text-xl text-gray-300 mb-8"
-                        >
-                          {slide.description}
-                        </motion.p>
-                        <motion.div
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 1.2 }}
-                        >
-                          <Link
-                            to="/products"
-                            style={{ backgroundColor: '#d3d1ce' }}
-                            className="inline-block text-gray-900 px-8 py-4 rounded-full font-semibold hover:shadow-2xl transition-all transform hover:scale-105"
-                          >
-                            Explore Collection
-                          </Link>
+                              {slide.title.split(' ').map((word, i) => (
+                                <motion.span
+                                  key={i}
+                                  initial={{ opacity: 0, y: 20 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  transition={{ delay: 0.7 + i * 0.1 }}
+                                  className="inline-block mr-4"
+                                >
+                                  {word}
+                                </motion.span>
+                              ))}
+                            </motion.h1>
+                          )}
+
+                          {slide.description && (
+                            <motion.p
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              transition={{ delay: 1 }}
+                              className="text-xl text-gray-300 mb-8"
+                            >
+                              {slide.description}
+                            </motion.p>
+                          )}
+
+                          {slide.title && (
+                            <motion.div
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: 1.2 }}
+                            >
+                              <Link
+                                to={`/products?category=${encodeURIComponent(slide.title)}`}
+                                style={{ backgroundColor: '#d3d1ce' }}
+                                className="inline-block text-gray-900 px-8 py-4 rounded-full font-semibold hover:shadow-2xl transition-all transform hover:scale-105"
+                              >
+                                Explore Collection
+                              </Link>
+                            </motion.div>
+                          )}
                         </motion.div>
-                      </motion.div>
+                      )}
                     </div>
                   </div>
                 </motion.div>

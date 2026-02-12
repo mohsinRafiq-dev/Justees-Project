@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 import { Plus, Trash2, Upload, X, Edit3, Image, Film } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
@@ -11,6 +12,7 @@ import {
   updateSlide,
   deleteSlide,
 } from '../../services/slides.service';
+import { getCategories } from '../../services/products.service';
 import { uploadSlideMedia } from '../../services/storage/upload';
 
 const SlidesManagement = () => {
@@ -33,12 +35,25 @@ const SlidesManagement = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState('');
 
+  const [categories, setCategories] = useState([]);
+  const [categorySearch, setCategorySearch] = useState('');
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [confirm, setConfirm] = useState({ open: false, id: null });
 
   useEffect(() => {
     if (!isAdminUser(user)) return;
     loadSlides();
+    loadCategories();
   }, [user]);
+
+  const loadCategories = async () => {
+    try {
+      const res = await getCategories();
+      if (res.success) setCategories(res.categories || []);
+    } catch (err) {
+      console.error('Error loading categories:', err);
+    }
+  };
 
   const loadSlides = async () => {
     setLoading(true);
@@ -108,6 +123,7 @@ const SlidesManagement = () => {
       setPreviewUrl('');
     }
     setSelectedFile(null);
+    setCategorySearch(slide ? slide.title : '');
     setIsModalOpen(true);
   };
 
@@ -116,12 +132,13 @@ const SlidesManagement = () => {
     setEditingId(null);
     setFormData({ title: '', subtitle: '', description: '', type: 'image', mediaUrl: '', order: 0, isVisible: true });
     setSelectedFile(null);
+    setCategorySearch('');
     setPreviewUrl('');
   };
 
   const handleSave = async () => {
-    if (!formData.title.trim() && !selectedFile && !formData.mediaUrl) {
-      toast.error('Please provide a title and media');
+    if (!selectedFile && !formData.mediaUrl) {
+      toast.error('Please provide media (Image or Video)');
       return;
     }
 
@@ -141,10 +158,10 @@ const SlidesManagement = () => {
         }
       }
 
-      const payload = {
-        title: formData.title.trim(),
-        subtitle: formData.subtitle.trim(),
-        description: formData.description.trim(),
+    const payload = {
+        title: (formData.title || '').trim(),
+        subtitle: (formData.subtitle || '').trim(),
+        description: (formData.description || '').trim(),
         type: formData.type,
         url: mediaUrl,
         order: Number(formData.order) || 0,
@@ -260,20 +277,72 @@ const SlidesManagement = () => {
                 </div>
               </div>
 
-              {/* Title */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
-                <input 
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" 
-                  placeholder="e.g., Premium Quality"
-                  value={formData.title} 
-                  onChange={(e) => setFormData({...formData, title: e.target.value})} 
-                />
+              {/* Category (Title) Select */}
+              <div className="relative">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Category (Title) <span className="text-gray-400 font-normal">(Optional)</span></label>
+                <div className="relative">
+                  <input
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                    placeholder="Search and select category..."
+                    value={categorySearch}
+                    onFocus={() => setShowCategoryDropdown(true)}
+                    onBlur={() => setTimeout(() => setShowCategoryDropdown(false), 200)}
+                    onChange={(e) => {
+                      setCategorySearch(e.target.value);
+                      setShowCategoryDropdown(true);
+                    }}
+                  />
+                  
+                  <AnimatePresence>
+                    {showCategoryDropdown && (
+                      <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-xl overflow-hidden max-h-48 overflow-y-auto">
+                        {categories
+                          .filter(c => c.name.toLowerCase().includes(categorySearch.toLowerCase()))
+                          .map(category => (
+                            <button
+                              key={category.id}
+                              type="button"
+                              onClick={() => {
+                                setFormData({ ...formData, title: category.name });
+                                setCategorySearch(category.name);
+                                setShowCategoryDropdown(false);
+                              }}
+                              className="w-full px-4 py-2 text-left hover:bg-gray-50 transition-colors text-sm text-gray-700 border-b last:border-0 border-gray-100"
+                            >
+                              {category.name}
+                            </button>
+                          ))}
+                        {categories.filter(c => c.name.toLowerCase().includes(categorySearch.toLowerCase())).length === 0 && (
+                          <div className="px-4 py-2 text-sm text-gray-500 italic">No categories found</div>
+                        )}
+                      </div>
+                    )}
+                  </AnimatePresence>
+                </div>
+                {formData.title && (
+                  <div className="mt-2 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                        Linked: {formData.title}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFormData({ ...formData, title: '' });
+                        setCategorySearch('');
+                      }}
+                      className="text-xs font-medium text-red-600 hover:text-red-700 hover:bg-red-50 px-2 py-1 rounded transition-colors"
+                    >
+                      Unlink Category
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* Subtitle */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Subtitle</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Subtitle <span className="text-gray-400 font-normal">(Optional)</span></label>
                 <input 
                   className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" 
                   placeholder="e.g., Elevate Your Style"
@@ -284,7 +353,7 @@ const SlidesManagement = () => {
 
               {/* Description */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Description <span className="text-gray-400 font-normal">(Optional)</span></label>
                 <textarea 
                   className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none" 
                   placeholder="Brief description for the slide..."
