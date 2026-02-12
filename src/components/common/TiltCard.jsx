@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'; // eslint-disable-line
 import { useState } from 'react';
 
-const TiltCard = ({ children, className = '' }) => {
+const TiltCard = ({ children, className = '', onClick }) => {
   const [rotateX, setRotateX] = useState(0);
   const [rotateY, setRotateY] = useState(0);
 
@@ -29,6 +29,7 @@ const TiltCard = ({ children, className = '' }) => {
       className={className}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
+      onClick={onClick}
       animate={{
         rotateX,
         rotateY,

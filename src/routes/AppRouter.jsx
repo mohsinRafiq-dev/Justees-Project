@@ -3,6 +3,7 @@ import { AuthProvider } from "../contexts/AuthContext.jsx";
 import { CartProvider, useCart } from "../contexts/CartContext.jsx";
 import ProtectedRoute from "./ProtectedRoute";
 import CartDrawer from "../components/common/CartDrawer";
+import ScrollToTop from "../components/common/ScrollToTop";
 
 // Wrapper to use context
 const GlobalCartDrawer = () => {
@@ -27,6 +28,7 @@ import AdminDashboard from "../pages/admin/AdminDashboard";
 const AppRouter = () => {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <AuthProvider>
         <CartProvider>
           <GlobalCartDrawer />

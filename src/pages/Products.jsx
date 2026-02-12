@@ -425,7 +425,7 @@ const Products = () => {
         </section>
 
         {/* Filters Section */}
-        <section className="py-8">
+        <section id="products-grid" className="py-8 scroll-mt-24">
           <div className="container mx-auto px-4">
             <div
               className={`rounded-2xl p-6 mb-8 ${isDark ? "bg-gray-800" : "bg-white"

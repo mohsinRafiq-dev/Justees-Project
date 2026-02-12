@@ -102,7 +102,7 @@ const Categories = () => {
                     whileHover={{ y: -10 }}
                   >
                     <Link
-                      to={`/products?category=${encodeURIComponent(category.name)}`}
+                      to={`/products?category=${encodeURIComponent(category.name)}#products-grid`}
                       className={`block ${isDark ? 'bg-gray-800' : 'bg-white'} rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all group`}
                     >
                       <div className="relative h-64 overflow-hidden">

@@ -266,6 +266,13 @@ const Home = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const scrollToSection = (id) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   const handleNewsletterSubmit = async (e) => {
     e.preventDefault();
     if (!email) return;
@@ -362,7 +369,7 @@ const Home = () => {
                 className="flex flex-wrap gap-4"
               >
                 <Link
-                  to="/products"
+                  to="/products#products-grid"
                   style={{ backgroundColor: '#d3d1ce' }}
                   className="text-gray-900 px-8 py-4 rounded-full text-lg font-semibold hover:shadow-2xl transition-all transform hover:scale-105"
                 >
@@ -480,7 +487,7 @@ const Home = () => {
                               transition={{ delay: 1.2 }}
                             >
                               <Link
-                                to={`/products?category=${encodeURIComponent(slide.title)}`}
+                                to={`/products?category=${encodeURIComponent(slide.title)}#products-grid`}
                                 style={{ backgroundColor: '#d3d1ce' }}
                                 className="inline-block text-gray-900 px-8 py-4 rounded-full font-semibold hover:shadow-2xl transition-all transform hover:scale-105"
                               >
@@ -585,7 +592,7 @@ const Home = () => {
 
 
       {/* Categories */}
-      <section className={`py-20 ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
+      <section id="categories-section" className={`py-20 ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -609,8 +616,8 @@ const Home = () => {
                 whileHover={{ scale: 1.05 }}
               >
                 <Link
-                  to={`/products?category=${encodeURIComponent(category.name)}`}
-                  className="group relative overflow-hidden rounded-lg aspect-square hover:shadow-2xl transition-all block"
+                  to={`/products?category=${encodeURIComponent(category.name)}#products-grid`}
+                  className="group relative overflow-hidden rounded-lg aspect-square hover:shadow-2xl transition-all block w-full text-left"
                 >
                   <LazyImage
                     src={category.image}
@@ -630,7 +637,7 @@ const Home = () => {
       </section>
 
       {/* Featured Products */}
-      <section className={`py-20 ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
+      <section id="products-section" className={`py-20 ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -947,9 +954,12 @@ const Home = () => {
                                 {review.customerName}
                               </h4>
                               {review.productName ? (
-                                <p className={`text-sm font-medium ${isDark ? 'text-blue-400' : 'text-blue-600'}`}>
+                                <button
+                                  onClick={() => navigate(`/products/${review.productId}`)}
+                                  className={`text-sm font-medium ${isDark ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'} transition-colors`}
+                                >
                                   Product: {review.productName}
-                                </p>
+                                </button>
                               ) : (
                                 <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
                                   General Review
