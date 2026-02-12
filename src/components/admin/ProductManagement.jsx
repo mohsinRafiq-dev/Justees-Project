@@ -327,7 +327,7 @@ const ProductManagement = () => {
 
         {/* Analytics Cards */}
         {analytics && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -344,27 +344,6 @@ const ProductManagement = () => {
                 </div>
                 <div className="p-3 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl shadow-lg">
                   <Package className="w-6 h-6 text-white" />
-                </div>
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className={`backdrop-blur-xl rounded-2xl p-6 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white/80 border-gray-200'} shadow-lg hover:shadow-xl transition-all`}
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className={`text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                    Total Sales
-                  </p>
-                  <p className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                    {analytics.totalSales}
-                  </p>
-                </div>
-                <div className="p-3 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl shadow-lg">
-                  <TrendingUp className="w-6 h-6 text-white" />
                 </div>
               </div>
             </motion.div>

@@ -165,14 +165,13 @@ export const getProductReviews = async (productId, limitCount = 50) => {
       console.log('[reviews] Product composite query successful:', reviews.length);
       return { success: true, reviews };
     } catch (indexError) {
-      console.log('[reviews] Product composite index not ready, trying fallback query:', indexError.message);
+      console.warn('[reviews] Product composite query failed, trying fallback:', indexError.message);
       
-      // Fallback: Get all reviews for this product and filter/sort in memory
+      // Fallback: Get ALL reviews for this product (simpler query often bypasses permission/index issues during dev)
       try {
         const fallbackQuery = query(
           collection(db, REVIEWS_COLLECTION),
-          where("productId", "==", productId),
-          limit(100) // Increase limit to fetch enough potentially visible ones
+          where("productId", "==", productId)
         );
         
         const querySnapshot = await getDocs(fallbackQuery);
@@ -185,7 +184,7 @@ export const getProductReviews = async (productId, limitCount = 50) => {
           });
         });
         
-        // Filter visible reviews and sort by creation date
+        // Manual filter and sort for maximum compatibility
         const visibleReviews = allProductReviews
           .filter(review => review.isVisible === true)
           .sort((a, b) => {
@@ -198,7 +197,7 @@ export const getProductReviews = async (productId, limitCount = 50) => {
         console.log('[reviews] Product fallback query successful:', visibleReviews.length);
         return { success: true, reviews: visibleReviews };
       } catch (fallbackError) {
-        console.error('[reviews] Product fallback query also failed:', fallbackError);
+        console.error('[reviews] Product fallback query also failed with error:', fallbackError.code, fallbackError.message);
         return { success: false, error: fallbackError.message, reviews: [] };
       }
     }

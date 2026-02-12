@@ -997,20 +997,6 @@ const ProductDetail = () => {
                           <span
                             className={`text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}
                           >
-                            SKU
-                          </span>
-                          <p
-                            className={`font-medium mt-1 ${isDark ? "text-white" : "text-gray-900"}`}
-                          >
-                            {product.sku || "N/A"}
-                          </p>
-                        </div>
-                        <div
-                          className={`p-4 rounded-lg ${isDark ? "bg-gray-700" : "bg-gray-50"}`}
-                        >
-                          <span
-                            className={`text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}
-                          >
                             Availability
                           </span>
                           <p

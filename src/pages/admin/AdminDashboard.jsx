@@ -28,11 +28,12 @@ import { useAuth } from "../../hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
 import { useTheme } from "../../contexts/ThemeContext";
 import { getProductAnalytics } from "../../services/products.service";
+import { getCategories } from "../../services/products/admin";
+import { getSlides } from "../../services/slides.service";
+import { getAllReviews } from "../../services/reviews.service";
 import { formatPrice } from "../../utils/validation";
 import ProductManagement from "../../components/admin/ProductManagement";
 import CategoriesManagement from "./CategoriesManagement";
-import SizesManagement from "./SizesManagement";
-import OrdersManagement from "./OrdersManagement";
 import ReviewsManagement from "./ReviewsManagement";
 import SlidesManagement from "./SlidesManagement";
 
@@ -48,9 +49,10 @@ const AdminDashboard = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [stats, setStats] = useState({
     totalProducts: 0,
-    totalOrders: 0,
-    totalUsers: 0,
-    revenue: 0,
+    totalCategories: 0,
+    totalReviews: 0,
+    totalSlides: 0,
+    totalViews: 0,
     lowStockItems: 0,
     outOfStockItems: 0,
   });
@@ -70,25 +72,23 @@ const AdminDashboard = () => {
     try {
       setLoading(true);
 
-      // Load product analytics
-      const analyticsResult = await getProductAnalytics();
-      if (analyticsResult.success) {
-        setStats((prev) => ({
-          ...prev,
-          totalProducts: analyticsResult.analytics.totalProducts,
-          lowStockItems:
-            analyticsResult.analytics.totalProducts -
-            analyticsResult.analytics.outOfStock,
-          outOfStockItems: analyticsResult.analytics.outOfStock,
-        }));
-      }
+      const [analyticsResult, categoriesResult, slidesResult, reviewsResult] = await Promise.all([
+        getProductAnalytics(),
+        getCategories(),
+        getSlides(),
+        getAllReviews({ limitCount: 1000 })
+      ]);
 
-      // Simulate other stats (replace with real API calls)
       setStats((prev) => ({
         ...prev,
-        totalOrders: 128,
-        totalUsers: 256,
-        revenue: 12500,
+        totalProducts: analyticsResult.success ? analyticsResult.analytics.totalProducts : 0,
+        totalViews: analyticsResult.success ? analyticsResult.analytics.totalViews : 0,
+        lowStockItems: analyticsResult.success ? 
+          (analyticsResult.analytics.totalProducts - analyticsResult.analytics.outOfStock) : 0,
+        outOfStockItems: analyticsResult.success ? analyticsResult.analytics.outOfStock : 0,
+        totalCategories: categoriesResult.success ? categoriesResult.categories.length : 0,
+        totalSlides: slidesResult.success ? slidesResult.slides.length : 0,
+        totalReviews: reviewsResult.success ? reviewsResult.reviews.length : 0,
       }));
     } catch (error) {
       console.error("Error loading dashboard data:", error);
@@ -108,11 +108,8 @@ const AdminDashboard = () => {
     { id: "dashboard", name: "Dashboard", icon: BarChart3 },
     { id: "products", name: "Products", icon: Package },
     { id: "categories", name: "Categories", icon: Tag },
-    { id: "sizes", name: "Sizes & Colors", icon: Layers },
     { id: "slides", name: "Slides", icon: Image },
-    { id: "orders", name: "Orders", icon: ShoppingBag },
     { id: "reviews", name: "Reviews", icon: Star },
-    { id: "users", name: "Users", icon: Users },
     { id: "settings", name: "Settings", icon: Settings },
   ];
 
@@ -125,25 +122,11 @@ const AdminDashboard = () => {
       action: () => handleTabChange("products"),
     },
     {
-      title: "View Orders",
-      description: "Manage orders",
-      icon: Eye,
-      color: "green",
-      action: () => handleTabChange("orders"),
-    },
-    {
       title: "Manage Slides",
       description: "Add images & videos",
       icon: Image,
       color: "yellow",
       action: () => handleTabChange("slides"),
-    },
-    {
-      title: "Analytics",
-      description: "View reports",
-      icon: TrendingUp,
-      color: "purple",
-      action: () => {},
     },
   ];
 
@@ -335,30 +318,31 @@ const AdminDashboard = () => {
 
       {/* Sidebar */}
       <AnimatePresence>
-        {(sidebarOpen || mobileMenuOpen) && (
+        {(sidebarOpen || mobileMenuOpen || !mobileMenuOpen) && (
           <motion.div
             initial={mobileMenuOpen ? { x: -300 } : { width: sidebarOpen ? 288 : 88 }}
             animate={{ 
-              x: 0,
+              x: mobileMenuOpen || window.innerWidth >= 1024 ? 0 : -300,
               width: mobileMenuOpen ? (window.innerWidth < 640 ? '100%' : 288) : (sidebarOpen ? 288 : 88)
             }}
             exit={mobileMenuOpen ? { x: -300 } : { width: 0 }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            transition={{ type: 'spring', damping: 20, stiffness: 150 }}
             className={`${
               mobileMenuOpen
                 ? "fixed inset-y-0 left-0 z-50 w-72"
-                : "hidden lg:flex flex-col h-screen sticky top-0"
-            } glass ${isDark ? "" : "glass-light"} shadow-2xl border-r ${isDark ? "border-gray-700" : "border-gray-200"} relative transition-all duration-300`}
+                : "flex flex-col h-screen sticky top-0"
+            } glass ${isDark ? "" : "glass-light"} shadow-2xl border-r ${isDark ? "border-gray-700" : "border-gray-200"} relative`}
           >
-            {/* Collapse Toggle Button (Desktop Only) */}
+            {/* Collapse Toggle Button (Outside inner overflow for visibility) */}
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="absolute -right-3 top-20 bg-blue-600 text-white p-1.5 rounded-full shadow-lg z-50 hidden lg:block hover:scale-110 transition-transform"
+              className="absolute -right-3 top-1/2 -translate-y-1/2 bg-blue-600 text-white p-1.5 rounded-full shadow-lg z-50 hidden lg:block hover:scale-110 transition-transform"
             >
               {sidebarOpen ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
             </button>
-
-            <div className={`p-6 flex items-center ${sidebarOpen ? "justify-between" : "justify-center"}`}>
+            {/* Inner Content Wrapper for Smooth Width Clipping */}
+            <div className="flex flex-col h-full overflow-hidden w-full whitespace-nowrap">
+              <div className={`p-6 flex items-center ${sidebarOpen ? "justify-between" : "justify-center"}`}>
               {sidebarOpen ? (
                 <Link
                   to="/"
@@ -392,7 +376,7 @@ const AdminDashboard = () => {
                       if (window.innerWidth < 1024) setMobileMenuOpen(false);
                     }}
                     title={!sidebarOpen ? item.name : ""}
-                    className={`w-full flex items-center ${sidebarOpen ? "px-4" : "justify-center"} py-3 text-left transition-all rounded-xl ${
+                    className={`w-full flex items-center ${sidebarOpen ? "px-4" : "justify-center"} py-3 text-left rounded-xl ${
                       activeTab === item.id
                         ? "bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-600 text-white shadow-lg"
                         : isDark
@@ -451,16 +435,17 @@ const AdminDashboard = () => {
 
               <button
                 onClick={handleLogout}
-                className={`w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-xl text-sm font-semibold transition-all shadow-lg flex items-center justify-center ${sidebarOpen ? "px-4 py-2 space-x-2" : "p-3"}`}
+                className={`w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-xl text-sm font-semibold shadow-lg flex items-center justify-center ${sidebarOpen ? "px-4 py-2 space-x-2" : "p-3"}`}
                 title={!sidebarOpen ? "Logout" : ""}
               >
                 <LogOut className="w-4 h-4" />
                 {sidebarOpen && <span>Logout</span>}
               </button>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
 
       {/* Main Content */}
       <div className="flex-1 overflow-hidden">
@@ -496,31 +481,27 @@ const AdminDashboard = () => {
                   icon={Package}
                   color="blue"
                   loading={loading}
-                  change={{ positive: true, value: 12 }}
                 />
                 <StatCard
-                  title="Total Orders"
-                  value={stats.totalOrders}
-                  icon={ShoppingBag}
-                  color="green"
-                  loading={loading}
-                  change={{ positive: true, value: 8 }}
-                />
-                <StatCard
-                  title="Total Users"
-                  value={stats.totalUsers}
-                  icon={Users}
+                  title="Total Categories"
+                  value={stats.totalCategories}
+                  icon={Tag}
                   color="purple"
                   loading={loading}
-                  change={{ positive: true, value: 15 }}
                 />
                 <StatCard
-                  title="Revenue"
-                  value={stats.revenue}
-                  icon={TrendingUp}
+                  title="Total Slides"
+                  value={stats.totalSlides}
+                  icon={Image}
                   color="yellow"
                   loading={loading}
-                  change={{ positive: true, value: 23 }}
+                />
+                <StatCard
+                  title="Total Reviews"
+                  value={stats.totalReviews}
+                  icon={Star}
+                  color="green"
+                  loading={loading}
                 />
               </div>
 
@@ -670,28 +651,6 @@ const AdminDashboard = () => {
             </motion.div>
           )}
 
-          {activeTab === "sizes" && (
-            <motion.div
-              key="sizes"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-            >
-              <SizesManagement />
-            </motion.div>
-          )}
-
-          {activeTab === "orders" && (
-            <motion.div
-              key="orders"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-            >
-              <OrdersManagement />
-            </motion.div>
-          )}
-
           {activeTab === "reviews" && (
             <motion.div
               key="reviews"
@@ -714,31 +673,6 @@ const AdminDashboard = () => {
             </motion.div>
           )}
 
-          {activeTab === "users" && (
-            <motion.div
-              key="users"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="p-8"
-            >
-              <h2
-                className={`text-3xl font-bold mb-4 ${isDark ? "text-white" : "text-gray-900"}`}
-              >
-                User Management
-              </h2>
-              <div
-                className={`glass ${isDark ? "" : "glass-light"} rounded-2xl p-8 text-center border ${isDark ? "border-gray-700" : "border-gray-200"}`}
-              >
-                <Users className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-                <p
-                  className={`text-lg ${isDark ? "text-gray-300" : "text-gray-600"}`}
-                >
-                  User management feature coming soon...
-                </p>
-              </div>
-            </motion.div>
-          )}
 
           {activeTab === "settings" && (
             <motion.div
