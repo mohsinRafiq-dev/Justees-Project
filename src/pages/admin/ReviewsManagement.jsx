@@ -53,10 +53,7 @@ const ReviewsManagement = () => {
   });
 
   useEffect(() => {
-    if (!isAdminUser(user)) {
-      toast.error("Unauthorized access");
-      return;
-    }
+    if (!isAdminUser(user)) return;
     loadReviews();
     loadProducts();
   }, [user]);
@@ -249,12 +246,12 @@ const ReviewsManagement = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
             <div>
-              <h1 className={`text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+              <h1 className={`text-2xl sm:text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
                 Reviews Management
               </h1>
-              <p className={`mt-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+              <p className={`mt-2 text-sm sm:text-base ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                 Manage customer reviews and testimonials
               </p>
             </div>
@@ -262,7 +259,7 @@ const ReviewsManagement = () => {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleCreateReview}
-              className="bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-600 hover:from-blue-700 hover:via-cyan-700 hover:to-teal-700 text-white px-6 py-3 rounded-xl font-semibold flex items-center space-x-2 shadow-lg transition-all"
+              className="bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-600 hover:from-blue-700 hover:via-cyan-700 hover:to-teal-700 text-white px-6 py-3 rounded-xl font-semibold flex items-center justify-center space-x-2 shadow-lg transition-all w-full sm:w-auto"
             >
               <Plus className="w-5 h-5" />
               <span>Add Review</span>
@@ -271,7 +268,7 @@ const ReviewsManagement = () => {
         </div>
 
         {/* Reviews Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -365,7 +362,9 @@ const ReviewsManagement = () => {
               </motion.button>
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <>
+              {/* Desktop Table View */}
+              <div className="hidden md:block overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead className={isDark ? 'bg-white/5' : 'bg-gray-50'}>
                   <tr>
@@ -531,21 +530,153 @@ const ReviewsManagement = () => {
                 </tbody>
               </table>
             </div>
+
+            {/* Mobile Card View */}
+            <div className="md:hidden space-y-4">
+              {reviews.map((review, index) => (
+                <motion.div
+                  key={review.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  className={`rounded-xl border p-4 ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200'}`}
+                >
+                  {/* Customer & Product Info */}
+                  <div className="flex items-start gap-3 mb-3">
+                    <div className={`p-2 rounded-full flex-shrink-0 ${isDark ? 'bg-white/10' : 'bg-gray-100'}`}>
+                      <User className={`w-5 h-5 ${isDark ? 'text-gray-400' : 'text-gray-600'}`} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className={`font-medium truncate ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                        {review.customerName}
+                      </h3>
+                      {review.email && (
+                        <p className={`text-xs truncate ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                          {review.email}
+                        </p>
+                      )}
+                      <div className="flex items-center mt-1">
+                        {review.productId ? (
+                          <>
+                            <Package className={`w-3 h-3 mr-1 ${isDark ? 'text-gray-400' : 'text-gray-500'}`} />
+                            <span className={`text-xs ${isDark ? 'text-gray-300' : 'text-gray-900'}`}>
+                              {review.productName || review.productId}
+                            </span>
+                          </>
+                        ) : (
+                          <span className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                            General Review
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Rating */}
+                  <div className="flex items-center mb-2">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className={`w-4 h-4 ${i < review.rating
+                          ? "text-yellow-500 fill-current"
+                          : isDark ? "text-gray-600" : "text-gray-300"
+                          }`}
+                      />
+                    ))}
+                    <span className={`ml-2 text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                      {review.rating}/5
+                    </span>
+                  </div>
+
+                  {/* Review Text */}
+                  <p className={`text-sm mb-3 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                    {review.review}
+                  </p>
+
+                  {/* Badges */}
+                  <div className="flex flex-wrap items-center gap-2 mb-3">
+                    {review.source === 'visitor' ? (
+                      <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-600 flex items-center gap-1">
+                        <User className="w-3 h-3" />
+                        Visitor
+                      </span>
+                    ) : (
+                      <span className="px-2 py-1 text-xs rounded-full bg-purple-100 text-purple-600 flex items-center gap-1">
+                        <Shield className="w-3 h-3" />
+                        Admin
+                      </span>
+                    )}
+                    {review.isVisible ? (
+                      <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-600">
+                        Visible
+                      </span>
+                    ) : (
+                      <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-600">
+                        Hidden
+                      </span>
+                    )}
+                    <div className="flex items-center">
+                      <Calendar className={`w-3 h-3 mr-1 ${isDark ? 'text-gray-400' : 'text-gray-500'}`} />
+                      <span className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                        {review.createdAt?.toDate
+                          ? new Date(review.createdAt.toDate()).toLocaleDateString()
+                          : "N/A"}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex items-center gap-2 pt-3 border-t ${isDark ? 'border-white/10' : 'border-gray-200'}">
+                    <button
+                      onClick={() => handleToggleVisibility(review)}
+                      className={`flex-1 p-2 rounded-lg transition-colors flex items-center justify-center gap-2 ${review.isVisible
+                        ? "text-green-600 bg-green-500/10 hover:bg-green-500/20"
+                        : isDark
+                          ? "text-gray-400 bg-white/5 hover:bg-white/10"
+                          : "text-gray-600 bg-gray-100 hover:bg-gray-200"
+                        }`}
+                      title={review.isVisible ? "Hide review" : "Show review"}
+                    >
+                      {review.isVisible ? (
+                        <><Eye className="w-4 h-4" /><span className="text-xs">Hide</span></>
+                      ) : (
+                        <><EyeOff className="w-4 h-4" /><span className="text-xs">Show</span></>
+                      )}
+                    </button>
+                    <button
+                      onClick={() => handleEditReview(review)}
+                      className={`p-2 rounded-lg transition-colors ${isDark ? 'text-cyan-400 bg-cyan-500/10 hover:bg-cyan-500/20' : 'text-cyan-600 bg-cyan-50 hover:bg-cyan-100'}`}
+                      title="Edit review"
+                    >
+                      <Edit3 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteReview(review)}
+                      className={`p-2 rounded-lg transition-colors ${isDark ? 'text-red-400 bg-red-500/10 hover:bg-red-500/20' : 'text-red-600 bg-red-50 hover:bg-red-100'}`}
+                      title="Delete review"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+            </>
           )}
         </div>
 
         {/* Review Form Modal */}
         <AnimatePresence>
           {showForm && (
-            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className={`w-full max-w-2xl rounded-2xl border ${isDark ? 'bg-gray-800 border-white/10' : 'bg-white border-gray-200'} shadow-2xl`}
+                className={`w-full max-w-2xl rounded-2xl border my-8 ${isDark ? 'bg-gray-800 border-white/10' : 'bg-white border-gray-200'} shadow-2xl`}
               >
-                <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-                  <h2 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
+                  <h2 className={`text-lg sm:text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
                     {editingReview ? "Edit Review" : "Add New Review"}
                   </h2>
                   <button
@@ -556,7 +687,7 @@ const ReviewsManagement = () => {
                   </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="p-6 space-y-6">
+                <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 sm:space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>

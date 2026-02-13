@@ -296,7 +296,7 @@ const AdminDashboard = () => {
       {/* Mobile Menu Button */}
       <button
         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-        className={`lg:hidden fixed top-4 left-4 z-50 p-2 rounded-xl glass ${isDark ? "" : "glass-light"} border ${isDark ? "border-gray-700" : "border-gray-200"}`}
+        className={`lg:hidden fixed top-4 left-4 z-50 p-3 rounded-xl shadow-lg ${isDark ? "bg-gray-800 text-white" : "bg-white text-gray-900"} border ${isDark ? "border-gray-700" : "border-gray-200"}`}
       >
         {mobileMenuOpen ? (
           <X className="w-6 h-6" />
@@ -318,34 +318,126 @@ const AdminDashboard = () => {
         )}
       </AnimatePresence>
 
-      {/* Sidebar */}
-      <AnimatePresence>
-        {(sidebarOpen || mobileMenuOpen || !mobileMenuOpen) && (
-          <motion.div
-            initial={mobileMenuOpen ? { x: -300 } : { width: sidebarOpen ? 288 : 88 }}
-            animate={{ 
-              x: mobileMenuOpen || window.innerWidth >= 1024 ? 0 : -300,
-              width: mobileMenuOpen ? (window.innerWidth < 640 ? '100%' : 288) : (sidebarOpen ? 288 : 88)
-            }}
-            exit={mobileMenuOpen ? { x: -300 } : { width: 0 }}
-            transition={{ type: 'spring', damping: 20, stiffness: 150 }}
-            className={`${
-              mobileMenuOpen
-                ? "fixed inset-y-0 left-0 z-50 w-72"
-                : "flex flex-col h-screen sticky top-0"
-            } glass ${isDark ? "" : "glass-light"} shadow-2xl border-r ${isDark ? "border-gray-700" : "border-gray-200"} relative`}
-          >
-            {/* Collapse Toggle Button (Outside inner overflow for visibility) */}
+      {/* Desktop Sidebar - Always Visible */}
+      <div
+        className={`hidden lg:flex flex-col h-screen sticky top-0 ${sidebarOpen ? 'w-72' : 'w-20'} transition-all duration-300 glass ${isDark ? "" : "glass-light"} shadow-2xl border-r ${isDark ? "border-gray-700" : "border-gray-200"} relative`}
+      >
+        {/* Collapse Toggle Button */}
+        <button
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="absolute -right-3 top-1/2 -translate-y-1/2 bg-blue-600 text-white p-1.5 rounded-full shadow-lg z-50 hover:scale-110 transition-transform"
+        >
+          {sidebarOpen ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+        </button>
+        
+        {/* Inner Content Wrapper */}
+        <div className="flex flex-col h-full overflow-hidden w-full whitespace-nowrap">
+          <div className={`p-6 flex items-center ${sidebarOpen ? "justify-between" : "justify-center"}`}>
+            {sidebarOpen ? (
+              <Link
+                to="/"
+                className="text-2xl font-bold bg-gradient-to-r from-blue-500 via-cyan-500 to-teal-500 bg-clip-text text-transparent flex items-center space-x-2 whitespace-nowrap"
+              >
+                <span>Justees</span>
+                <span className={`text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}>Admin</span>
+              </Link>
+            ) : (
+              <Link to="/" className="text-2xl font-bold text-blue-500">J</Link>
+            )}
+          </div>
+
+          <nav className="mt-6 px-3 flex-1 space-y-1 overflow-y-auto">
+            {sidebarItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <motion.button
+                  key={item.id}
+                  whileHover={{ scale: 1.02, x: sidebarOpen ? 4 : 0 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => handleTabChange(item.id)}
+                  title={!sidebarOpen ? item.name : ""}
+                  className={`w-full flex items-center ${sidebarOpen ? "px-4" : "justify-center"} py-3 text-left rounded-xl ${
+                    activeTab === item.id
+                      ? "bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-600 text-white shadow-lg"
+                      : isDark
+                        ? "text-gray-300 hover:bg-gray-800/50"
+                        : "text-gray-700 hover:bg-gray-100"
+                  }`}
+                >
+                  <Icon className={`w-5 h-5 ${sidebarOpen ? "mr-3" : ""}`} />
+                  {sidebarOpen && <span className="font-medium whitespace-nowrap">{item.name}</span>}
+                </motion.button>
+              );
+            })}
+          </nav>
+
+          {/* User Menu */}
+          <div className={`p-4 border-t ${isDark ? "border-gray-700" : "border-gray-200"}`}>
+            {sidebarOpen ? (
+              <div className={`glass ${isDark ? "" : "glass-light"} rounded-xl p-4 mb-3`}>
+                <div className="flex items-center space-x-3 mb-3">
+                  <img
+                    className="h-10 w-10 rounded-full ring-2 ring-blue-500 flex-shrink-0"
+                    src={user?.photoURL || "https://via.placeholder.com/40"}
+                    alt={user?.displayName || "Admin"}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className={`text-sm font-medium truncate ${isDark ? "text-white" : "text-gray-900"}`}>{user?.displayName || "Admin"}</p>
+                    <p className={`text-xs truncate ${isDark ? "text-gray-400" : "text-gray-500"}`}>{user?.email}</p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <button onClick={toggleTheme} className={`flex-1 flex items-center justify-center p-2 rounded-lg transition-all ${isDark ? "bg-gray-700 hover:bg-gray-600" : "bg-gray-200 hover:bg-gray-300"}`}>
+                    {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                  </button>
+                  <Link to="/" className={`flex-1 flex items-center justify-center p-2 rounded-lg transition-all ${isDark ? "bg-gray-700 hover:bg-gray-600" : "bg-gray-200 hover:bg-gray-300"}`}>
+                    <Home className="w-4 h-4" />
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center space-y-4 mb-3">
+                <img
+                  className="h-10 w-10 rounded-full ring-2 ring-blue-500"
+                  src={user?.photoURL || "https://via.placeholder.com/40"}
+                  alt="Admin"
+                />
+                <div className="flex flex-col items-center gap-2 w-full">
+                  <button onClick={toggleTheme} className={`p-2 rounded-lg transition-all ${isDark ? "bg-gray-700 hover:bg-gray-600" : "bg-gray-200 hover:bg-gray-300"}`}>
+                    {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                  </button>
+                  <Link to="/" className={`p-2 rounded-lg transition-all ${isDark ? "bg-gray-700 hover:bg-gray-600" : "bg-gray-200 hover:bg-gray-300"}`}>
+                    <Home className="w-4 h-4" />
+                  </Link>
+                </div>
+              </div>
+            )}
+
             <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="absolute -right-3 top-1/2 -translate-y-1/2 bg-blue-600 text-white p-1.5 rounded-full shadow-lg z-50 hidden lg:block hover:scale-110 transition-transform"
+              onClick={handleLogout}
+              className={`w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-xl text-sm font-semibold shadow-lg flex items-center justify-center ${sidebarOpen ? "px-4 py-2 space-x-2" : "p-3"}`}
+              title={!sidebarOpen ? "Logout" : ""}
             >
-              {sidebarOpen ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+              <LogOut className="w-4 h-4" />
+              {sidebarOpen && <span>Logout</span>}
             </button>
-            {/* Inner Content Wrapper for Smooth Width Clipping */}
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Sidebar */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ x: -300 }}
+            animate={{ x: 0 }}
+            exit={{ x: -300 }}
+            transition={{ type: 'spring', damping: 20, stiffness: 150 }}
+            className="lg:hidden fixed inset-y-0 left-0 z-50 w-80 max-w-[85vw] glass shadow-2xl border-r border-gray-700"
+          >
+            {/* Inner Content Wrapper */}
             <div className="flex flex-col h-full overflow-hidden w-full whitespace-nowrap">
-              <div className={`p-6 flex items-center ${sidebarOpen ? "justify-between" : "justify-center"}`}>
-              {sidebarOpen ? (
+              <div className="p-6 flex items-center justify-between">
                 <Link
                   to="/"
                   className="text-2xl font-bold bg-gradient-to-r from-blue-500 via-cyan-500 to-teal-500 bg-clip-text text-transparent flex items-center space-x-2 whitespace-nowrap"
@@ -353,49 +445,42 @@ const AdminDashboard = () => {
                   <span>Justees</span>
                   <span className={`text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}>Admin</span>
                 </Link>
-              ) : (
-                <Link to="/" className="text-2xl font-bold text-blue-500">J</Link>
-              )}
-              
-              {/* Mobile Close Button */}
-              {mobileMenuOpen && (
-                <button onClick={() => setMobileMenuOpen(false)} className="lg:hidden p-2 text-gray-500">
+                
+                {/* Mobile Close Button */}
+                <button onClick={() => setMobileMenuOpen(false)} className="p-2 text-gray-500">
                   <X className="w-6 h-6" />
                 </button>
-              )}
-            </div>
+              </div>
 
-            <nav className="mt-6 px-3 flex-1 space-y-1 overflow-y-auto">
-              {sidebarItems.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <motion.button
-                    key={item.id}
-                    whileHover={{ scale: 1.02, x: sidebarOpen ? 4 : 0 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => {
-                      handleTabChange(item.id);
-                      if (window.innerWidth < 1024) setMobileMenuOpen(false);
-                    }}
-                    title={!sidebarOpen ? item.name : ""}
-                    className={`w-full flex items-center ${sidebarOpen ? "px-4" : "justify-center"} py-3 text-left rounded-xl ${
-                      activeTab === item.id
-                        ? "bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-600 text-white shadow-lg"
-                        : isDark
-                          ? "text-gray-300 hover:bg-gray-800/50"
-                          : "text-gray-700 hover:bg-gray-100"
-                    }`}
-                  >
-                    <Icon className={`w-5 h-5 ${sidebarOpen ? "mr-3" : ""}`} />
-                    {sidebarOpen && <span className="font-medium whitespace-nowrap">{item.name}</span>}
-                  </motion.button>
-                );
-              })}
-            </nav>
+              <nav className="mt-6 px-3 flex-1 space-y-1 overflow-y-auto">
+                {sidebarItems.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <motion.button
+                      key={item.id}
+                      whileHover={{ scale: 1.02, x: 4 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => {
+                        handleTabChange(item.id);
+                        setMobileMenuOpen(false);
+                      }}
+                      className={`w-full flex items-center px-4 py-3 text-left rounded-xl ${
+                        activeTab === item.id
+                          ? "bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-600 text-white shadow-lg"
+                          : isDark
+                            ? "text-gray-300 hover:bg-gray-800/50"
+                            : "text-gray-700 hover:bg-gray-100"
+                      }`}
+                    >
+                      <Icon className="w-5 h-5 mr-3" />
+                      <span className="font-medium whitespace-nowrap">{item.name}</span>
+                    </motion.button>
+                  );
+                })}
+              </nav>
 
-            {/* User Menu */}
-            <div className={`p-4 border-t ${isDark ? "border-gray-700" : "border-gray-200"}`}>
-              {sidebarOpen ? (
+              {/* User Menu */}
+              <div className={`p-4 border-t ${isDark ? "border-gray-700" : "border-gray-200"}`}>
                 <div className={`glass ${isDark ? "" : "glass-light"} rounded-xl p-4 mb-3`}>
                   <div className="flex items-center space-x-3 mb-3">
                     <img
@@ -417,40 +502,22 @@ const AdminDashboard = () => {
                     </Link>
                   </div>
                 </div>
-              ) : (
-                <div className="flex flex-col items-center space-y-4 mb-3">
-                  <img
-                    className="h-10 w-10 rounded-full ring-2 ring-blue-500"
-                    src={user?.photoURL || "https://via.placeholder.com/40"}
-                    alt="Admin"
-                  />
-                  <div className="flex flex-col items-center gap-2 w-full">
-                    <button onClick={toggleTheme} className={`p-2 rounded-lg transition-all ${isDark ? "bg-gray-700 hover:bg-gray-600" : "bg-gray-200 hover:bg-gray-300"}`}>
-                      {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-                    </button>
-                    <Link to="/" className={`p-2 rounded-lg transition-all ${isDark ? "bg-gray-700 hover:bg-gray-600" : "bg-gray-200 hover:bg-gray-300"}`}>
-                      <Home className="w-4 h-4" />
-                    </Link>
-                  </div>
-                </div>
-              )}
 
-              <button
-                onClick={handleLogout}
-                className={`w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-xl text-sm font-semibold shadow-lg flex items-center justify-center ${sidebarOpen ? "px-4 py-2 space-x-2" : "p-3"}`}
-                title={!sidebarOpen ? "Logout" : ""}
-              >
-                <LogOut className="w-4 h-4" />
-                {sidebarOpen && <span>Logout</span>}
-              </button>
+                <button
+                  onClick={handleLogout}
+                  className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-xl px-4 py-2 text-sm font-semibold shadow-lg flex items-center justify-center space-x-2"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Logout</span>
+                </button>
+              </div>
             </div>
-          </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden w-full">
         <AnimatePresence mode="wait">
           {activeTab === "dashboard" && (
             <motion.div
@@ -458,25 +525,25 @@ const AdminDashboard = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="p-4 lg:p-8"
+              className="p-4 sm:p-6 lg:p-8 pt-16 lg:pt-8"
             >
               {/* Header */}
-              <div className="mb-8">
+              <div className="mb-6 sm:mb-8">
                 <h2
-                  className={`text-4xl font-bold mb-2 ${isDark ? "text-white" : "text-gray-900"}`}
+                  className={`text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 ${isDark ? "text-white" : "text-gray-900"}`}
                 >
                   Welcome back,{" "}
                   {user?.displayName?.split(" ")[0] || "Admin"}!
                 </h2>
                 <p
-                  className={`text-lg ${isDark ? "text-gray-400" : "text-gray-600"}`}
+                  className={`text-sm sm:text-base lg:text-lg ${isDark ? "text-gray-400" : "text-gray-600"}`}
                 >
                   Here's what's happening with your store today.
                 </p>
               </div>
 
               {/* Stats Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
                 <StatCard
                   title="Total Products"
                   value={stats.totalProducts}
@@ -509,9 +576,9 @@ const AdminDashboard = () => {
 
               {/* Alerts */}
               {(stats.outOfStockItems > 0 || stats.lowStockItems > 0) && (
-                <div className="mb-8">
+                <div className="mb-6 sm:mb-8">
                   <h3
-                    className={`text-lg font-semibold mb-4 ${isDark ? "text-white" : "text-gray-900"}`}
+                    className={`text-base sm:text-lg font-semibold mb-4 ${isDark ? "text-white" : "text-gray-900"}`}
                   >
                     Alerts & Notifications
                   </h3>

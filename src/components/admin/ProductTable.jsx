@@ -99,18 +99,20 @@ const ProductTable = ({
   };
 
   return (
-    <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-        <thead className={`${isDark ? 'bg-white/5' : 'bg-gray-50'}`}>
-          <tr>
-            <th className="px-6 py-3 text-left">
-              <input
-                type="checkbox"
-                checked={selectedProducts.size === products.length && products.length > 0}
-                onChange={toggleSelectAll}
-                className="h-4 w-4 text-cyan-600 focus:ring-cyan-500 border-gray-300 rounded"
-              />
-            </th>
+    <div className="w-full">
+      {/* Desktop Table View - Hidden on Mobile */}
+      <div className="hidden md:block overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+          <thead className={`${isDark ? 'bg-white/5' : 'bg-gray-50'}`}>
+            <tr>
+              <th className="px-6 py-3 text-left">
+                <input
+                  type="checkbox"
+                  checked={selectedProducts.size === products.length && products.length > 0}
+                  onChange={toggleSelectAll}
+                  className="h-4 w-4 text-cyan-600 focus:ring-cyan-500 border-gray-300 rounded"
+                />
+              </th>
 
             <th
               className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer transition-colors ${isDark ? 'text-gray-400 hover:bg-white/5' : 'text-gray-500 hover:bg-gray-100'}`}
@@ -414,6 +416,211 @@ const ProductTable = ({
           })}
         </tbody>
       </table>
+      </div>
+
+      {/* Mobile Card View - Shown on Mobile */}
+      <div className="md:hidden space-y-4">
+        {products.map((product, index) => {
+          const stockStatus = getStockStatus(product);
+          const isExpanded = expandedRows.has(product.id);
+          const isSelected = selectedProducts.has(product.id);
+
+          return (
+            <motion.div
+              key={product.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.05 }}
+              className={`rounded-xl border p-4 ${
+                isDark
+                  ? 'bg-gray-800/50 border-gray-700'
+                  : 'bg-white border-gray-200'
+              } ${isSelected ? 'ring-2 ring-cyan-500' : ''}`}
+            >
+              {/* Card Header */}
+              <div className="flex items-start gap-3 mb-3">
+                <input
+                  type="checkbox"
+                  checked={isSelected}
+                  onChange={() => toggleProductSelection(product.id)}
+                  className="h-5 w-5 text-cyan-600 focus:ring-cyan-500 border-gray-300 rounded mt-1"
+                />
+                
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <div className="flex-1 min-w-0">
+                      <h3 className={`font-semibold text-base truncate ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                        {product.name}
+                      </h3>
+                      <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                        {product.category}
+                      </p>
+                    </div>
+                    {product.image && (
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        className="w-16 h-16 object-cover rounded-lg"
+                      />
+                    )}
+                  </div>
+
+                  {/* Price and Stock */}
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className={`text-lg font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                      {formatPrice(product.price)}
+                    </span>
+                    <span className={`px-2 py-1 text-xs rounded-full border ${stockStatus.color}`}>
+                      {stockStatus.label} ({product.totalStock || 0})
+                    </span>
+                  </div>
+
+                  {/* Status Badges */}
+                  <div className="flex items-center gap-2 flex-wrap mb-3">
+                    {getStatusBadge(product)}
+                    {product.featured && (
+                      <span className={`px-2 py-1 text-xs rounded-full border ${isDark ? 'bg-yellow-400/10 text-yellow-400 border-yellow-400/20' : 'bg-yellow-100 text-yellow-600 border-yellow-200'}`}>
+                        <Star className="w-3 h-3 inline mr-1" />
+                        Featured
+                      </span>
+                    )}
+                    {product.views > 0 && (
+                      <span className={`px-2 py-1 text-xs rounded-full ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                        <Eye className="w-3 h-3 inline mr-1" />
+                        {product.views} views
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <button
+                      onClick={() => onEdit(product)}
+                      className={`flex-1 min-w-[100px] flex items-center justify-center gap-1 px-3 py-2 rounded-lg text-sm transition-colors ${
+                        isDark
+                          ? 'bg-cyan-600/10 text-cyan-400 hover:bg-cyan-600/20'
+                          : 'bg-cyan-100 text-cyan-600 hover:bg-cyan-200'
+                      }`}
+                    >
+                      <Edit3 className="w-4 h-4" />
+                      Edit
+                    </button>
+
+                    <button
+                      onClick={() => onToggleVisibility(product)}
+                      className={`flex items-center justify-center gap-1 px-3 py-2 rounded-lg text-sm transition-colors ${
+                        isDark
+                          ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      }`}
+                      title={product.isVisible ? 'Hide' : 'Show'}
+                    >
+                      {product.isVisible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                    </button>
+
+                    <button
+                      onClick={() => onToggleFeatured(product)}
+                      className={`flex items-center justify-center gap-1 px-3 py-2 rounded-lg text-sm transition-colors ${
+                        product.featured
+                          ? isDark
+                            ? 'bg-yellow-400/20 text-yellow-400'
+                            : 'bg-yellow-100 text-yellow-600'
+                          : isDark
+                            ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      }`}
+                      title={product.featured ? 'Unfeature' : 'Feature'}
+                    >
+                      <Star className="w-4 h-4" {...(product.featured ? { fill: 'currentColor' } : {})} />
+                    </button>
+
+                    <button
+                      onClick={() => onDelete(product)}
+                      className={`flex items-center justify-center gap-1 px-3 py-2 rounded-lg text-sm transition-colors ${
+                        isDark
+                          ? 'bg-red-600/10 text-red-400 hover:bg-red-600/20'
+                          : 'bg-red-100 text-red-600 hover:bg-red-200'
+                      }`}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+
+                    <button
+                      onClick={() => toggleRowExpansion(product.id)}
+                      className={`flex items-center justify-center gap-1 px-3 py-2 rounded-lg text-sm transition-colors ${
+                        isDark
+                          ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      }`}
+                    >
+                      {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                    </button>
+                  </div>
+
+                  {/* Expanded Details */}
+                  {isExpanded && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="mt-4 pt-4 border-t ${isDark ? 'border-gray-700' : 'border-gray-200'}"
+                    >
+                      {product.description && (
+                        <div className="mb-3">
+                          <h4 className={`font-medium text-sm mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                            Description
+                          </h4>
+                          <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                            {product.description}
+                          </p>
+                        </div>
+                      )}
+
+                      {product.variants && product.variants.length > 0 && (
+                        <div className="mb-3">
+                          <h4 className={`font-medium text-sm mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                            Variants ({product.variants.length})
+                          </h4>
+                          <div className="space-y-1">
+                            {product.variants.map((variant, idx) => (
+                              <div key={idx} className="text-sm flex justify-between">
+                                <span className={isDark ? 'text-gray-300' : 'text-gray-900'}>
+                                  {variant.size} - {variant.color}
+                                </span>
+                                <span className={isDark ? 'text-gray-500' : 'text-gray-600'}>
+                                  Stock: {variant.stock || 0}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {product.tags && product.tags.length > 0 && (
+                        <div>
+                          <h4 className={`font-medium text-sm mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                            Tags
+                          </h4>
+                          <div className="flex flex-wrap gap-2">
+                            {product.tags.map((tag, idx) => (
+                              <span
+                                key={idx}
+                                className="px-2 py-1 text-xs bg-cyan-500/20 text-cyan-400 rounded-full"
+                              >
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </motion.div>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          );
+        })}
+      </div>
 
       {products.length === 0 && (
         <div className={`text-center py-8 ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>

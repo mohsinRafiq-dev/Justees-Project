@@ -313,13 +313,15 @@ export const isValidPhone = (phone) => {
 export const isAdminUser = (user) => {
   if (!user || !user.email) return false;
 
-  const adminEmail = import.meta.env.VITE_ADMIN_EMAIL;
-  if (!adminEmail) {
+  const adminEmails = import.meta.env.VITE_ADMIN_EMAIL;
+  if (!adminEmails) {
     console.warn('VITE_ADMIN_EMAIL not configured');
     return false;
   }
 
-  return user.email.toLowerCase() === adminEmail.toLowerCase();
+  // Split by comma and check if user email matches any admin email
+  const emailList = adminEmails.split(',').map(email => email.trim().toLowerCase());
+  return emailList.includes(user.email.toLowerCase());
 };
 
 export default {

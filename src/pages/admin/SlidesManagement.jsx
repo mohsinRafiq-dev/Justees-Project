@@ -225,16 +225,16 @@ const SlidesManagement = () => {
   }
 
   return (
-    <div className="p-8">
-      <div className="flex items-center justify-between mb-6">
+    <div className="p-4 sm:p-6 lg:p-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
         <div>
-          <h2 className={`text-2xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}>Slides</h2>
-          <p className={`${isDark ? "text-gray-400" : "text-gray-600"}`}>Add and manage hero slides (images/videos)</p>
+          <h2 className={`text-2xl sm:text-3xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}>Slides</h2>
+          <p className={`text-sm sm:text-base ${isDark ? "text-gray-400" : "text-gray-600"}`}>Add and manage hero slides (images/videos)</p>
         </div>
         <div className="flex items-center space-x-2">
           <button
             onClick={() => openModal()}
-            className="bg-blue-600 text-white px-4 py-2 rounded flex items-center space-x-2 hover:bg-blue-700 transition-colors"
+            className="bg-blue-600 text-white px-4 py-2 rounded flex items-center space-x-2 hover:bg-blue-700 transition-colors w-full sm:w-auto justify-center"
           >
             <Plus className="w-4 h-4" />
             <span>Add Slide</span>
@@ -246,8 +246,8 @@ const SlidesManagement = () => {
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
           <div className={`${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"} rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl my-8 border`}>
-            <div className={`sticky top-0 border-b px-6 py-4 rounded-t-2xl z-10 ${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"}`}>
-              <h3 className={`text-xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}>{editingId ? 'Edit Slide' : 'Add New Slide'}</h3>
+            <div className={`sticky top-0 border-b px-4 sm:px-6 py-3 sm:py-4 rounded-t-2xl z-10 ${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"}`}>
+              <h3 className={`text-lg sm:text-xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}>{editingId ? 'Edit Slide' : 'Add New Slide'}</h3>
             </div>
 
             <div className="p-6 space-y-6">
@@ -387,7 +387,7 @@ const SlidesManagement = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className={`block text-sm font-medium mb-2 ${isDark ? "text-gray-300" : "text-gray-700"}`}>Order</label>
                   <input 
@@ -421,7 +421,7 @@ const SlidesManagement = () => {
             </div>
 
             {/* Actions - Sticky bottom */}
-            <div className={`sticky bottom-0 border-t px-6 py-4 rounded-b-2xl ${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"}`}>
+            <div className={`sticky bottom-0 border-t px-4 sm:px-6 py-3 sm:py-4 rounded-b-2xl ${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"}`}>
               <div className="flex justify-end gap-3">
                 <button 
                   onClick={closeModal} 
@@ -461,22 +461,22 @@ const SlidesManagement = () => {
         ) : (
           <ul className={`divide-y ${isDark ? "divide-gray-700" : "divide-gray-100"}`}>
             {slides.map((s) => (
-              <li key={s.id} className={`flex items-center justify-between py-4 hover:bg-black/5 px-6 transition-colors`}>
+              <li key={s.id} className={`flex flex-col sm:flex-row sm:items-center sm:justify-between py-4 hover:bg-black/5 px-4 sm:px-6 transition-colors gap-3 sm:gap-0`}>
                 <div className="flex items-center gap-4 flex-1">
-                  <div className={`w-20 h-12 rounded overflow-hidden border ${isDark ? "bg-gray-900 border-gray-700" : "bg-gray-100 border-gray-200"}`}>
+                  <div className={`w-20 h-12 rounded overflow-hidden border flex-shrink-0 ${isDark ? "bg-gray-900 border-gray-700" : "bg-gray-100 border-gray-200"}`}>
                     {s.type === 'video' ? (
                       <video src={s.url} className="w-full h-full object-cover" />
                     ) : (
                       <img src={s.url} alt={s.title} className="w-full h-full object-cover" />
                     )}
                   </div>
-                  <div>
-                    <h3 className={`font-medium ${isDark ? "text-gray-100" : "text-gray-900"}`}>{s.title || 'Untitled'}</h3>
+                  <div className="flex-1 min-w-0">
+                    <h3 className={`font-medium truncate ${isDark ? "text-gray-100" : "text-gray-900"}`}>{s.title || 'Untitled'}</h3>
                     <p className={`text-sm line-clamp-1 ${isDark ? "text-gray-400" : "text-gray-500"}`}>{s.subtitle}</p>
                     <p className={`text-xs ${isDark ? "text-gray-500" : "text-gray-400"}`}>Order: {s.order ?? 0} • {s.type}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 self-end sm:self-center">
                   <button onClick={() => openModal(s)} className={`p-2 rounded-full transition-colors ${isDark ? "text-blue-400 hover:bg-blue-500/10" : "text-blue-600 hover:bg-blue-50"}`} title="Edit"><Edit3 className="w-4 h-4" /></button>
                   <button onClick={() => handleDelete(s.id)} className={`p-2 rounded-full transition-colors ${isDark ? "text-red-400 hover:bg-red-500/10" : "text-red-600 hover:bg-red-50"}`} title="Delete"><Trash2 className="w-4 h-4" /></button>
                 </div>

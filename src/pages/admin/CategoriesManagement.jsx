@@ -199,8 +199,8 @@ const CategoriesManagement = () => {
 
       {/* Add/Edit Category Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className={`${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-100"} rounded-2xl max-w-md w-full shadow-2xl p-6 border`}>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+          <div className={`${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-100"} rounded-2xl max-w-md w-full shadow-2xl p-4 sm:p-6 border my-8`}>
             <h3 className={`text-xl font-bold mb-6 ${isDark ? "text-white" : "text-gray-900"}`}>{editingId ? 'Edit Category' : 'Add New Category'}</h3>
 
             <div className="space-y-6">
@@ -316,19 +316,19 @@ const CategoriesManagement = () => {
         ) : (
           <ul className={`divide-y ${isDark ? "divide-gray-700" : "divide-gray-100"}`}>
             {categories.map((c) => (
-              <li key={c.id} className={`flex items-center justify-between py-4 hover:bg-black/5 px-6 transition-colors`}>
+              <li key={c.id} className={`flex flex-col sm:flex-row sm:items-center sm:justify-between py-4 hover:bg-black/5 px-4 sm:px-6 transition-colors gap-3 sm:gap-0`}>
                 <div className="flex items-center gap-4 flex-1">
                   {c.image ? (
-                    <img src={c.image} alt={c.name} className={`w-12 h-12 rounded object-cover border ${isDark ? "border-gray-700 bg-gray-900" : "border-gray-200 bg-gray-100"}`} />
+                    <img src={c.image} alt={c.name} className={`w-12 h-12 sm:w-12 sm:h-12 rounded object-cover border flex-shrink-0 ${isDark ? "border-gray-700 bg-gray-900" : "border-gray-200 bg-gray-100"}`} />
                   ) : (
-                    <div className={`w-12 h-12 rounded flex items-center justify-center text-xs ${isDark ? "bg-gray-900 text-gray-500" : "bg-gray-200 text-gray-500"}`}>No Img</div>
+                    <div className={`w-12 h-12 sm:w-12 sm:h-12 rounded flex items-center justify-center text-xs flex-shrink-0 ${isDark ? "bg-gray-900 text-gray-500" : "bg-gray-200 text-gray-500"}`}>No Img</div>
                   )}
-                  <div>
-                    <h3 className={`font-medium ${isDark ? "text-gray-100" : "text-gray-900"}`}>{c.name}</h3>
-                    {c.description && <p className={`text-sm line-clamp-1 ${isDark ? "text-gray-400" : "text-gray-500"}`}>{c.description}</p>}
+                  <div className="flex-1 min-w-0">
+                    <h3 className={`font-medium truncate ${isDark ? "text-gray-100" : "text-gray-900"}`}>{c.name}</h3>
+                    {c.description && <p className={`text-sm line-clamp-2 sm:line-clamp-1 ${isDark ? "text-gray-400" : "text-gray-500"}`}>{c.description}</p>}
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 self-end sm:self-center">
                   <button
                     onClick={() => openModal(c)}
                     className={`p-2 rounded-full transition-colors ${isDark ? "text-blue-400 hover:bg-blue-500/10" : "text-blue-600 hover:bg-blue-50"}`}

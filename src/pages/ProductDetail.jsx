@@ -254,7 +254,6 @@ const ProductDetail = () => {
   };
 
   const { 
-    wishlist, 
     addToWishlist, 
     removeFromWishlist, 
     isInWishlist 

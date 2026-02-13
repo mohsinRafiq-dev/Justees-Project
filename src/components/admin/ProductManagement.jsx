@@ -54,19 +54,12 @@ const ProductManagement = () => {
   const [productToDelete, setProductToDelete] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
-  // Check admin permissions
-  useEffect(() => {
-    if (!isAdminUser(user)) {
-      toast.error("Unauthorized access");
-      return;
-    }
-  }, [user]);
-
   // Load products and analytics
   useEffect(() => {
+    if (!isAdminUser(user)) return;
     loadProducts();
     loadAnalytics();
-  }, []);
+  }, [user]);
 
   // Filter products when filters change
   useEffect(() => {
@@ -301,15 +294,15 @@ const ProductManagement = () => {
 
   return (
     <div className="w-full">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex justify-between items-center">
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
             <div>
-              <h1 className={`text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+              <h1 className={`text-2xl sm:text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
                 Product Management
               </h1>
-              <p className={`mt-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+              <p className={`mt-2 text-sm sm:text-base ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                 Manage your product catalog, inventory, and settings
               </p>
             </div>
@@ -317,7 +310,7 @@ const ProductManagement = () => {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleCreateProduct}
-              className="bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-600 hover:from-blue-700 hover:via-cyan-700 hover:to-teal-700 text-white px-6 py-3 rounded-xl font-semibold flex items-center space-x-2 shadow-lg transition-all"
+              className="bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-600 hover:from-blue-700 hover:via-cyan-700 hover:to-teal-700 text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-semibold flex items-center justify-center space-x-2 shadow-lg transition-all w-full sm:w-auto"
             >
               <Plus className="w-5 h-5" />
               <span>Add Product</span>
@@ -327,7 +320,7 @@ const ProductManagement = () => {
 
         {/* Analytics Cards */}
         {analytics && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -396,8 +389,8 @@ const ProductManagement = () => {
         )}
 
         {/* Filters and Search */}
-        <div className={`backdrop-blur-xl rounded-2xl mb-6 p-6 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white/80 border-gray-200'} shadow-lg`}>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className={`backdrop-blur-xl rounded-2xl mb-4 sm:mb-6 p-4 sm:p-6 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white/80 border-gray-200'} shadow-lg`}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
             {/* Search */}
             <div className="lg:col-span-2">
               <div className="relative">

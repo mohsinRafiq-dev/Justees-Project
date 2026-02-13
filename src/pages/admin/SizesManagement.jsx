@@ -176,21 +176,21 @@ const SizesManagement = () => {
   }
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-6 lg:p-8">
       <div className="mb-6">
-        <h2 className={`text-2xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}>Sizes & Colors</h2>
-        <p className={`${isDark ? "text-gray-400" : "text-gray-600"}`}>Manage product sizes and available colors</p>
+        <h2 className={`text-2xl sm:text-3xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}>Sizes & Colors</h2>
+        <p className={`text-sm sm:text-base ${isDark ? "text-gray-400" : "text-gray-600"}`}>Manage product sizes and available colors</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className={`rounded-xl shadow-lg border p-6 ${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"}`}>
-          <div className="flex items-center justify-between mb-6">
-            <h3 className={`font-bold ${isDark ? "text-white" : "text-gray-900"}`}>Sizes</h3>
+        <div className={`rounded-xl shadow-lg border p-4 sm:p-6 ${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"}`}>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-3">
+            <h3 className={`font-bold text-lg ${isDark ? "text-white" : "text-gray-900"}`}>Sizes</h3>
             <div className="flex items-center space-x-2">
               <input
                 value={newSize}
                 onChange={(e) => setNewSize(e.target.value)}
-                className={`rounded px-3 py-2 outline-none border transition-all ${
+                className={`rounded px-3 py-2 outline-none border transition-all flex-1 sm:flex-none ${
                   isDark ? "bg-gray-900 border-gray-700 text-white focus:ring-blue-500/50" : "bg-white border-gray-300 focus:ring-blue-500 text-gray-900"
                 } focus:ring-2`}
                 placeholder="e.g. XS"
@@ -240,14 +240,14 @@ const SizesManagement = () => {
           )}
         </div>
 
-        <div className={`rounded-xl shadow-lg border p-6 ${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"}`}>
-          <div className="flex items-center justify-between mb-6">
-            <h3 className={`font-bold ${isDark ? "text-white" : "text-gray-900"}`}>Colors</h3>
+        <div className={`rounded-xl shadow-lg border p-4 sm:p-6 ${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"}`}>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-3">
+            <h3 className={`font-bold text-lg ${isDark ? "text-white" : "text-gray-900"}`}>Colors</h3>
             <div className="flex items-center space-x-2">
               <input
                 value={newColor}
                 onChange={(e) => setNewColor(e.target.value)}
-                className={`rounded px-3 py-2 outline-none border transition-all ${
+                className={`rounded px-3 py-2 outline-none border transition-all flex-1 sm:flex-none ${
                   isDark ? "bg-gray-900 border-gray-700 text-white focus:ring-blue-500/50" : "bg-white border-gray-300 focus:ring-blue-500 text-gray-900"
                 } focus:ring-2`}
                 placeholder="e.g. Burgundy"
