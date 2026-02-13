@@ -83,7 +83,7 @@ const CartDrawer = () => {
                                     <h3 className="text-xl font-bold mb-2">Your cart is empty</h3>
                                     <p className="text-gray-500 mb-6">Looks like you haven't added anything yet.</p>
                                     <button
-                                        onClick={onClose}
+                                        onClick={closeCart}
                                         className="bg-blue-600 text-white px-6 py-2 rounded-full font-semibold hover:bg-blue-700 transition-colors"
                                     >
                                         Start Shopping

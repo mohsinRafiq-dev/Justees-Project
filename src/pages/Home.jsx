@@ -106,9 +106,9 @@ const Home = () => {
   // Load slides from Firestore
   const loadSlides = async () => {
     try {
-      console.log('[Home] Loading slides...');
+      // console.log('[Home] Loading slides...');
       const res = await getSlidesForHome(10);
-      console.log('[Home] Slides result:', res);
+      // console.log('[Home] Slides result:', res);
 
       if (res.success && res.slides.length > 0) {
         // Normalize slides to expected props (url, type, title...)
@@ -122,10 +122,10 @@ const Home = () => {
           type: s.type || 'image',
           order: s.order || idx
         }));
-        console.log('[Home] Setting normalized slides:', normalized);
+        // console.log('[Home] Setting normalized slides:', normalized);
         setHeroSlides(normalized);
       } else {
-        console.log('[Home] No slides found or query failed');
+        // console.log('[Home] No slides found or query failed');
         setHeroSlides([]);
       }
     } catch (error) {
