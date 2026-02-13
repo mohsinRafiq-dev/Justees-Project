@@ -421,7 +421,11 @@ const Home = () => {
                         onEnded={nextSlide}
                       />
                     ) : (
-                      <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${slide.url})` }} />
+                      <LazyImage
+                        src={slide.url}
+                        alt={slide.title || 'Slide'}
+                        className="w-full h-full object-cover"
+                      />
                     )}
                     <div className="absolute inset-0 bg-gradient-to-r from-gray-900/90 via-gray-800/40 to-gray-900/50" />
                   </div>
