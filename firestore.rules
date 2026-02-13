@@ -26,6 +26,12 @@ service cloud.firestore {
       allow read, list: if true; // Anyone can read reviews
       allow write: if request.auth != null; // Only authenticated users can write
     }
+
+    // Slides collection - Public read, Authenticated write
+    match /slides/{slideId} {
+      allow read, list: if true;
+      allow write: if request.auth != null;
+    }
     
     // All other collections - Authenticated users only
     match /{document=**} {

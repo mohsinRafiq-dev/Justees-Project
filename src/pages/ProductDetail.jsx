@@ -121,7 +121,7 @@ const ProductDetail = () => {
         toast.error("Failed to load product");
       }
     } catch (error) {
-      console.error("Error loading product:", error);
+      // console.error("Error loading product:", error);
       toast.error("Error loading product");
     } finally {
       setLoading(false);
@@ -135,17 +135,17 @@ const ProductDetail = () => {
   const loadProductReviews = useCallback(async () => {
     if (!id) return;
     try {
-      console.log("Fetching reviews for product ID:", id);
+      // console.log("Fetching reviews for product ID:", id);
       const result = await getProductReviews(id, 50);
       if (result.success) {
-        console.log(`Successfully fetched ${result.reviews.length} reviews`);
+        // console.log(`Successfully fetched ${result.reviews.length} reviews`);
         setProductReviews(result.reviews);
       } else {
-        console.error("Failed to fetch reviews:", result.error);
+        // console.error("Failed to fetch reviews:", result.error);
         toast.error("Low-level error loading reviews. Please check console.");
       }
     } catch (error) {
-      console.error("Error loading product reviews:", error);
+      // console.error("Error loading product reviews:", error);
     }
   }, [id]);
 
@@ -170,7 +170,7 @@ const ProductDetail = () => {
         setRelatedProducts(related.slice(0, 4));
       }
     } catch (error) {
-      console.error("Error loading related products:", error);
+      // console.error("Error loading related products:", error);
     }
   }, [product]);
 
@@ -341,7 +341,7 @@ const ProductDetail = () => {
         );
       }
     } catch (error) {
-      console.error("Error submitting review:", error);
+      // console.error("Error submitting review:", error);
       toast.error("Failed to submit review. Please try again.");
     } finally {
       setReviewSubmitting(false);

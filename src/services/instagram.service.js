@@ -30,7 +30,7 @@ export const getInstagramPosts = async (limit = 6) => {
   try {
     // Check if API is configured
     if (!INSTAGRAM_ACCESS_TOKEN || !INSTAGRAM_USER_ID) {
-      console.log('Instagram API not configured. Using fallback images.');
+      // console.log('Instagram API not configured. Using fallback images.');
       return {
         success: true,
         posts: FALLBACK_IMAGES.map((url, index) => ({
@@ -79,7 +79,7 @@ export const getInstagramPosts = async (limit = 6) => {
       isRealTime: true,
     };
   } catch (error) {
-    console.error('Error fetching Instagram posts:', error);
+    // console.error('Error fetching Instagram posts:', error);
     
     // Return fallback images on error
     return {

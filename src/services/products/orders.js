@@ -7,7 +7,7 @@ export const getAllOrders = async () => {
     const orders = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
     return { success: true, orders };
   } catch (error) {
-    console.error("Error getting orders:", error);
+    // console.error("Error getting orders:", error);
     return { success: false, error: error.message || "Failed to get orders" };
   }
 };
@@ -18,7 +18,7 @@ export const updateOrderStatus = async (orderId, status) => {
     await updateDoc(ref, { status, updatedAt: new Date() });
     return { success: true };
   } catch (error) {
-    console.error("Error updating order:", error);
+    // console.error("Error updating order:", error);
     return { success: false, error: error.message || "Failed to update order" };
   }
 };

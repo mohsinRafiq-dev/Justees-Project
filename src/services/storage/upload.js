@@ -4,16 +4,16 @@ import { compressImage, validateImage, validateMedia, generateFileName } from '.
 
 
 export const uploadProductImageEnhanced = async (file, productId = null, onProgress = null) => {
-  console.log('[storage] uploadProductImageEnhanced called', { fileName: file?.name, productId });
+
   try {
     const validation = validateImage(file);
     if (!validation.valid) {
-      console.warn('[storage] image validation failed', validation);
+
       throw new Error(validation.error);
     }
 
     const compressedBlob = await compressImage(file);
-    console.log('[storage] compressed image', { originalSize: file.size, compressedSize: compressedBlob?.size });
+
 
     const fileName = generateFileName(file.name, productId);
     const imagePath = productId ? `products/${productId}/${fileName}` : `products/temp/${fileName}`;
@@ -21,9 +21,9 @@ export const uploadProductImageEnhanced = async (file, productId = null, onProgr
 
     // Debug: log current auth state to help diagnose permission issues
     try {
-      console.log('[storage] auth.currentUser', auth?.currentUser ? { uid: auth.currentUser.uid, email: auth.currentUser.email } : null);
+
     } catch (e) {
-      console.debug('[storage] auth debug failed', e.message || e);
+
     }
 
     // Upload helper that can be retried after refreshing auth token
@@ -39,17 +39,17 @@ export const uploadProductImageEnhanced = async (file, productId = null, onProgr
       let result = await doUpload();
       return result;
     } catch (uploadError) {
-      console.error('[storage] upload error', uploadError);
+      // console.error('[storage] upload error', uploadError);
 
       // If unauthorized, try refreshing auth token once then retry
       if (uploadError && uploadError.code === 'storage/unauthorized' && auth?.currentUser && typeof auth.currentUser.getIdToken === 'function') {
         try {
-          console.log('[storage] attempting token refresh and retry');
+
           await auth.currentUser.getIdToken(true);
           const retryResult = await doUpload();
           return retryResult;
         } catch (retryError) {
-          console.error('[storage] retry upload error', retryError);
+          // console.error('[storage] retry upload error', retryError);
           return { success: false, error: retryError.message || 'Failed to upload image after token refresh', code: retryError.code || null };
         }
       }
@@ -57,7 +57,7 @@ export const uploadProductImageEnhanced = async (file, productId = null, onProgr
       return { success: false, error: uploadError.message || 'Failed to upload image', code: uploadError.code || null };
     }
   } catch (error) {
-    console.error('Error uploading image:', error);
+    // console.error('Error uploading image:', error);
     return { success: false, error: error.message || 'Failed to upload image' };
   }
 };
@@ -81,20 +81,20 @@ export const uploadCategoryImage = async (file) => {
     const downloadURL = await getDownloadURL(uploadResult.ref);
     return { success: true, url: downloadURL };
   } catch (error) {
-    console.error('Error uploading category image:', error);
+    // console.error('Error uploading category image:', error);
     return { success: false, error: error.message || 'Failed to upload category image' };
   }
 };
 
 export const uploadMultipleProductImages = async (files, productId, colorMapping = [], onProgress = null) => {
-  console.log('[storage] uploadMultipleProductImages called', { count: files?.length, productId });
+
   try {
     const uploadPromises = files.map(async (file, index) => {
-      console.log(`[storage] starting upload for file index ${index}`, { name: file.name });
+
       const result = await uploadProductImageEnhanced(file, productId, (progress) => {
         if (onProgress) onProgress(index, progress);
       });
-      console.debug(`[storage] upload result for index ${index}`, result);
+
       return result;
     });
 
@@ -111,7 +111,7 @@ export const uploadMultipleProductImages = async (files, productId, colorMapping
       totalFailed: failed.length
     };
   } catch (error) {
-    console.error('Error uploading multiple images:', error);
+    // console.error('Error uploading multiple images:', error);
     return { success: false, error: error.message || 'Failed to upload images' };
   }
 };
@@ -127,7 +127,7 @@ export const uploadSlideMedia = async (file) => {
     if (typeof validateMedia === 'function') {
       validation = validateMedia(file, { allowImages: true, allowVideos: true });
     } else {
-      console.warn('[storage] validateMedia not found, falling back to validateImage');
+
       const imgValidation = validateImage(file);
       validation = { ...imgValidation, type: imgValidation.valid ? 'image' : null };
     }
@@ -137,7 +137,7 @@ export const uploadSlideMedia = async (file) => {
     }
 
     if (!auth || !auth.currentUser) {
-      console.warn('[storage] uploadSlideMedia: not authenticated');
+
       return { success: false, error: 'Not authenticated. Please log in and try again.' };
     }
 
@@ -166,15 +166,15 @@ export const uploadSlideMedia = async (file) => {
     try {
       return await doUpload();
     } catch (uploadError) {
-      console.error('[storage] uploadSlideMedia upload error', uploadError);
+      // console.error('[storage] uploadSlideMedia upload error', uploadError);
       // If unauthorized, try refreshing token and retry once
       if (uploadError && uploadError.code === 'storage/unauthorized' && auth?.currentUser && typeof auth.currentUser.getIdToken === 'function') {
         try {
-          console.log('[storage] attempting token refresh and retry');
+
           await auth.currentUser.getIdToken(true);
           return await doUpload();
         } catch (retryError) {
-          console.error('[storage] retry uploadSlideMedia error', retryError);
+          // console.error('[storage] retry uploadSlideMedia error', retryError);
           return { success: false, error: retryError.message || 'Failed to upload media after token refresh', code: retryError.code || null };
         }
       }
@@ -187,7 +187,7 @@ export const uploadSlideMedia = async (file) => {
       return { success: false, error: uploadError.message || 'Failed to upload media', code: uploadError.code || null };
     }
   } catch (error) {
-    console.error('Error uploading slide media:', error);
+    // console.error('Error uploading slide media:', error);
     return { success: false, error: error.message || 'Failed to upload media' };
   }
 };
