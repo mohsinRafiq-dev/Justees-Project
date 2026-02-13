@@ -377,9 +377,9 @@ const AdminDashboard = () => {
               <div className={`glass ${isDark ? "" : "glass-light"} rounded-xl p-4 mb-3`}>
                 <div className="flex items-center space-x-3 mb-3">
                   <img
-                    className="h-10 w-10 rounded-full ring-2 ring-blue-500 flex-shrink-0"
-                    src={user?.photoURL || "https://via.placeholder.com/40"}
-                    alt={user?.displayName || "Admin"}
+                    className="h-10 w-10 rounded-full ring-2 ring-blue-500 flex-shrink-0 object-contain bg-white p-1"
+                    src="/justees_logo.png"
+                    alt="Justees"
                   />
                   <div className="flex-1 min-w-0">
                     <p className={`text-sm font-medium truncate ${isDark ? "text-white" : "text-gray-900"}`}>{user?.displayName || "Admin"}</p>
@@ -398,9 +398,9 @@ const AdminDashboard = () => {
             ) : (
               <div className="flex flex-col items-center space-y-4 mb-3">
                 <img
-                  className="h-10 w-10 rounded-full ring-2 ring-blue-500"
-                  src={user?.photoURL || "https://via.placeholder.com/40"}
-                  alt="Admin"
+                  className="h-10 w-10 rounded-full ring-2 ring-blue-500 object-contain bg-white p-1"
+                  src="/justees_logo.png"
+                  alt="Justees"
                 />
                 <div className="flex flex-col items-center gap-2 w-full">
                   <button onClick={toggleTheme} className={`p-2 rounded-lg transition-all ${isDark ? "bg-gray-700 hover:bg-gray-600" : "bg-gray-200 hover:bg-gray-300"}`}>
@@ -421,15 +421,6 @@ const AdminDashboard = () => {
               <LogOut className="w-4 h-4" />
               {sidebarOpen && <span>Logout</span>}
             </button>
-            
-            {/* Justees Logo */}
-            <div className="mt-4 flex justify-center">
-              <img
-                src="/justees_logo.png"
-                alt="Justees"
-                className={`${sidebarOpen ? "h-12" : "h-8"} object-contain transition-all duration-300`}
-              />
-            </div>
           </div>
         </div>
       </div>
@@ -493,9 +484,9 @@ const AdminDashboard = () => {
                 <div className={`glass ${isDark ? "" : "glass-light"} rounded-xl p-4 mb-3`}>
                   <div className="flex items-center space-x-3 mb-3">
                     <img
-                      className="h-10 w-10 rounded-full ring-2 ring-blue-500 flex-shrink-0"
-                      src={user?.photoURL || "https://via.placeholder.com/40"}
-                      alt={user?.displayName || "Admin"}
+                      className="h-10 w-10 rounded-full ring-2 ring-blue-500 flex-shrink-0 object-contain bg-white p-1"
+                      src="/justees_logo.png"
+                      alt="Justees"
                     />
                     <div className="flex-1 min-w-0">
                       <p className={`text-sm font-medium truncate ${isDark ? "text-white" : "text-gray-900"}`}>{user?.displayName || "Admin"}</p>
@@ -519,15 +510,6 @@ const AdminDashboard = () => {
                   <LogOut className="w-4 h-4" />
                   <span>Logout</span>
                 </button>
-                
-                {/* Justees Logo */}
-                <div className="mt-4 flex justify-center">
-                  <img
-                    src="/justees_logo.png"
-                    alt="Justees"
-                    className="h-12 object-contain"
-                  />
-                </div>
               </div>
             </div>
           </motion.div>
