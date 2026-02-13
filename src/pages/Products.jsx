@@ -9,7 +9,6 @@ import { useWishlist } from "../contexts/WishlistContext";
 import { getAllProducts, getCategories } from "../services/products.service";
 import LazyImage from "../components/common/LazyImage";
 import Navbar from "../components/common/Navbar";
-import Footer from "../components/common/Footer";
 import ProductQuickView from "../components/products/ProductQuickView";
 import LoadingSpinner from "../components/common/LoadingSpinner";
 import { formatPrice } from "../utils/validation";
@@ -588,7 +587,6 @@ const Products = () => {
           onClose={closeQuickView}
         />
       </div>
-      <Footer />
     </>
   );
 };

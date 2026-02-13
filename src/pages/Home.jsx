@@ -18,7 +18,6 @@ import Navbar from '../components/common/Navbar';
 import AnimatedBackground from '../components/common/AnimatedBackground';
 import AnimatedCounter from '../components/common/AnimatedCounter';
 import TiltCard from '../components/common/TiltCard';
-import Footer from '../components/common/Footer';
 
 const Home = () => {
   const { isDark } = useTheme();
@@ -1078,9 +1077,6 @@ const Home = () => {
         </div>
       </section>
 
-
-      {/* Footer */}
-      <Footer />
 
       {/* Product Quick View Modal */}
       <ProductQuickView

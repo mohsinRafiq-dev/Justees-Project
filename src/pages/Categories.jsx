@@ -5,7 +5,6 @@ import { ShoppingBag } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import LazyImage from '../components/common/LazyImage';
 import Navbar from '../components/common/Navbar';
-import Footer from '../components/common/Footer';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import { getCategories, getAllProducts } from '../services/products.service';
 
@@ -160,7 +159,6 @@ const Categories = () => {
           </div>
         </section>
       </div>
-      <Footer />
     </>
   );
 };

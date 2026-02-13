@@ -1473,7 +1473,6 @@ const ProductDetail = () => {
           )}
         </div>
       </div>
-      <Footer />
     </>
   );
 };
