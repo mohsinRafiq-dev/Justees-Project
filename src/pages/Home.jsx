@@ -36,8 +36,36 @@ const Home = () => {
   const [instagramPosts, setInstagramPosts] = useState([]);
 
 
-  // Hero slides (loaded from Firestore). Start empty — no hardcoded dummy slides.
-  const [heroSlides, setHeroSlides] = useState([]);
+  // Hero slides (loaded from Firestore or use default fallback slides)
+  const [heroSlides, setHeroSlides] = useState([
+    {
+      id: 'default-1',
+      title: 'Premium T-Shirts',
+      subtitle: 'New Collection',
+      description: 'Discover our latest arrivals',
+      url: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=1920&q=80',
+      type: 'image',
+      order: 0
+    },
+    {
+      id: 'default-2',
+      title: 'Stylish Hoodies',
+      subtitle: 'Winter Essentials',
+      description: 'Stay warm and fashionable',
+      url: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=1920&q=80',
+      type: 'image',
+      order: 1
+    },
+    {
+      id: 'default-3',
+      title: 'Classic Designs',
+      subtitle: 'Timeless Style',
+      description: 'Quality that lasts',
+      url: 'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=1920&q=80',
+      type: 'image',
+      order: 2
+    }
+  ]);
 
   // Helper function to format price in Indian format
   const formatPrice = (price) => {
@@ -125,12 +153,12 @@ const Home = () => {
         console.log('[Home] Setting normalized slides:', normalized);
         setHeroSlides(normalized);
       } else {
-        console.log('[Home] No slides found or query failed');
-        setHeroSlides([]);
+        console.log('[Home] No slides found in database, using default slides');
+        // Keep the default slides - don't set to empty array
       }
     } catch (error) {
       console.error('[Home] Error loading slides:', error);
-      setHeroSlides([]);
+      // Keep the default slides on error
     }
   };
 
