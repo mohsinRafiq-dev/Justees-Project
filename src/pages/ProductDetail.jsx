@@ -121,7 +121,7 @@ const ProductDetail = () => {
         toast.error("Failed to load product");
       }
     } catch (error) {
-      // console.error("Error loading product:", error);
+      console.error("Error loading product:", error);
       toast.error("Error loading product");
     } finally {
       setLoading(false);
@@ -145,7 +145,7 @@ const ProductDetail = () => {
         toast.error("Low-level error loading reviews. Please check console.");
       }
     } catch (error) {
-      // console.error("Error loading product reviews:", error);
+      console.error("Error loading product reviews:", error);
     }
   }, [id]);
 
@@ -170,7 +170,7 @@ const ProductDetail = () => {
         setRelatedProducts(related.slice(0, 4));
       }
     } catch (error) {
-      // console.error("Error loading related products:", error);
+      console.error("Error loading related products:", error);
     }
   }, [product]);
 
@@ -341,7 +341,7 @@ const ProductDetail = () => {
         );
       }
     } catch (error) {
-      // console.error("Error submitting review:", error);
+      console.error("Error submitting review:", error);
       toast.error("Failed to submit review. Please try again.");
     } finally {
       setReviewSubmitting(false);

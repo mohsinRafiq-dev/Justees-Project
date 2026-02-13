@@ -164,7 +164,7 @@ export const getProductReviews = async (productId, limitCount = 50) => {
 
 
       return { success: true, reviews };
-    } catch (indexError) {
+    } catch {
 
       
       // Fallback: Get ALL reviews for this product (simpler query often bypasses permission/index issues during dev)
@@ -242,7 +242,7 @@ export const getRecentReviews = async (limitCount = 6) => {
 
 
       return { success: true, reviews };
-    } catch (indexError) {
+    } catch {
 
       
       // Fallback: Get all reviews and filter/sort in memory
@@ -297,4 +297,7 @@ export const toggleReviewVisibility = async (reviewId, isVisible) => {
     });
     return { success: true };
   } catch (error) {
-    // console.error("Error toggling review visibility:", error);
+    console.error("Error toggling review visibility:", error);
+    return { success: false, error: error.message };
+  }
+};
