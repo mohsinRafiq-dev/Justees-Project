@@ -421,6 +421,15 @@ const AdminDashboard = () => {
               <LogOut className="w-4 h-4" />
               {sidebarOpen && <span>Logout</span>}
             </button>
+            
+            {/* Justees Logo */}
+            <div className="mt-4 flex justify-center">
+              <img
+                src="/justees_logo.png"
+                alt="Justees"
+                className={`${sidebarOpen ? "h-12" : "h-8"} object-contain transition-all duration-300`}
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -510,6 +519,15 @@ const AdminDashboard = () => {
                   <LogOut className="w-4 h-4" />
                   <span>Logout</span>
                 </button>
+                
+                {/* Justees Logo */}
+                <div className="mt-4 flex justify-center">
+                  <img
+                    src="/justees_logo.png"
+                    alt="Justees"
+                    className="h-12 object-contain"
+                  />
+                </div>
               </div>
             </div>
           </motion.div>
