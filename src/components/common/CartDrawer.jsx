@@ -3,6 +3,7 @@ import { X, Plus, Minus, Trash2, ShoppingBag } from 'lucide-react';
 import { useCart } from '../../contexts/CartContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { formatPrice } from '../../utils/validation';
+import { WHATSAPP_NUMBER } from '../../utils/constants';
 
 const CartDrawer = () => {
     const { 
@@ -19,9 +20,6 @@ const CartDrawer = () => {
     const handleWhatsAppCheckout = () => {
         if (cartItems.length === 0) return;
 
-        // Default WhatsApp Number (Ideally from env)
-        const phoneNumber = "923001234567"; // Replace with actual number
-
         let message = "*New Order Request*\n";
         message += "------------------\n";
 
@@ -35,7 +33,7 @@ const CartDrawer = () => {
         message += `*Total: ${formatPrice(getCartTotal())}*\n`;
         message += "\nPlease confirm my order.";
 
-        const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+        const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
         window.open(url, '_blank');
     };
 
