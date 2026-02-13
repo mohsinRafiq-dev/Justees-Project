@@ -718,7 +718,7 @@ const ReviewsManagement = () => {
                         required
                       >
                         {[5, 4, 3, 2, 1].map((rating) => (
-                          <option key={rating} value={rating}>
+                          <option key={rating} value={rating} className={isDark ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'}>
                             {rating} Star{rating !== 1 ? "s" : ""}
                           </option>
                         ))}

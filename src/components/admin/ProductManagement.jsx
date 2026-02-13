@@ -413,7 +413,7 @@ const ProductManagement = () => {
                 className={`w-full rounded-xl px-4 py-2 transition-all focus:ring-2 focus:ring-cyan-500 focus:outline-none ${isDark ? 'bg-white/5 border border-white/10 text-white' : 'bg-white border border-gray-300 text-gray-900'}`}
               >
                 {categories.map((category) => (
-                  <option key={category} value={category}>
+                  <option key={category} value={category} className={isDark ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'}>
                     {category}
                   </option>
                 ))}
@@ -427,11 +427,11 @@ const ProductManagement = () => {
                 onChange={(e) => setStatusFilter(e.target.value)}
                 className={`w-full rounded-xl px-4 py-2 transition-all focus:ring-2 focus:ring-cyan-500 focus:outline-none ${isDark ? 'bg-white/5 border border-white/10 text-white' : 'bg-white border border-gray-300 text-gray-900'}`}
               >
-                <option value="All">All Status</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-                <option value="out-of-stock">Out of Stock</option>
-                <option value="low-stock">Low Stock</option>
+                <option value="All" className={isDark ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'}>All Status</option>
+                <option value="active" className={isDark ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'}>Active</option>
+                <option value="inactive" className={isDark ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'}>Inactive</option>
+                <option value="out-of-stock" className={isDark ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'}>Out of Stock</option>
+                <option value="low-stock" className={isDark ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'}>Low Stock</option>
               </select>
             </div>
 
@@ -446,14 +446,14 @@ const ProductManagement = () => {
                 }}
                 className={`w-full rounded-xl px-4 py-2 transition-all focus:ring-2 focus:ring-cyan-500 focus:outline-none ${isDark ? 'bg-white/5 border border-white/10 text-white' : 'bg-white border border-gray-300 text-gray-900'}`}
               >
-                <option value="createdAt-desc">Newest First</option>
-                <option value="createdAt-asc">Oldest First</option>
-                <option value="name-asc">Name A-Z</option>
-                <option value="name-desc">Name Z-A</option>
-                <option value="price-asc">Price Low-High</option>
-                <option value="price-desc">Price High-Low</option>
-                <option value="totalStock-desc">Stock High-Low</option>
-                <option value="views-desc">Most Viewed</option>
+                <option value="createdAt-desc" className={isDark ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'}>Newest First</option>
+                <option value="createdAt-asc" className={isDark ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'}>Oldest First</option>
+                <option value="name-asc" className={isDark ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'}>Name A-Z</option>
+                <option value="name-desc" className={isDark ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'}>Name Z-A</option>
+                <option value="price-asc" className={isDark ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'}>Price Low-High</option>
+                <option value="price-desc" className={isDark ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'}>Price High-Low</option>
+                <option value="totalStock-desc" className={isDark ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'}>Stock High-Low</option>
+                <option value="views-desc" className={isDark ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'}>Most Viewed</option>
               </select>
             </div>
           </div>

@@ -565,14 +565,14 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
                           : `bg-white border-gray-300 focus:ring-blue-500 ${errors.category ? 'border-red-500' : ''}`
                       } border focus:ring-2`}
                     >
-                      <option value="">Select Category</option>
+                      <option value="" className={isDark ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'}>Select Category</option>
                       {availableCategories && availableCategories.length > 0 ? (
                         availableCategories.map(category => (
-                          <option key={category} value={category}>{category}</option>
+                          <option key={category} value={category} className={isDark ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'}>{category}</option>
                         ))
                       ) : (
                         CATEGORIES.map(category => (
-                          <option key={category} value={category}>{category}</option>
+                          <option key={category} value={category} className={isDark ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'}>{category}</option>
                         ))
                       )}
                     </select>
@@ -653,12 +653,12 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
                         isDark ? "bg-gray-900 border-gray-700 text-white focus:ring-blue-500/50" : "bg-white border-gray-300 focus:ring-blue-500 text-gray-900"
                       } border focus:ring-2`}
                     >
-                      <option value="">No Badge</option>
-                      <option value="New">New</option>
-                      <option value="Sale">Sale</option>
-                      <option value="Hot">Hot</option>
-                      <option value="Limited">Limited</option>
-                      <option value="Bestseller">Bestseller</option>
+                      <option value="" className={isDark ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'}>No Badge</option>
+                      <option value="New" className={isDark ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'}>New</option>
+                      <option value="Sale" className={isDark ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'}>Sale</option>
+                      <option value="Hot" className={isDark ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'}>Hot</option>
+                      <option value="Limited" className={isDark ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'}>Limited</option>
+                      <option value="Bestseller" className={isDark ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'}>Bestseller</option>
                     </select>
                   </div>
                 </div>
@@ -797,8 +797,8 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
                         isDark ? "bg-gray-900 border-gray-700 text-white focus:ring-blue-500/50" : "bg-white border-gray-300 focus:ring-blue-500 text-gray-900"
                       } border focus:ring-2`}
                   >
-                    <option value="in_stock">In Stock</option>
-                    <option value="out_of_stock">Out of Stock</option>
+                    <option value="in_stock" className={isDark ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'}>In Stock</option>
+                    <option value="out_of_stock" className={isDark ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'}>Out of Stock</option>
                   </select>
                 </div>
               </div>
