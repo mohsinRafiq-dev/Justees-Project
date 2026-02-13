@@ -508,22 +508,26 @@ const Home = () => {
           {/* Slider Controls - Only show if multiple slides */}
           {heroSlides.length > 1 && (
             <>
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={prevSlide}
-                className="absolute left-4 top-1/2 -translate-y-1/2 glass p-3 rounded-full hover:bg-white/30 transition-all z-10"
-              >
-                <ChevronLeft className="w-6 h-6 text-white" />
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={nextSlide}
-                className="absolute right-4 top-1/2 -translate-y-1/2 glass p-3 rounded-full hover:bg-white/30 transition-all z-10"
-              >
-                <ChevronRight className="w-6 h-6 text-white" />
-              </motion.button>
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10">
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={prevSlide}
+                  className="glass p-3 rounded-full hover:bg-white/30 transition-colors"
+                >
+                  <ChevronLeft className="w-6 h-6 text-white" />
+                </motion.button>
+              </div>
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 z-10">
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={nextSlide}
+                  className="glass p-3 rounded-full hover:bg-white/30 transition-colors"
+                >
+                  <ChevronRight className="w-6 h-6 text-white" />
+                </motion.button>
+              </div>
 
               {/* Slider Indicators */}
               <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex space-x-2 z-10">
