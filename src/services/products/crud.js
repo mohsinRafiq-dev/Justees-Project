@@ -44,7 +44,7 @@ export const getProductById = async (productId) => {
       product,
     };
   } catch (error) {
-    console.error("Error fetching product:", error);
+    // console.error("Error fetching product:", error);
     return {
       success: false,
       error: error.message || "Failed to load product",
@@ -135,7 +135,7 @@ export const createProduct = async (
       message: "Product created successfully",
     };
   } catch (error) {
-    console.error("Error creating product:", error);
+    // console.error("Error creating product:", error);
     return { success: false, error: error.message || "Failed to create product" };
   }
 };
@@ -203,7 +203,7 @@ export const updateProduct = async (
 
     return { success: true, message: "Product updated successfully" };
   } catch (error) {
-    console.error("Error updating product:", error);
+    // console.error("Error updating product:", error);
     return { success: false, error: error.message || "Failed to update product" };
   }
 };
@@ -216,14 +216,14 @@ export const deleteProduct = async (productId) => {
 
     const deleteImagesResult = await deleteAllProductImages(productId);
     if (!deleteImagesResult.success) {
-      console.warn("Some images may not have been deleted:", deleteImagesResult.error);
+      // console.warn("Some images may not have been deleted:", deleteImagesResult.error);
     }
 
     await deleteDoc(productRef);
 
     return { success: true, message: "Product deleted successfully" };
   } catch (error) {
-    console.error("Error deleting product:", error);
+    // console.error("Error deleting product:", error);
     return { success: false, error: error.message || "Failed to delete product" };
   }
 };
@@ -248,7 +248,7 @@ export const updateProductStock = async (productId, variantId, newStock) => {
 
     return { success: true, message: "Stock updated successfully" };
   } catch (error) {
-    console.error("Error updating stock:", error);
+    // console.error("Error updating stock:", error);
     return { success: false, error: error.message || "Failed to update stock" };
   }
 };

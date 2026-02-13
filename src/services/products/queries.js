@@ -84,7 +84,7 @@ export const getAllProducts = async (options = {}) => {
       total: products.length,
     };
   } catch (error) {
-    console.error("Error fetching products:", error);
+    // console.error("Error fetching products:", error);
     return {
       success: false,
       error: error.message || "Failed to load products",
@@ -144,7 +144,7 @@ export const getProductAnalytics = async (productId = null) => {
       };
     }
   } catch (error) {
-    console.error("Error getting analytics:", error);
+    // console.error("Error getting analytics:", error);
     return {
       success: false,
       error: error.message || "Failed to get analytics",

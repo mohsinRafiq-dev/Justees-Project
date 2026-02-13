@@ -85,7 +85,7 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
         category: prev.category || (categoriesRes.success && categoriesRes.categories && categoriesRes.categories.length > 0 ? categoriesRes.categories[0].name : (CATEGORIES?.[0] || ''))
       }));
     } catch (err) {
-      console.error('Error loading sizes/colors/categories:', err);
+      // console.error('Error loading sizes/colors/categories:', err);
     }
   };
 
@@ -100,8 +100,8 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
   // Initialize form with existing product data
   useEffect(() => {
     if (product) {
-      console.log('[ProductForm] Loading product for edit:', product);
-      console.log('[ProductForm] Product images:', product.images);
+      // console.log('[ProductForm] Loading product for edit:', product);
+      // console.log('[ProductForm] Product images:', product.images);
 
       setFormData(prevFormData => ({
         ...prevFormData,
@@ -134,20 +134,20 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
 
       // Set existing images grouped by color
       if (product.images) {
-        console.log('[ProductForm] Processing images for colors...');
+        // console.log('[ProductForm] Processing images for colors...');
         const imagesByColor = {};
         product.images.forEach(img => {
-          console.log('[ProductForm] Processing image:', img);
+          // console.log('[ProductForm] Processing image:', img);
           const color = img.color || 'default';
           if (!imagesByColor[color]) {
             imagesByColor[color] = [];
           }
           imagesByColor[color].push(img.url);
         });
-        console.log('[ProductForm] Images by color:', imagesByColor);
+        // console.log('[ProductForm] Images by color:', imagesByColor);
         setExistingImages(imagesByColor);
       } else {
-        console.log('[ProductForm] No images found in product data');
+        // console.log('[ProductForm] No images found in product data');
       }
     }
   }, [product]);
@@ -330,10 +330,7 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
     const formValidation = validateProductForm(formData);
     const variantValidation = validateVariants(variants);
 
-    console.log('Form validation:', formValidation);
-    console.log('Variant validation:', variantValidation);
-    console.log('Current variants:', variants);
-    console.log('Form data:', formData);
+
 
     const allErrors = {
       ...(formValidation.errors || formValidation),
@@ -353,7 +350,7 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
       allErrors.images = imageErrors.join(' | ');
     }
 
-    console.log('All errors:', allErrors);
+    // console.log('All errors:', allErrors);
     setErrors(allErrors);
     return Object.keys(allErrors).length === 0;
   };
@@ -361,8 +358,8 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    console.log('Form submission started');
-    console.log('User:', user);
+    // console.log('Form submission started');
+    // console.log('User:', user);
 
     if (!validateForm()) {
       toast.error('Please fix the errors before submitting');
@@ -377,7 +374,7 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
     setLoading(true);
 
     try {
-      console.log('Preparing product data...');
+      // console.log('Preparing product data...');
       // Prepare product data
       const productData = {
         ...formData,
@@ -407,13 +404,13 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
         });
       });
 
-      console.log('Image files prepared:', allNewImageFiles.length);
-      console.log('Image color mapping:', imageColorMapping);
+      // console.log('Image files prepared:', allNewImageFiles.length);
+      // console.log('Image color mapping:', imageColorMapping);
 
       let result;
 
       if (product) {
-        console.log('Updating existing product:', product.id);
+        // console.log('Updating existing product:', product.id);
         // Update existing product
         result = await updateProduct(
           product.id,
@@ -424,7 +421,7 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
           imageColorMapping
         );
       } else {
-        console.log('Creating new product');
+        // console.log('Creating new product');
         // Create new product
         result = await createProduct(
           productData,
@@ -434,7 +431,7 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
         );
       }
 
-      console.log('Service result:', result);
+      // console.log('Service result:', result);
 
       if (result.success) {
         toast.success(product ? 'Product updated successfully!' : 'Product created successfully!');
@@ -472,7 +469,7 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
       }
 
     } catch (error) {
-      console.error('Error saving product:', error);
+      // console.error('Error saving product:', error);
       toast.error('Error saving product');
     } finally {
       setLoading(false);

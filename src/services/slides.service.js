@@ -109,7 +109,7 @@ export const getSlides = async (options = {}) => {
 
 export const getSlidesForHome = async (limitCount = 10) => {
   try {
-    console.log('[slides] getSlidesForHome called, limit:', limitCount);
+
     
     // First try with composite index (isVisible + order)
     try {
@@ -124,10 +124,10 @@ export const getSlidesForHome = async (limitCount = 10) => {
       querySnapshot.forEach((docSnap) => {
         slides.push({ id: docSnap.id, ...docSnap.data() });
       });
-      console.log('[slides] Successfully loaded slides with composite index:', slides);
+
       return { success: true, slides };
     } catch (indexError) {
-      console.warn('[slides] Composite index not ready, trying fallback query:', indexError.message);
+
       
       // Fallback: get all slides and filter/sort in memory
       const basicQuery = query(collection(db, SLIDES_COLLECTION), limit(limitCount * 2));
@@ -135,7 +135,7 @@ export const getSlidesForHome = async (limitCount = 10) => {
       const allSlides = [];
       querySnapshot.forEach((docSnap) => {
         const slideData = { id: docSnap.id, ...docSnap.data() };
-        // Filter visible slides in memory
+        // Filter visible slides in memory (allow null/undefined to default to true)
         if (slideData.isVisible !== false) {
           allSlides.push(slideData);
         }
@@ -143,7 +143,7 @@ export const getSlidesForHome = async (limitCount = 10) => {
       
       // Sort by order and limit
       const sortedSlides = allSlides.sort((a, b) => (a.order || 0) - (b.order || 0)).slice(0, limitCount);
-      console.log('[slides] Fallback query successful:', sortedSlides);
+
       return { success: true, slides: sortedSlides };
     }
   } catch (error) {

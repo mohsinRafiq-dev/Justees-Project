@@ -31,7 +31,7 @@ export const addReview = async (reviewData) => {
     const docRef = await addDoc(collection(db, REVIEWS_COLLECTION), reviewDoc);
     return { success: true, id: docRef.id, review: { id: docRef.id, ...reviewDoc } };
   } catch (error) {
-    console.error("Error adding review:", error);
+    // console.error("Error adding review:", error);
     return { success: false, error: error.message };
   }
 };
@@ -50,7 +50,7 @@ export const updateReview = async (reviewId, reviewData) => {
     await updateDoc(reviewRef, updateData);
     return { success: true, review: { id: reviewId, ...updateData } };
   } catch (error) {
-    console.error("Error updating review:", error);
+    // console.error("Error updating review:", error);
     return { success: false, error: error.message };
   }
 };
@@ -64,7 +64,7 @@ export const deleteReview = async (reviewId) => {
     await deleteDoc(reviewRef);
     return { success: true };
   } catch (error) {
-    console.error("Error deleting review:", error);
+    // console.error("Error deleting review:", error);
     return { success: false, error: error.message };
   }
 };
@@ -86,7 +86,7 @@ export const getReview = async (reviewId) => {
       return { success: false, error: "Review not found" };
     }
   } catch (error) {
-    console.error("Error getting review:", error);
+    // console.error("Error getting review:", error);
     return { success: false, error: error.message };
   }
 };
@@ -130,7 +130,7 @@ export const getAllReviews = async (options = {}) => {
 
     return { success: true, reviews };
   } catch (error) {
-    console.error("Error getting reviews:", error);
+    // console.error("Error getting reviews:", error);
     return { success: false, error: error.message, reviews: [] };
   }
 };
@@ -140,7 +140,7 @@ export const getAllReviews = async (options = {}) => {
  */
 export const getProductReviews = async (productId, limitCount = 50) => {
   try {
-    console.log('[reviews] getProductReviews called, product:', productId);
+
 
     // Try composite query first
     try {
@@ -162,16 +162,23 @@ export const getProductReviews = async (productId, limitCount = 50) => {
         });
       });
 
-      console.log('[reviews] Product composite query successful:', reviews.length);
+
       return { success: true, reviews };
     } catch (indexError) {
-      console.warn('[reviews] Product composite query failed, trying fallback:', indexError.message);
+
       
       // Fallback: Get ALL reviews for this product (simpler query often bypasses permission/index issues during dev)
       try {
+        // Handle potential string/number mismatches for ID
+        const searchIds = [String(productId)];
+        const numId = Number(productId);
+        if (!isNaN(numId)) {
+          searchIds.push(numId);
+        }
+
         const fallbackQuery = query(
           collection(db, REVIEWS_COLLECTION),
-          where("productId", "==", productId)
+          where("productId", "in", searchIds)
         );
         
         const querySnapshot = await getDocs(fallbackQuery);
@@ -186,7 +193,7 @@ export const getProductReviews = async (productId, limitCount = 50) => {
         
         // Manual filter and sort for maximum compatibility
         const visibleReviews = allProductReviews
-          .filter(review => review.isVisible === true)
+          .filter(review => review.isVisible !== false)
           .sort((a, b) => {
             const dateA = a.createdAt?.toDate?.() || new Date(0);
             const dateB = b.createdAt?.toDate?.() || new Date(0);
@@ -194,7 +201,7 @@ export const getProductReviews = async (productId, limitCount = 50) => {
           })
           .slice(0, limitCount);
         
-        console.log('[reviews] Product fallback query successful:', visibleReviews.length);
+
         return { success: true, reviews: visibleReviews };
       } catch (fallbackError) {
         console.error('[reviews] Product fallback query also failed with error:', fallbackError.code, fallbackError.message);
@@ -212,7 +219,7 @@ export const getProductReviews = async (productId, limitCount = 50) => {
  */
 export const getRecentReviews = async (limitCount = 6) => {
   try {
-    console.log('[reviews] getRecentReviews called, limit:', limitCount);
+
 
     // Try composite query first
     try {
@@ -233,10 +240,10 @@ export const getRecentReviews = async (limitCount = 6) => {
         });
       });
 
-      console.log('[reviews] Composite query successful:', reviews);
+
       return { success: true, reviews };
     } catch (indexError) {
-      console.log('[reviews] Composite index not ready, trying fallback query:', indexError.message);
+
       
       // Fallback: Get all reviews and filter/sort in memory
       try {
@@ -265,15 +272,15 @@ export const getRecentReviews = async (limitCount = 6) => {
           })
           .slice(0, limitCount);
         
-        console.log('[reviews] Fallback query successful:', visibleReviews);
+
         return { success: true, reviews: visibleReviews };
       } catch (fallbackError) {
-        console.error('[reviews] Fallback query also failed:', fallbackError);
+        // console.error('[reviews] Fallback query also failed:', fallbackError);
         return { success: false, error: fallbackError.message, reviews: [] };
       }
     }
   } catch (error) {
-    console.error("Error getting recent reviews:", error);
+    // console.error("Error getting recent reviews:", error);
     return { success: false, error: error.message, reviews: [] };
   }
 };
@@ -290,7 +297,7 @@ export const toggleReviewVisibility = async (reviewId, isVisible) => {
     });
     return { success: true };
   } catch (error) {
-    console.error("Error toggling review visibility:", error);
+    // console.error("Error toggling review visibility:", error);
     return { success: false, error: error.message };
   }
 };

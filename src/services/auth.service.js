@@ -58,7 +58,7 @@ export const loginAdminWithGoogle = async () => {
       try {
         await user.delete();
       } catch (deleteError) {
-        console.log('User deletion skipped:', deleteError.message);
+        // console.log('User deletion skipped:', deleteError.message);
       }
 
       throw new Error('Access denied. You are not authorized to access the admin panel.');
@@ -66,7 +66,7 @@ export const loginAdminWithGoogle = async () => {
 
     return user;
   } catch (error) {
-    console.error('Google login error:', error);
+    // console.error('Google login error:', error);
     if (error.message.includes('Access denied') || error.message.includes('not properly configured')) {
       throw error;
     }
@@ -102,7 +102,7 @@ export const loginAdmin = async (email, password) => {
 
     return userCredential.user;
   } catch (error) {
-    console.error('Email login error:', error);
+    // console.error('Email login error:', error);
     
     if (error.message.includes('Access denied') || error.message.includes('not properly configured')) {
       throw error;
@@ -121,7 +121,7 @@ export const updateAdminPassword = async (user, newPassword) => {
     await updatePassword(user, newPassword);
     return { success: true };
   } catch (error) {
-    console.error('Error updating password:', error);
+    // console.error('Error updating password:', error);
     return { success: false, error: error.message };
   }
 };
@@ -134,7 +134,7 @@ export const logoutAdmin = async () => {
   try {
     await signOut(auth);
   } catch (error) {
-    console.error('Logout error:', error);
+    // console.error('Logout error:', error);
     throw new Error('Failed to logout. Please try again.');
   }
 };
