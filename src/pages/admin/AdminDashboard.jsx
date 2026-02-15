@@ -31,6 +31,7 @@ import { getProductAnalytics } from "../../services/products.service";
 import { getCategories } from "../../services/products/admin";
 import { getSlides } from "../../services/slides.service";
 import { getAllReviews } from "../../services/reviews.service";
+import { getSiteSettings, updateSiteSettings } from "../../services/settings.service";
 import { formatPrice } from "../../utils/validation";
 import ProductManagement from "../../components/admin/ProductManagement";
 import CategoriesManagement from "./CategoriesManagement";
@@ -225,6 +226,175 @@ const AdminDashboard = () => {
             {passLoading ? "Changing..." : "Change Password"}
           </button>
         </form>
+      </div>
+    );
+  };
+
+
+  const SiteSettingsForm = () => {
+    const [settingsLoading, setSettingsLoading] = useState(false);
+    const [message, setMessage] = useState({ type: "", text: "" });
+    const [volumeTexts, setVolumeTexts] = useState(["Volume 1: The Debut"]); // Array of texts
+    const [newText, setNewText] = useState(""); // Input for new text
+    const [isLoading, setIsLoading] = useState(true);
+
+    // Load current settings on mount
+    useEffect(() => {
+      const loadSettings = async () => {
+        setIsLoading(true);
+        const result = await getSiteSettings();
+        if (result.success && result.settings) {
+          // Support both old single text and new array format
+          if (result.settings.volumeTexts && Array.isArray(result.settings.volumeTexts)) {
+            setVolumeTexts(result.settings.volumeTexts.length > 0 ? result.settings.volumeTexts : ["Volume 1: The Debut"]);
+          } else if (result.settings.volumeText) {
+            // Migrate old single text to array format
+            setVolumeTexts([result.settings.volumeText]);
+          }
+        }
+        setIsLoading(false);
+      };
+      loadSettings();
+    }, []);
+
+    const handleAddText = () => {
+      if (!newText.trim()) {
+        setMessage({
+          type: "error",
+          text: "Please enter text before adding",
+        });
+        return;
+      }
+      setVolumeTexts([...volumeTexts, newText.trim()]);
+      setNewText("");
+      setMessage({ type: "", text: "" });
+    };
+
+    const handleRemoveText = (index) => {
+      if (volumeTexts.length === 1) {
+        setMessage({
+          type: "error",
+          text: "You must have at least one ticker text",
+        });
+        return;
+      }
+      setVolumeTexts(volumeTexts.filter((_, i) => i !== index));
+      setMessage({ type: "", text: "" });
+    };
+
+    const handleUpdate = async (e) => {
+      e.preventDefault();
+      if (volumeTexts.length === 0 || volumeTexts.every(text => !text.trim())) {
+        setMessage({
+          type: "error",
+          text: "You must have at least one ticker text",
+        });
+        return;
+      }
+      setSettingsLoading(true);
+      setMessage({ type: "", text: "" });
+
+      const res = await updateSiteSettings({ volumeTexts, volumeText: volumeTexts[0] }); // Keep volumeText for backward compatibility
+      if (res.success) {
+        setMessage({
+          type: "success",
+          text: "Settings updated successfully!",
+        });
+      } else {
+        setMessage({
+          type: "error",
+          text: res.error || "Failed to update settings",
+        });
+      }
+      setSettingsLoading(false);
+    };
+
+    return (
+      <div>
+        <h4
+          className={`font-medium mb-4 ${isDark ? "text-white" : "text-gray-900"}`}
+        >
+          Volume Ticker Texts
+        </h4>
+        {message.text && (
+          <div
+            className={`p-3 rounded-xl mb-4 text-sm ${
+              message.type === "error"
+                ? isDark
+                  ? "bg-red-900/30 text-red-300 border border-red-500/50"
+                  : "bg-red-50 text-red-700"
+                : isDark
+                  ? "bg-green-900/30 text-green-300 border border-green-500/50"
+                  : "bg-green-50 text-green-700"
+            }`}
+          >
+            {message.text}
+          </div>
+        )}
+        
+        {/* Current Ticker Texts */}
+        <div className="space-y-3 mb-4">
+          <label className={`block text-sm font-medium ${isDark ? "text-gray-300" : "text-gray-700"}`}>
+            Current Ticker Texts
+          </label>
+          {isLoading ? (
+            <div className="text-sm text-gray-500">Loading...</div>
+          ) : (
+            <div className="space-y-2">
+              {volumeTexts.map((text, index) => (
+                <div key={index} className={`flex items-center gap-2 p-3 rounded-lg ${isDark ? "bg-gray-700/50" : "bg-gray-100"}`}>
+                  <span className={`flex-1 ${isDark ? "text-white" : "text-gray-900"}`}>{text}</span>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveText(index)}
+                    className="text-red-500 hover:text-red-700 px-2 py-1 rounded transition-colors"
+                    title="Remove"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Add New Text */}
+        <div className="space-y-2 mb-4">
+          <label className={`block text-sm font-medium ${isDark ? "text-gray-300" : "text-gray-700"}`}>
+            Add New Ticker Text
+          </label>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={newText}
+              onChange={(e) => setNewText(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddText())}
+              disabled={isLoading}
+              className={`flex-1 border ${isDark ? "border-gray-600 bg-gray-700/50 text-white placeholder-gray-400" : "border-gray-300 bg-white text-gray-900 placeholder-gray-500"} rounded-xl px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none transition-all disabled:opacity-50`}
+              placeholder="e.g., Volume 2: The Evolution"
+            />
+            <button
+              type="button"
+              onClick={handleAddText}
+              disabled={isLoading}
+              className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-4 py-2 rounded-xl hover:from-green-700 hover:to-emerald-700 disabled:opacity-50 transition-all shadow-lg whitespace-nowrap"
+            >
+              Add
+            </button>
+          </div>
+          <p className={`text-xs ${isDark ? "text-gray-400" : "text-gray-500"}`}>
+            These texts will scroll across the homepage ticker bar
+          </p>
+        </div>
+
+        {/* Save Button */}
+        <button
+          onClick={handleUpdate}
+          disabled={settingsLoading || isLoading}
+          className="bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-600 text-white px-6 py-2 rounded-xl hover:from-blue-700 hover:via-cyan-700 hover:to-teal-700 disabled:opacity-50 transition-all shadow-lg"
+        >
+          {settingsLoading ? "Saving..." : "Save All Changes"}
+        </button>
       </div>
     );
   };
@@ -768,24 +938,49 @@ const AdminDashboard = () => {
                 Settings
               </h2>
 
-              <div
-                className={`glass ${isDark ? "" : "glass-light"} rounded-2xl shadow-xl max-w-2xl border ${isDark ? "border-gray-700" : "border-gray-200"}`}
-              >
-                <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-                  <h3
-                    className={`text-lg font-semibold ${isDark ? "text-white" : "text-gray-900"}`}
-                  >
-                    Security Settings
-                  </h3>
-                  <p
-                    className={`text-sm mt-1 ${isDark ? "text-gray-400" : "text-gray-600"}`}
-                  >
-                    Manage your account security and preferences
-                  </p>
+              <div className="space-y-6 max-w-2xl">
+                {/* Site Settings */}
+                <div
+                  className={`glass ${isDark ? "" : "glass-light"} rounded-2xl shadow-xl border ${isDark ? "border-gray-700" : "border-gray-200"}`}
+                >
+                  <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+                    <h3
+                      className={`text-lg font-semibold ${isDark ? "text-white" : "text-gray-900"}`}
+                    >
+                      Site Settings
+                    </h3>
+                    <p
+                      className={`text-sm mt-1 ${isDark ? "text-gray-400" : "text-gray-600"}`}
+                    >
+                      Customize your website content and appearance
+                    </p>
+                  </div>
+
+                  <div className="p-6">
+                    <SiteSettingsForm />
+                  </div>
                 </div>
 
-                <div className="p-6">
-                  <PasswordUpdateForm />
+                {/* Security Settings */}
+                <div
+                  className={`glass ${isDark ? "" : "glass-light"} rounded-2xl shadow-xl border ${isDark ? "border-gray-700" : "border-gray-200"}`}
+                >
+                  <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+                    <h3
+                      className={`text-lg font-semibold ${isDark ? "text-white" : "text-gray-900"}`}
+                    >
+                      Security Settings
+                    </h3>
+                    <p
+                      className={`text-sm mt-1 ${isDark ? "text-gray-400" : "text-gray-600"}`}
+                    >
+                      Manage your account security and preferences
+                    </p>
+                  </div>
+
+                  <div className="p-6">
+                    <PasswordUpdateForm />
+                  </div>
                 </div>
               </div>
             </motion.div>
