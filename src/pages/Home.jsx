@@ -576,7 +576,7 @@ const Home = () => {
             {[
               { icon: Truck, title: 'Free Shipping', desc: 'On orders over Rs. 4,000' },
               { icon: Shield, title: 'Secure Payment', desc: '100% secure checkout' },
-              { icon: RefreshCw, title: 'Easy Returns', desc: '30-day return policy' },
+              { icon: RefreshCw, title: 'Easy Returns', desc: '7-day return policy' },
               { icon: Headphones, title: '24/7 Support', desc: 'Dedicated support team' },
             ].map((feature, index) => (
               <motion.div
