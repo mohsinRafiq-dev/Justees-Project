@@ -40,8 +40,8 @@ const About = () => {
   ];
 
   const stats = [
-    { number: '10,000+', label: 'Happy Customers' },
-    { number: '500+', label: 'Products Sold' },
+    { number: '1,000+', label: 'Happy Customers' },
+    { number: '1,500+', label: 'Products Sold' },
     { number: '4.9', label: 'Average Rating' },
     { number: '100%', label: 'Satisfaction Rate' },
   ];

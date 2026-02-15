@@ -226,8 +226,8 @@ const Home = () => {
 
   // Stats
   const stats = [
-    { icon: TrendingUp, value: '10000', label: 'Happy Customers', suffix: '+' },
-    { icon: Award, value: '500', label: 'Products Sold', suffix: '+' },
+    { icon: TrendingUp, value: '1000', label: 'Happy Customers', suffix: '+' },
+    { icon: Award, value: '1500', label: 'Products Sold', suffix: '+' },
     { icon: Star, value: '4.9', label: 'Average Rating', suffix: '' },
     { icon: CheckCircle, value: '100', label: 'Satisfaction', suffix: '%' },
   ];
@@ -912,7 +912,7 @@ const Home = () => {
               <CheckCircle className="w-16 h-16 mx-auto mb-4" style={{ color: isDark ? 'white' : '#d3d1ce' }} />
               <h3 className={`text-xl font-bold mb-3 ${isDark ? 'text-white' : 'text-gray-900'}`}>100% Satisfaction</h3>
               <p className={isDark ? 'text-gray-400' : 'text-gray-600'}>
-                Not happy? We offer easy returns and exchanges within 30 days.
+                Not happy? We offer easy returns and exchanges within 7 days.
               </p>
             </div>
           </div>
