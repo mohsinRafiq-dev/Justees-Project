@@ -22,13 +22,79 @@ const FALLBACK_IMAGES = [
 ];
 
 /**
- * Fetch Instagram posts using Instagram Basic Display API
+ * Fetch Instagram posts using multiple automatic methods
  * @param {number} limit - Number of posts to fetch (default: 6)
  * @returns {Promise<Object>} - Object with success status and posts array
  */
 export const getInstagramPosts = async (limit = 6) => {
   try {
-    // Check if API is configured
+    // Try Method 1: RapidAPI Instagram API (Free tier available)
+    try {
+      const response = await fetch(`https://instagram-scraper-api2.p.rapidapi.com/v1/posts_by_username?username=${INSTAGRAM_USERNAME}&limit=${limit}`, {
+        method: 'GET',
+        headers: {
+          'X-RapidAPI-Key': 'demo-key', // Replace with your RapidAPI key for higher limits
+          'X-RapidAPI-Host': 'instagram-scraper-api2.p.rapidapi.com'
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.data && data.data.items && data.data.items.length > 0) {
+          return {
+            success: true,
+            posts: data.data.items.slice(0, limit).map((item) => ({
+              id: item.id,
+              media_url: item.image_versions2?.candidates?.[0]?.url || item.thumbnail_url,
+              permalink: `https://instagram.com/p/${item.code}`,
+              caption: item.caption?.text || '',
+              media_type: item.media_type === 2 ? 'VIDEO' : 'IMAGE',
+            })),
+            isRealTime: true,
+          };
+        }
+      }
+    } catch (rapidApiError) {
+      console.log('RapidAPI method failed, trying next method...');
+    }
+
+    // Try Method 2: Instagram web scraping (Free but may be blocked)
+    try {
+      const response = await fetch(`https://www.instagram.com/${INSTAGRAM_USERNAME}/?__a=1&__d=dis`);
+      if (response.ok) {
+        const data = await response.json();
+        const posts = data?.graphql?.user?.edge_owner_to_timeline_media?.edges?.slice(0, limit) || [];
+        
+        if (posts.length > 0) {
+          return {
+            success: true,
+            posts: posts.map((edge, index) => ({
+              id: edge.node.id,
+              media_url: edge.node.display_url,
+              permalink: `https://instagram.com/p/${edge.node.shortcode}`,
+              caption: edge.node.edge_media_to_caption?.edges?.[0]?.node?.text || '',
+              media_type: edge.node.__typename === 'GraphVideo' ? 'VIDEO' : 'IMAGE',
+            })),
+            isRealTime: true,
+          };
+        }
+      }
+    } catch (jsonpError) {
+      console.log('Instagram JSONP method failed, trying fallback...');
+    }
+
+    // Try Method 2: Instagram web scraping (Free but may be blocked)
+    try {
+      const response = await fetch(`https://www.instagram.com/web/search/topsearch/?query=${INSTAGRAM_USERNAME}`);
+      if (response.ok) {
+        // This method may not work consistently due to Instagram's anti-scraping measures
+        console.log('Instagram web scraping method - results may vary');
+      }
+    } catch (webError) {
+      console.log('Instagram web method failed...');
+    }
+
+    // Method 3: Check if API is configured
     if (!INSTAGRAM_ACCESS_TOKEN || !INSTAGRAM_USER_ID) {
       // console.log('Instagram API not configured. Using fallback images.');
       return {

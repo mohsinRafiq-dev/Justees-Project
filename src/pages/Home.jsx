@@ -38,7 +38,6 @@ import { subscribeToNewsletter } from "../services/newsletter.service";
 import { getAllProducts, getCategories } from "../services/products.service";
 import { getRecentReviews } from "../services/reviews.service";
 import {
-  getInstagramPosts,
   getInstagramProfileUrl,
   getInstagramHandle,
 } from "../services/instagram.service";
@@ -63,7 +62,6 @@ const Home = () => {
   const [currentReviewSlide, setCurrentReviewSlide] = useState(0);
   const REVIEWS_PER_PAGE = 6;
   const totalSlides = Math.ceil(reviews.length / REVIEWS_PER_PAGE);
-  const [instagramPosts, setInstagramPosts] = useState([]);
   const [volumeTexts, setVolumeTexts] = useState(["Volume 1: The Debut"]); // Array of ticker texts
 
   // Hero slides (loaded from Firestore or use default fallback slides)
@@ -157,7 +155,6 @@ const Home = () => {
 
     loadFeaturedProducts();
     loadReviews();
-    loadInstagramPosts();
     loadSlides();
     loadSiteSettings();
   }, []);
@@ -192,18 +189,6 @@ const Home = () => {
     } catch (error) {
       console.error("[Home] Error loading slides:", error);
       // Keep the default slides on error
-    }
-  };
-
-  // Load Instagram posts
-  const loadInstagramPosts = async () => {
-    try {
-      const result = await getInstagramPosts(6);
-      if (result.success && result.posts.length > 0) {
-        setInstagramPosts(result.posts);
-      }
-    } catch (error) {
-      console.error("Error loading Instagram posts:", error);
     }
   };
 
@@ -1273,37 +1258,25 @@ const Home = () => {
               Follow Us
             </a>
           </div>
-          {instagramPosts.length > 0 && (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-              {instagramPosts.map((post, index) => (
-                <a
-                  key={post.id}
-                  href={post.permalink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group relative aspect-square overflow-hidden rounded-lg hover:shadow-2xl transition-all"
-                  title={
-                    post.caption
-                      ? post.caption.substring(0, 100)
-                      : "Instagram post"
-                  }
-                >
-                  <LazyImage
-                    src={post.media_url}
-                    alt={
-                      post.caption
-                        ? post.caption.substring(0, 50)
-                        : `Instagram post ${index + 1}`
-                    }
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center">
-                    <Instagram className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </div>
-                </a>
-              ))}
-            </div>
-          )}
+
+          {/* LightWidget Instagram Feed */}
+          <div className="lightwidget-instagram-feed">
+            {/* LightWidget WIDGET */}
+            <script src="https://cdn.lightwidget.com/widgets/lightwidget.js"></script>
+            <iframe
+              src="//lightwidget.com/widgets/12c96c5c9e695ecc8ef3e7ab6a148b34.html"
+              scrolling="no"
+              allowTransparency="true"
+              className="lightwidget-widget w-full border-0 overflow-hidden rounded-lg"
+              style={{
+                width: "100%",
+                border: 0,
+                overflow: "hidden",
+                minHeight: "200px",
+                height: "auto",
+              }}
+            />
+          </div>
         </div>
       </section>
 
