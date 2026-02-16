@@ -70,10 +70,10 @@ const Home = () => {
   const [heroSlides, setHeroSlides] = useState([
     {
       id: "default-1",
-      title: "Premium T-Shirts",
-      subtitle: "New Collection",
-      description: "Discover our latest arrivals",
-      url: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=1920&q=80",
+      title: "Welcome to Justees",
+      subtitle: "Premium Quality Clothing",
+      description: "Discover style that defines you",
+      url: "/JUSTEES_1920x1080.png",
       type: "image",
       order: 0,
     },
@@ -417,7 +417,7 @@ const Home = () => {
       <section className="relative h-screen overflow-hidden">
         <div className="absolute inset-0">
           <LazyImage
-            src="https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=1920&q=80"
+            src="/JUSTEES_1920x1080.png"
             alt="Justees Hero"
             className="w-full h-full object-cover"
           />
