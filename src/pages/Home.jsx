@@ -438,7 +438,8 @@ const Home = () => {
                 transition={{ delay: 0.2, duration: 0.8 }}
                 className="text-4xl md:text-8xl font-bold text-white mb-4 md:mb-6 leading-tight"
               >
-                Welcome to<br />
+                Welcome to
+                <br />
                 <span
                   style={{ color: "#d3d1ce", fontFamily: "Cookie, cursive" }}
                 >
