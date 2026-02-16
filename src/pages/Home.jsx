@@ -419,18 +419,18 @@ const Home = () => {
           <LazyImage
             src="/JUSTEES_1920x1080.png"
             alt="Justees Hero"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover object-center"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-gray-900/80 via-gray-800/50 to-gray-900/70" />
+          <div className="absolute inset-0 bg-gradient-to-t from-gray-900/90 via-gray-900/30 to-transparent" />
         </div>
 
-        <div className="relative h-full flex items-center">
-          <div className="container mx-auto px-4">
+        <div className="relative h-full flex items-end pb-12 md:pb-24">
+          <div className="pl-8 md:pl-16 pr-8">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
-              className="max-w-3xl"
+              className="max-w-xl"
             >
               <motion.h1
                 initial={{ opacity: 0, y: 20 }}
