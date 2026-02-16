@@ -414,7 +414,7 @@ const Home = () => {
       <Navbar />
 
       {/* Main Hero Banner */}
-      <section className="relative h-screen overflow-hidden">
+      <section className="relative h-[70vh] md:h-screen overflow-hidden">
         <div className="absolute inset-0">
           <LazyImage
             src="/JUSTEES_1920x1080.png"
@@ -436,9 +436,9 @@ const Home = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2, duration: 0.8 }}
-                className="text-6xl md:text-8xl font-bold text-white mb-6 leading-tight"
+                className="text-4xl md:text-8xl font-bold text-white mb-4 md:mb-6 leading-tight"
               >
-                Welcome to{" "}
+                Welcome to<br />
                 <span
                   style={{ color: "#d3d1ce", fontFamily: "Cookie, cursive" }}
                 >
@@ -449,7 +449,7 @@ const Home = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4, duration: 0.8 }}
-                className="text-2xl md:text-3xl text-gray-200 mb-8 font-light"
+                className="text-lg md:text-3xl text-gray-200 mb-6 md:mb-8 font-light"
               >
                 Discover Premium Quality Clothing That Defines Your Style
               </motion.p>
