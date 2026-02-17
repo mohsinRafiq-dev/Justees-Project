@@ -832,8 +832,25 @@ const ProductDetail = () => {
 
               {/* Features */}
               <div
-                className={`grid grid-cols-1 md:grid-cols-3 gap-4 p-6 rounded-xl ${isDark ? "bg-gray-800" : "bg-gray-100"}`}
+                className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-6 rounded-xl ${isDark ? "bg-gray-800" : "bg-gray-100"}`}
               >
+                <div className="flex items-center space-x-3">
+                  <Package
+                    className={`w-8 h-8 ${isDark ? "text-blue-400" : "text-blue-600"}`}
+                  />
+                  <div>
+                    <p
+                      className={`font-medium ${isDark ? "text-white" : "text-gray-900"}`}
+                    >
+                      Smart Choice
+                    </p>
+                    <p
+                      className={`text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}
+                    >
+                      PKR 500 Advance, FREE Delivery
+                    </p>
+                  </div>
+                </div>
                 <div className="flex items-center space-x-3">
                   <Truck
                     className={`w-8 h-8 ${isDark ? "text-blue-400" : "text-blue-600"}`}
