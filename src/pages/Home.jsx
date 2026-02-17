@@ -709,6 +709,24 @@ const Home = () => {
         </div>
       </section>
 
+      {/* Smart Choice Ticker */}
+      <div
+        className="relative overflow-hidden py-3"
+        style={{ backgroundColor: "#d3d1ce" }}
+      >
+        <div className="animate-marquee whitespace-nowrap">
+          {[...Array(12)].map((_, index) => (
+            <span
+              key={index}
+              className="text-gray-900 text-2xl md:text-3xl font-bold mx-12"
+              style={{ fontFamily: "Cookie, cursive" }}
+            >
+              Smart Choice: PKR 500 Advance, FREE Delivery
+            </span>
+          ))}
+        </div>
+      </div>
+
       {/* Categories */}
       <section
         id="categories-section"
