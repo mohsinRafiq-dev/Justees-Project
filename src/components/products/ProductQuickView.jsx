@@ -360,6 +360,7 @@ const ProductQuickView = ({ product, isOpen, onClose }) => {
 
             {/* Additional Info */}
             <div className="mt-4 pt-4 border-t border-gray-700 space-y-1.5 text-xs text-gray-400">
+              <p>✓ Smart Choice: PKR 500 Advance, FREE Delivery</p>
               <p>✓ Free shipping on orders over Rs. 4,000</p>
               <p>✓ 7-day easy returns</p>
               <p>✓ 100% authentic products</p>
