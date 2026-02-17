@@ -1294,11 +1294,11 @@ const Home = () => {
               href={getInstagramProfileUrl()}
               target="_blank"
               rel="noopener noreferrer"
-              style={{ backgroundColor: "#d3d1ce" }}
-              className="inline-block text-gray-900 px-6 py-3 rounded-full font-semibold hover:opacity-90 transition-all transform hover:scale-105 flex items-center gap-2 mx-auto"
+              aria-label="Follow us on Instagram"
+              className={`inline-flex items-center gap-2 px-5 py-2 rounded-full font-semibold w-max transition-transform transform hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-400 ${isDark ? 'bg-pink-600 text-white hover:bg-pink-500' : 'bg-pink-50 text-pink-700 hover:bg-pink-100'}`}
             >
               <Instagram className="w-5 h-5" />
-              Follow Us
+              <span>Follow Us</span>
               {isRealTimeFeed && (
                 <span className="ml-2 flex items-center gap-1 text-sm">
                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
