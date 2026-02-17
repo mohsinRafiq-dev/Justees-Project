@@ -38,6 +38,7 @@ import { subscribeToNewsletter } from "../services/newsletter.service";
 import { getAllProducts, getCategories } from "../services/products.service";
 import { getRecentReviews } from "../services/reviews.service";
 import {
+  getInstagramPosts,
   getInstagramProfileUrl,
   getInstagramHandle,
 } from "../services/instagram.service";
@@ -63,6 +64,11 @@ const Home = () => {
   const REVIEWS_PER_PAGE = 6;
   const totalSlides = Math.ceil(reviews.length / REVIEWS_PER_PAGE);
   const [volumeTexts, setVolumeTexts] = useState(["Volume 1: The Debut"]); // Array of ticker texts
+
+  // Instagram Posts State
+  const [instagramPosts, setInstagramPosts] = useState([]);
+  const [instagramLoading, setInstagramLoading] = useState(true);
+  const [isRealTimeFeed, setIsRealTimeFeed] = useState(false);
 
   // Hero slides (loaded from Firestore or use default fallback slides)
   const [heroSlides, setHeroSlides] = useState([
@@ -319,6 +325,25 @@ const Home = () => {
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Load Instagram Posts
+  useEffect(() => {
+    const loadInstagramPosts = async () => {
+      try {
+        setInstagramLoading(true);
+        const result = await getInstagramPosts(6); // Load 6 posts
+        setInstagramPosts(result.posts || []);
+        setIsRealTimeFeed(result.isRealTime || false);
+      } catch (error) {
+        console.error('Failed to load Instagram posts:', error);
+        setInstagramPosts([]);
+      } finally {
+        setInstagramLoading(false);
+      }
+    };
+
+    loadInstagramPosts();
   }, []);
 
   // Mobile menu is closed by default, no need for effect
@@ -1270,30 +1295,57 @@ const Home = () => {
               target="_blank"
               rel="noopener noreferrer"
               style={{ backgroundColor: "#d3d1ce" }}
-              className="inline-block text-gray-900 px-6 py-3 rounded-full font-semibold hover:opacity-90 transition-all transform hover:scale-105"
+              className="inline-block text-gray-900 px-6 py-3 rounded-full font-semibold hover:opacity-90 transition-all transform hover:scale-105 flex items-center gap-2 mx-auto"
             >
+              <Instagram className="w-5 h-5" />
               Follow Us
+              {isRealTimeFeed && (
+                <span className="ml-2 flex items-center gap-1 text-sm">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                  Live Feed
+                </span>
+              )}
             </a>
           </div>
 
-          {/* LightWidget Instagram Feed */}
-          <div className="lightwidget-instagram-feed">
-            {/* LightWidget WIDGET */}
-            <script src="https://cdn.lightwidget.com/widgets/lightwidget.js"></script>
-            <iframe
-              src="//lightwidget.com/widgets/12c96c5c9e695ecc8ef3e7ab6a148b34.html"
-              scrolling="no"
-              allowTransparency="true"
-              className="lightwidget-widget w-full border-0 overflow-hidden rounded-lg"
-              style={{
-                width: "100%",
-                border: 0,
-                overflow: "hidden",
-                minHeight: "200px",
-                height: "auto",
-              }}
-            />
-          </div>
+          {/* Instagram Posts Grid */}
+          {instagramLoading ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+              {[...Array(6)].map((_, index) => (
+                <div
+                  key={index}
+                  className={`aspect-square rounded-lg animate-pulse ${
+                    isDark ? "bg-gray-700" : "bg-gray-200"
+                  }`}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+              {instagramPosts.map((post, index) => (
+                <a
+                  key={post.id}
+                  href={post.permalink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group relative aspect-square rounded-lg overflow-hidden bg-gradient-to-br from-pink-500 via-purple-500 to-yellow-500 p-0.5 hover:scale-105 transition-all duration-300"
+                  title={post.caption}
+                >
+                  <div className="w-full h-full bg-white rounded-lg overflow-hidden">
+                    <img
+                      src={post.media_url}
+                      alt={post.caption || 'Instagram post'}
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                      loading="lazy"
+                    />
+                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
+                      <Instagram className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 w-8 h-8" />
+                    </div>
+                  </div>
+                </a>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
