@@ -57,12 +57,19 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
   const [errors, setErrors] = useState({});
   const [tagInput, setTagInput] = useState('');
   const [availableColors, setAvailableColors] = useState(DEFAULT_COLORS || []);
+  const [masterColors, setMasterColors] = useState([]); // full color objects from admin (name, hex, ...)
   const [availableSizes, setAvailableSizes] = useState(DEFAULT_SIZES || []);
   const [availableCategories, setAvailableCategories] = useState(CATEGORIES || []);
   // Colors and sizes selected for this specific product (checkboxes in UI)
   const [selectedColors, setSelectedColors] = useState([]);
   const [selectedSizes, setSelectedSizes] = useState([]);
   const [newColorInput, setNewColorInput] = useState('');
+
+  const getColorHex = (name) => {
+    if (!name) return name;
+    const found = masterColors.find(c => c.name && c.name.toLowerCase() === name.toLowerCase());
+    return (found && found.hex) ? found.hex : name;
+  };
 
   // Load admin-defined sizes/colors (if any) and keep defaults as fallback
   const loadAttributes = async () => {
@@ -73,6 +80,7 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
       }
       if (colorsRes.success && colorsRes.colors) {
         setAvailableColors(colorsRes.colors.map((c) => c.name));
+        setMasterColors(colorsRes.colors || []);
       }
       if (categoriesRes.success && categoriesRes.categories) {
         setAvailableCategories(categoriesRes.categories.map(cat => cat.name));
@@ -813,16 +821,20 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
                 <div className={`border rounded-lg p-4 ${isDark ? "border-gray-700 bg-gray-900/50" : "border-gray-200 bg-white"}`}>
                   <h4 className={`font-medium mb-3 ${isDark ? "text-white" : "text-gray-900"}`}>Select Colors for this Product</h4>
                   <div className="flex flex-wrap gap-2 mb-4">
-                    {availableColors.length > 0 ? availableColors.map(color => (
-                      <label key={color} className={`flex items-center gap-2 px-3 py-1 border rounded transition-colors cursor-pointer ${
-                          selectedColors.includes(color) 
-                            ? (isDark ? 'bg-blue-500/20 border-blue-500/50 text-blue-400' : 'bg-blue-50 border-blue-200 text-blue-700') 
+                    {availableColors.length > 0 ? availableColors.map(color => {
+                      const hex = getColorHex(color);
+                      return (
+                        <label key={color} className={`flex items-center gap-2 px-3 py-1 border rounded transition-colors cursor-pointer ${
+                          selectedColors.includes(color)
+                            ? (isDark ? 'bg-blue-500/20 border-blue-500/50 text-blue-400' : 'bg-blue-50 border-blue-200 text-blue-700')
                             : (isDark ? 'bg-gray-800 border-gray-700 text-gray-400 hover:border-gray-600' : 'bg-gray-50 border-gray-200 text-gray-600 hover:border-gray-300')
                         }`}>
-                        <input type="checkbox" checked={selectedColors.includes(color)} onChange={() => toggleColorSelection(color)} className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
-                        <span className="text-sm font-medium">{color}</span>
-                      </label>
-                    )) : (
+                          <input type="checkbox" checked={selectedColors.includes(color)} onChange={() => toggleColorSelection(color)} className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                          <div className="w-4 h-4 rounded border" style={{ backgroundColor: hex || 'transparent', borderColor: hex ? 'rgba(0,0,0,0.12)' : undefined }} />
+                          <span className="text-sm font-medium">{color}</span>
+                        </label>
+                      );
+                    }) : (
                       <p className="text-gray-500 text-sm">No colors available. Add colors on the Sizes & Colors page.</p>
                     )}
                   </div>
@@ -851,9 +863,17 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
                       <div className="grid gap-2 text-sm" style={{ gridTemplateColumns: `1fr repeat(${selectedColors.length}, minmax(80px, 1fr))` }}>
                         {/* Header */}
                         <div className={`font-medium ${isDark ? "text-gray-400" : "text-gray-700"}`}>Size/Color</div>
-                        {selectedColors.map(color => (
-                          <div key={color} className={`font-medium text-center ${isDark ? "text-gray-400" : "text-gray-700"}`}>{color}</div>
-                        ))}
+                        {selectedColors.map(color => {
+                          const hex = getColorHex(color);
+                          return (
+                            <div key={color} className={`font-medium text-center ${isDark ? "text-gray-400" : "text-gray-700"}`}>
+                              <div className="flex items-center justify-center gap-2">
+                                <div className="w-3 h-3 rounded" style={{ backgroundColor: hex || 'transparent', border: '1px solid rgba(0,0,0,0.08)' }} />
+                                <span>{color}</span>
+                              </div>
+                            </div>
+                          );
+                        })}
 
                         {/* Stock Grid */}
                         {selectedSizes.map(size => (
@@ -953,7 +973,7 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
                         <h4 className={`font-medium mb-4 flex items-center gap-2 ${isDark ? "text-white" : "text-gray-900"}`}>
                           <div
                             className={`w-4 h-4 rounded border ${isDark ? "border-white/20" : "border-gray-300"}`}
-                            style={{ backgroundColor: color.toLowerCase() }}
+                            style={{ backgroundColor: getColorHex(color) }}
                           />
                           {color} Images
                         </h4>

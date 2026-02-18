@@ -133,11 +133,19 @@ export const getColors = async () => {
   }
 };
 
-export const createColor = async (name) => {
+export const createColor = async (name, hex = '') => {
   try {
     const slug = generateSlug(name);
-    // Removed hex, order, isActive
-    const docRef = await addDoc(collection(db, COLORS_COLLECTION), { name, slug, createdAt: new Date() });
+    // normalize hex if provided
+    let hexValue = '';
+    if (hex && typeof hex === 'string') {
+      let h = hex.trim();
+      if (h && !h.startsWith('#')) h = `#${h}`;
+      if (/^#[0-9A-Fa-f]{3}$/.test(h)) h = '#' + h[1] + h[1] + h[2] + h[2] + h[3] + h[3];
+      if (/^#[0-9A-Fa-f]{6}$/.test(h)) hexValue = h.toUpperCase();
+    }
+
+    const docRef = await addDoc(collection(db, COLORS_COLLECTION), { name, slug, hex: hexValue, createdAt: new Date() });
     return { success: true, id: docRef.id };
   } catch (error) {
     console.error("Error creating color:", error);

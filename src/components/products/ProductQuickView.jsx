@@ -6,6 +6,7 @@ import { useWishlist } from "../../contexts/WishlistContext";
 import { useTheme } from "../../contexts/ThemeContext";
 import LazyImage from "../common/LazyImage";
 import { formatPrice } from "../../utils/validation";
+import { getColors } from '../../services/products.service';
 import { toast } from 'react-hot-toast';
 
 const ProductQuickView = ({ product, isOpen, onClose }) => {
@@ -17,6 +18,26 @@ const ProductQuickView = ({ product, isOpen, onClose }) => {
   const [selectedColor, setSelectedColor] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [masterColors, setMasterColors] = useState([]);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const res = await getColors();
+        if (res.success && mounted) setMasterColors(res.colors || []);
+      } catch (err) {
+        console.error('Failed to load colors:', err);
+      }
+    })();
+    return () => (mounted = false);
+  }, []);
+
+  const getColorHex = (name) => {
+    if (!name) return name;
+    const found = masterColors.find(c => c.name && c.name.toLowerCase() === name.toLowerCase());
+    return (found && found.hex) ? found.hex : name;
+  };
 
   // Get unique sizes and colors from product variants
   const availableSizes = product?.variants ? [...new Set(product.variants.map(v => v.size))] : [];
@@ -233,7 +254,7 @@ const ProductQuickView = ({ product, isOpen, onClose }) => {
                             ? 'border-gray-600 hover:scale-110 hover:border-gray-400'
                             : 'border-gray-700 opacity-50 cursor-not-allowed'
                           }`}
-                        style={{ backgroundColor: color }}
+                        style={{ backgroundColor: getColorHex(color) }}
                       >
                         {!hasStock && (
                           <div className="absolute inset-0 flex items-center justify-center">

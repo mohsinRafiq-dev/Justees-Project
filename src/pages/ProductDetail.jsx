@@ -22,7 +22,7 @@ import { toast } from "react-hot-toast";
 import { useTheme } from "../contexts/ThemeContext";
 import { useCart } from "../contexts/CartContext";
 import { useWishlist } from "../contexts/WishlistContext";
-import { getAllProducts } from "../services/products.service";
+import { getAllProducts, getColors } from "../services/products.service";
 import { getProductReviews, addReview } from "../services/reviews.service";
 import { formatPrice } from "../utils/validation";
 import { generateWhatsAppInquiryLink } from "../utils/whatsapp";
@@ -46,7 +46,27 @@ const ProductDetail = () => {
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
   const [quantity, setQuantity] = useState(1);
+  const [masterColors, setMasterColors] = useState([]);
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const res = await getColors();
+        if (res.success && mounted) setMasterColors(res.colors || []);
+      } catch (err) {
+        console.error('Failed to load master colors:', err);
+      }
+    })();
+    return () => (mounted = false);
+  }, []);
+
+  const getColorHex = (name) => {
+    if (!name) return name;
+    const found = masterColors.find(c => c.name && c.name.toLowerCase() === name.toLowerCase());
+    return (found && found.hex) ? found.hex : name;
+  };
   const [activeTab, setActiveTab] = useState("description");
 
   // Review form state
@@ -720,6 +740,7 @@ const ProductDetail = () => {
                         (v) => v.color === color && v.size === selectedSize
                       );
                       const isAvailable = variant && variant.stock > 0;
+                      const hexBg = getColorHex(color);
 
                       return (
                         <button
@@ -737,18 +758,18 @@ const ProductDetail = () => {
                           style={{
                             backgroundColor:
                               selectedColor === color
-                                ? color
+                                ? hexBg
                                 : "transparent",
                             color:
                               selectedColor === color
-                                ? getContrastColor(color)
+                                ? getContrastColor(hexBg)
                                 : undefined,
                           }}
                         >
                           <div className="flex items-center space-x-2">
                             <div
                               className="w-4 h-4 rounded-full border-2 border-white shadow-sm"
-                              style={{ backgroundColor: color }}
+                              style={{ backgroundColor: hexBg }}
                             />
                             <span>{color}</span>
                             {selectedColor === color && (
@@ -1567,18 +1588,44 @@ const RelatedProductCard = ({ product, isDark }) => {
 };
 
 // Helper function to determine text color based on background color
-function getContrastColor(hexColor) {
-  // Convert hex to RGB
-  const hex = hexColor.replace("#", "");
-  const r = parseInt(hex.substr(0, 2), 16);
-  const g = parseInt(hex.substr(2, 2), 16);
-  const b = parseInt(hex.substr(4, 2), 16);
+function getContrastColor(color) {
+  // Accept either hex (#RRGGBB / #RGB) or named CSS color/value
+  let r, g, b;
 
-  // Calculate luminance
+  // If looks like a hex string, parse it
+  if (typeof color === 'string' && /^#?[0-9A-Fa-f]{3,6}$/.test(color)) {
+    const hex = color.replace('#', '');
+    const full = hex.length === 3 ? hex.split('').map(c => c + c).join('') : hex;
+    r = parseInt(full.substr(0, 2), 16);
+    g = parseInt(full.substr(2, 2), 16);
+    b = parseInt(full.substr(4, 2), 16);
+  } else {
+    // Try to resolve named CSS color to rgb using canvas
+    try {
+      const ctx = document.createElement('canvas').getContext('2d');
+      ctx.fillStyle = color;
+      const computed = ctx.fillStyle; // returns rgb(...) or #rrggbb
+      if (computed.startsWith('#')) {
+        const hex = computed.replace('#', '');
+        r = parseInt(hex.substr(0, 2), 16);
+        g = parseInt(hex.substr(2, 2), 16);
+        b = parseInt(hex.substr(4, 2), 16);
+      } else if (computed.startsWith('rgb')) {
+        const nums = computed.match(/\d+/g);
+        r = Number(nums[0]);
+        g = Number(nums[1]);
+        b = Number(nums[2]);
+      } else {
+        // fallback to black
+        return '#000000';
+      }
+    } catch (e) {
+      return '#000000';
+    }
+  }
+
   const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-
-  // Return black or white based on luminance
-  return luminance > 0.5 ? "#000000" : "#FFFFFF";
+  return luminance > 0.5 ? '#000000' : '#FFFFFF';
 }
 
 export default ProductDetail;
