@@ -216,8 +216,9 @@ const Products = () => {
                       ? "bg-green-500 text-white"
                       : product.badge === "Hot"
                         ? "bg-orange-500 text-white"
-                        : "bg-blue-500 text-white"
+                        : "text-gray-900"
                     }`}
+                  style={product.badge !== "Sale" && product.badge !== "New" && product.badge !== "Hot" ? { backgroundColor: '#d3d1ce' } : {}}
                 >
                   {product.badge}
                 </span>
@@ -243,7 +244,10 @@ const Products = () => {
               </button>
               <button
                 onClick={() => openQuickView(product)}
-                className="p-2 rounded-full bg-white/80 text-gray-700 hover:bg-blue-500 hover:text-white backdrop-blur-sm transition-colors"
+                className="p-2 rounded-full bg-white/80 text-gray-700 hover:text-white backdrop-blur-sm transition-colors"
+                style={{ hover: { backgroundColor: '#d3d1ce' } }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#d3d1ce'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.8)'}
               >
                 <Eye className="w-4 h-4" />
               </button>
@@ -371,10 +375,9 @@ const Products = () => {
               disabled={isOutOfStock}
               className={`w-full py-3 px-4 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center space-x-2 mt-auto ${isOutOfStock
                 ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                : isDark
-                  ? "bg-blue-600 hover:bg-blue-700 text-white"
-                  : "bg-gray-900 hover:bg-blue-600 text-white"
+                : "text-gray-900"
                 }`}
+              style={!isOutOfStock ? { backgroundColor: '#d3d1ce' } : {}}
             >
               <ShoppingCart className="w-5 h-5" />
               <span>{isOutOfStock ? "Out of Stock" : "Add to Cart"}</span>
@@ -446,10 +449,12 @@ const Products = () => {
                     placeholder="Search products..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className={`w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500 ${isDark
+                    className={`w-full px-4 py-2 rounded-lg border focus:ring-2 ${isDark
                       ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
                       : "bg-white border-gray-300 text-gray-900 placeholder-gray-500"
                       }`}
+                    style={{ focusRing: '#d3d1ce' }}
+                    onFocus={(e) => e.currentTarget.style.outlineColor = '#d3d1ce'}
                   />
                 </div>
 
@@ -458,10 +463,11 @@ const Products = () => {
                   <select
                     value={selectedCategory}
                     onChange={(e) => handleCategoryChange(e.target.value)}
-                    className={`w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500 ${isDark
+                    className={`w-full px-4 py-2 rounded-lg border focus:ring-2 ${isDark
                       ? "bg-gray-700 border-gray-600 text-white"
                       : "bg-white border-gray-300 text-gray-900"
                       }`}
+                    onFocus={(e) => e.currentTarget.style.outlineColor = '#d3d1ce'}
                   >
                     <option value="All">All Categories</option>
                     {categories.map((category) => (
@@ -479,10 +485,11 @@ const Products = () => {
                       const [min, max] = e.target.value.split("-").map(Number);
                       setPriceRange({ min, max });
                     }}
-                    className={`w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500 ${isDark
+                    className={`w-full px-4 py-2 rounded-lg border focus:ring-2 ${isDark
                       ? "bg-gray-700 border-gray-600 text-white"
                       : "bg-white border-gray-300 text-gray-900"
                       }`}
+                    onFocus={(e) => e.currentTarget.style.outlineColor = '#d3d1ce'}
                   >
                     <option value="0-1000000">All Prices</option>
                     <option value="0-1000">Under Rs. 1,000</option>
@@ -501,10 +508,11 @@ const Products = () => {
                       setSortBy(field);
                       setSortOrder(order);
                     }}
-                    className={`w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500 ${isDark
+                    className={`w-full px-4 py-2 rounded-lg border focus:ring-2 ${isDark
                       ? "bg-gray-700 border-gray-600 text-white"
                       : "bg-white border-gray-300 text-gray-900"
                       }`}
+                    onFocus={(e) => e.currentTarget.style.outlineColor = '#d3d1ce'}
                   >
                     <option value="createdAt-desc">Newest First</option>
                     <option value="createdAt-asc">Oldest First</option>
@@ -558,7 +566,8 @@ const Products = () => {
                     setPriceRange({ min: 0, max: 1000000 });
                     setSearchTerm("");
                   }}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors"
+                  style={{ backgroundColor: '#d3d1ce' }}
+                  className="text-gray-900 px-6 py-2 rounded-lg font-semibold transition-colors hover:opacity-90"
                 >
                   Clear Filters
                 </button>
