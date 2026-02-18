@@ -1308,44 +1308,64 @@ const Home = () => {
             </a>
           </div>
 
-          {/* Instagram Posts Grid */}
-          {instagramLoading ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-              {[...Array(6)].map((_, index) => (
-                <div
-                  key={index}
-                  className={`aspect-square rounded-lg animate-pulse ${
-                    isDark ? "bg-gray-700" : "bg-gray-200"
-                  }`}
+          {/* Instagram Images */}
+          {/* Mobile View - Single Image */}
+          <div className="md:hidden">
+            <motion.a
+              href={getInstagramProfileUrl()}
+              target="_blank"
+              rel="noopener noreferrer"
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              whileHover={{ scale: 1.02 }}
+              className="block relative rounded-lg overflow-hidden group cursor-pointer"
+            >
+              <LazyImage
+                src="/Mobile res.jpeg"
+                alt="Justees Instagram"
+                className="w-full h-auto object-cover"
+              />
+              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300 flex items-center justify-center">
+                <Instagram className="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              </div>
+            </motion.a>
+          </div>
+
+          {/* Desktop View - 7 Letter Images */}
+          <div className="hidden md:grid grid-cols-4 lg:grid-cols-7 gap-2">
+            {[
+              { src: '/Justees Pics/J.jpeg', alt: 'J' },
+              { src: '/Justees Pics/U.jpeg', alt: 'U' },
+              { src: '/Justees Pics/S 1.jpeg', alt: 'S1' },
+              { src: '/Justees Pics/T.jpeg', alt: 'T' },
+              { src: '/Justees Pics/E 1.jpeg', alt: 'E1' },
+              { src: '/Justees Pics/E 2.jpeg', alt: 'E2' },
+              { src: '/Justees Pics/S 2.jpeg', alt: 'S2' },
+            ].map((image, index) => (
+              <motion.a
+                key={index}
+                href={getInstagramProfileUrl()}
+                target="_blank"
+                rel="noopener noreferrer"
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+                whileHover={{ scale: 1.05 }}
+                className="relative aspect-square overflow-hidden rounded-lg group cursor-pointer"
+              >
+                <LazyImage
+                  src={image.src}
+                  alt={image.alt}
+                  className="w-full h-full object-cover"
                 />
-              ))}
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-              {instagramPosts.map((post, index) => (
-                <a
-                  key={post.id}
-                  href={post.permalink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group relative aspect-square rounded-lg overflow-hidden bg-gradient-to-br from-pink-500 via-purple-500 to-yellow-500 p-0.5 hover:scale-105 transition-all duration-300"
-                  title={post.caption}
-                >
-                  <div className="w-full h-full bg-white rounded-lg overflow-hidden">
-                    <img
-                      src={post.media_url}
-                      alt={post.caption || 'Instagram post'}
-                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                      loading="lazy"
-                    />
-                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
-                      <Instagram className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 w-8 h-8" />
-                    </div>
-                  </div>
-                </a>
-              ))}
-            </div>
-          )}
+                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300 flex items-center justify-center">
+                  <Instagram className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </div>
+              </motion.a>
+            ))}
+          </div>
         </div>
       </section>
 

@@ -58,13 +58,17 @@ const About = () => {
             animate={{ opacity: 1, y: 0 }}
             className="text-center max-w-4xl mx-auto"
           >
-            <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-600 bg-clip-text text-transparent">
+            <h1 className="text-5xl md:text-6xl font-bold mb-6" style={{ color: '#d3d1ce', fontFamily: 'Cookie, cursive' }}>
               About Justees
             </h1>
-            <p className={`text-xl ${isDark ? 'text-gray-400' : 'text-gray-600'} leading-relaxed`}>
-              We're on a mission to make premium quality clothing accessible to everyone. 
-              Since our inception, we've been dedicated to delivering exceptional style, 
-              comfort, and value to our customers.
+            <p className={`text-xl ${isDark ? 'text-gray-400' : 'text-gray-600'} leading-relaxed space-y-2`}>
+              JUSTEES was created for the generation that refuses to Blend in.<br />
+              We don't follow seasons, We don't chase noise, We design for presence.<br /><br />
+              For Gen Z, it's self expression.<br />
+              For professionals, it's effortless style.<br />
+              For creatives, it's identity.<br />
+              For JUSTEES LEAGUE, it's comfort without compromise.<br /><br />
+              We believe streetwear isn't about hype, it's about how you carry yourself.🤍
             </p>
           </motion.div>
         </div>
@@ -80,25 +84,27 @@ const About = () => {
               viewport={{ once: true }}
               className="text-center mb-16"
             >
-              <h2 className={`text-4xl font-bold mb-6 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+              <h2 className="text-5xl md:text-6xl font-bold mb-6" style={{ color: '#d3d1ce', fontFamily: 'Cookie, cursive' }}>
                 Our Story
               </h2>
               <div className={`space-y-6 text-lg ${isDark ? 'text-gray-400' : 'text-gray-600'} text-left`}>
                 <p>
-                  Justees was born from a simple idea: everyone deserves to look and feel great 
-                  in what they wear, without breaking the bank. We started as a small team of 
-                  fashion enthusiasts who were frustrated with the lack of quality, affordable 
-                  clothing options in the market.
+                  Our story began with a simple idea to create clothing that feels as powerful 
+                  as the person wearing it. ✨ In a world full of noise and fast trends, we 
+                  wanted to build something timeless pieces that don't just sit in your wardrobe, 
+                  but become part of your identity.
                 </p>
                 <p>
-                  Today, we've grown into a trusted brand serving thousands of customers worldwide. 
-                  Our commitment remains unchanged – to provide premium quality products at fair 
-                  prices, backed by exceptional customer service.
+                  JUSTEES was born from late nights, bold dreams, and the belief that confidence 
+                  starts with comfort. Every stitch, every silhouette, every shade is designed 
+                  to move with you through your growth, your hustle, your moments.
                 </p>
                 <p>
-                  Every product we offer is carefully selected and tested to ensure it meets our 
-                  high standards. We believe in building lasting relationships with our customers 
-                  through transparency, honesty, and consistent quality.
+                  This isn't just streetwear. It's a statement of presence. And when you wear 
+                  JUSTEES, you're not just buying clothing you're stepping into a mindset. 🖤
+                </p>
+                <p className="text-4xl md:text-5xl font-bold text-center mt-8" style={{ fontFamily: 'Cookie, cursive', color: '#d3d1ce' }}>
+                  WELCOME TO JUSTEES LEAGUE !
                 </p>
               </div>
             </motion.div>
@@ -134,7 +140,7 @@ const About = () => {
                 whileHover={{ y: -10 }}
                 className={`p-8 rounded-xl ${isDark ? 'bg-gray-900' : 'bg-gray-50'} text-center`}
               >
-                <value.icon className={`w-12 h-12 mx-auto mb-4 ${isDark ? 'text-blue-500' : 'text-blue-600'}`} />
+                <value.icon className="w-12 h-12 mx-auto mb-4" style={{ color: '#d3d1ce' }} />
                 <h3 className={`text-xl font-bold mb-3 ${isDark ? 'text-white' : 'text-gray-900'}`}>
                   {value.title}
                 </h3>
@@ -174,7 +180,7 @@ const About = () => {
                 transition={{ delay: index * 0.1 }}
                 className="text-center"
               >
-                <h3 className="text-5xl font-bold mb-2 bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-600 bg-clip-text text-transparent">
+                <h3 className="text-5xl font-bold mb-2" style={{ color: '#d3d1ce' }}>
                   {stat.number}
                 </h3>
                 <p className={isDark ? 'text-gray-400' : 'text-gray-600'}>
@@ -202,7 +208,8 @@ const About = () => {
             </p>
             <a
               href="/products"
-              className="inline-block bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-8 py-4 rounded-full font-semibold hover:shadow-2xl hover:shadow-cyan-500/50 transition-all transform hover:scale-105"
+              style={{ backgroundColor: '#d3d1ce' }}
+              className="inline-block text-gray-900 px-8 py-4 rounded-full font-semibold hover:shadow-2xl transition-all transform hover:scale-105"
             >
               Start Shopping
             </a>

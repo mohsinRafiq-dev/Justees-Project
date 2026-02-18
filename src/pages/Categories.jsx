@@ -67,7 +67,7 @@ const Categories = () => {
               animate={{ opacity: 1, y: 0 }}
               className="text-center max-w-3xl mx-auto"
             >
-              <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-600 bg-clip-text text-transparent">
+              <h1 className="text-5xl md:text-6xl font-bold mb-6" style={{ color: '#d3d1ce' }}>
                 Explore Our Categories
               </h1>
               <p className={`text-xl ${isDark ? 'text-gray-400' : 'text-gray-600'} mb-8`}>
@@ -121,10 +121,10 @@ const Categories = () => {
                           {category.description || `Explore our collection of ${category.name}`}
                         </p>
                         <div className="flex items-center justify-between">
-                          <span className="text-blue-600 font-semibold group-hover:text-cyan-600 transition-colors">
+                          <span className="font-semibold transition-colors" style={{ color: '#d3d1ce' }}>
                             Shop Now
                           </span>
-                          <ShoppingBag className="w-5 h-5 text-blue-600 group-hover:text-cyan-600 transition-colors" />
+                          <ShoppingBag className="w-5 h-5 transition-colors" style={{ color: '#d3d1ce' }} />
                         </div>
                       </div>
                     </Link>
@@ -151,7 +151,8 @@ const Categories = () => {
               </p>
               <Link
                 to="/products"
-                className="inline-block bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-8 py-4 rounded-full font-semibold hover:shadow-2xl hover:shadow-cyan-500/50 transition-all transform hover:scale-105"
+                style={{ backgroundColor: '#d3d1ce' }}
+                className="inline-block text-gray-900 px-8 py-4 rounded-full font-semibold hover:shadow-2xl transition-all transform hover:scale-105"
               >
                 View All Products
               </Link>
