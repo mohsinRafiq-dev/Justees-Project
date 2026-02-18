@@ -20,7 +20,7 @@ const CartDrawer = () => {
     const handleWhatsAppCheckout = () => {
         if (cartItems.length === 0) return;
 
-        let message = "*New Order Request*\n";
+        let message = "*Order Confirmation*\n";
         message += "------------------\n";
 
         cartItems.forEach((item, index) => {
@@ -30,8 +30,8 @@ const CartDrawer = () => {
         });
 
         message += "------------------\n";
-        message += `*Total: ${formatPrice(getCartTotal())}*\n`;
-        message += "\nPlease confirm my order.";
+        message += `*Total: ${formatPrice(getCartTotal())}*\n\n`;
+        message += "Please confirm my order.";
 
         const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
         window.open(url, '_blank');

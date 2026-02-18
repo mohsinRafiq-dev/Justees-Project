@@ -1048,7 +1048,7 @@ const Home = () => {
         animate={{ scale: 1 }}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
-        onClick={() => openWhatsAppInquiry()}
+        onClick={() => openWhatsAppInquiry("Hello Justees,I have a question about your brand.\nLooking forward to hearing from you.")}
         className="fixed bottom-6 right-6 bg-green-500 hover:bg-green-600 text-white p-4 rounded-full shadow-2xl transition-all transform hover:scale-110 z-50 animate-bounce"
         aria-label="Chat on WhatsApp"
       >
