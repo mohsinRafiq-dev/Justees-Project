@@ -74,15 +74,19 @@ const Products = () => {
 
   // Product page hero/photos (editable from admin)
   const [productPhotos, setProductPhotos] = useState([]);
+  const [photosLoading, setPhotosLoading] = useState(true);
   const [currentPhoto, setCurrentPhoto] = useState(0);
 
   useEffect(() => {
     const loadPhotos = async () => {
+      setPhotosLoading(true);
       try {
         const res = await getProductPhotos({ isVisible: true, limitCount: 10 });
         if (res.success) setProductPhotos(res.photos || []);
       } catch (err) {
         console.error("Error loading product page photos", err);
+      } finally {
+        setPhotosLoading(false);
       }
     };
 
@@ -470,17 +474,17 @@ const Products = () => {
               className="text-center"
             >
               {/* Product page images managed from Admin (Product page photos tab) */}
-              {productPhotos.length > 0 ? (
+              {photosLoading ? (
+                <LoadingSpinner />
+              ) : productPhotos.length > 0 ? (
                 <div className="mb-8 relative">
-                  {/* full-bleed, full-viewport height image (show full image without cropping) */}
-                  <div className="relative mx-auto max-w-4xl">
-                    <div className="w-full overflow-hidden">
-                      <img
-                        src={productPhotos[currentPhoto].url}
-                        alt={productPhotos[currentPhoto].title || "Products"}
-                        className="w-full h-96 md:h-[60vh] lg:h-[70vh] object-cover object-center rounded-lg shadow-lg"
-                      />
-                    </div>
+                  {/* full-width hero image */}
+                  <div className="relative w-full overflow-hidden">
+                    <img
+                      src={productPhotos[currentPhoto].url}
+                      alt={productPhotos[currentPhoto].title || "Products"}
+                      className="w-full h-96 md:h-[60vh] lg:h-[70vh] object-cover object-center rounded-lg shadow-lg"
+                    />
                   </div>
 
                   {/* controls remain centered inside the container */}
