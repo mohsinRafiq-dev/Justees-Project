@@ -743,7 +743,7 @@ const Home = () => {
         className="relative overflow-hidden py-3"
         style={{ backgroundColor: "#d3d1ce" }}
       >
-        <div className="animate-marquee whitespace-nowrap">
+        <div className="animate-marquee-slow whitespace-nowrap">
           {[...Array(12)].map((_, index) => (
             <span
               key={index}

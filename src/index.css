@@ -196,8 +196,14 @@ html {
 
 .animate-marquee {
   display: inline-block;
-  animation: marquee 25s linear infinite;
+  animation: marquee 40s linear infinite; /* slower scroll */
 }
+
+/* extra-slow version for promotional tickers */
+.animate-marquee-slow {
+  display: inline-block;
+  animation: marquee 60s linear infinite;
+} 
 
 .animate-marquee:hover {
   animation-play-state: paused;
