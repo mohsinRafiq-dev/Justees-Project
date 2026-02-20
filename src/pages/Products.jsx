@@ -473,12 +473,12 @@ const Products = () => {
               {productPhotos.length > 0 ? (
                 <div className="mb-8 relative">
                   {/* full-bleed, full-viewport height image (show full image without cropping) */}
-                  <div className="relative left-1/2 -translate-x-1/2 w-screen max-w-none">
+                  <div className="relative mx-auto max-w-4xl">
                     <div className="w-full overflow-hidden">
                       <img
                         src={productPhotos[currentPhoto].url}
                         alt={productPhotos[currentPhoto].title || "Products"}
-                        className="w-full h-screen object-cover object-center"
+                        className="w-full h-96 md:h-[60vh] lg:h-[70vh] object-cover object-center rounded-lg shadow-lg"
                       />
                     </div>
                   </div>
