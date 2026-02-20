@@ -1,12 +1,21 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { motion } from "framer-motion";
-import { Heart, ShoppingCart, Eye, Filter, Star } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Heart,
+  ShoppingCart,
+  Eye,
+  Filter,
+  Star,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import { toast } from "react-hot-toast";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTheme } from "../contexts/ThemeContext";
 import { useCart } from "../contexts/CartContext";
 import { useWishlist } from "../contexts/WishlistContext";
 import { getAllProducts, getCategories } from "../services/products.service";
+import { getProductPhotos } from "../services/productPhotos.service";
 import LazyImage from "../components/common/LazyImage";
 import Navbar from "../components/common/Navbar";
 import ProductQuickView from "../components/products/ProductQuickView";
@@ -42,7 +51,7 @@ const Products = () => {
             orderDirection: "desc",
             limitCount: 100,
           }),
-          getCategories()
+          getCategories(),
         ]);
 
         if (productsRes.success) {
@@ -62,6 +71,33 @@ const Products = () => {
 
     fetchData();
   }, []);
+
+  // Product page hero/photos (editable from admin)
+  const [productPhotos, setProductPhotos] = useState([]);
+  const [currentPhoto, setCurrentPhoto] = useState(0);
+
+  useEffect(() => {
+    const loadPhotos = async () => {
+      try {
+        const res = await getProductPhotos({ isVisible: true, limitCount: 10 });
+        if (res.success) setProductPhotos(res.photos || []);
+      } catch (err) {
+        console.error("Error loading product page photos", err);
+      }
+    };
+
+    loadPhotos();
+  }, []);
+
+  // autoplay
+  useEffect(() => {
+    if (!productPhotos || productPhotos.length <= 1) return;
+    const id = setInterval(
+      () => setCurrentPhoto((p) => (p + 1) % productPhotos.length),
+      5000,
+    );
+    return () => clearInterval(id);
+  }, [productPhotos]);
 
   const handleCategoryChange = (category) => {
     const newParams = new URLSearchParams(searchParams);
@@ -117,13 +153,12 @@ const Products = () => {
     return filtered;
   }, [products, selectedCategory, priceRange, sortBy, sortOrder, searchTerm]);
 
-
   const { isInWishlist, toggleWishlist } = useWishlist();
 
   const handleQuickAdd = (product) => {
     const stock = Number(getProductStock(product));
-    const isOutOfStock = product.stockStatus === 'out_of_stock' || stock === 0;
-    
+    const isOutOfStock = product.stockStatus === "out_of_stock" || stock === 0;
+
     if (isOutOfStock) {
       toast.error("This product is out of stock");
       return;
@@ -157,7 +192,7 @@ const Products = () => {
 
   const getProductStock = (product) => {
     if (product.variants && product.variants.length > 0) {
-      if (typeof product.totalStock === 'number') return product.totalStock;
+      if (typeof product.totalStock === "number") return product.totalStock;
       return product.variants.reduce((sum, v) => sum + (v.stock || 0), 0);
     }
     return product.stock || 0;
@@ -170,18 +205,18 @@ const Products = () => {
         : product.images[0];
     }
     // Return placeholder instead of external URL
-    return `https://placehold.co/400x400?text=${encodeURIComponent(product.name || 'Product')}`;
+    return `https://placehold.co/400x400?text=${encodeURIComponent(product.name || "Product")}`;
   };
 
   const ProductCard = ({ product }) => {
     const stock = getProductStock(product);
-    const isOutOfStock = product.stockStatus === 'out_of_stock' || stock === 0;
+    const isOutOfStock = product.stockStatus === "out_of_stock" || stock === 0;
     const isLowStock = stock > 0 && stock <= 5;
     const imageUrl = getProductImage(product);
 
     const handleCardClick = (e) => {
       // Don't navigate if clicking on buttons
-      if (e.target.closest('button')) {
+      if (e.target.closest("button")) {
         return;
       }
       navigate(`/products/${product.id}`);
@@ -195,8 +230,9 @@ const Products = () => {
       >
         <div
           onClick={handleCardClick}
-          className={`relative rounded-2xl overflow-hidden h-full cursor-pointer ${isDark ? "bg-gray-800" : "bg-white"
-            } shadow-lg hover:shadow-2xl transition-shadow duration-300 flex flex-col`}
+          className={`relative rounded-2xl overflow-hidden h-full cursor-pointer ${
+            isDark ? "bg-gray-800" : "bg-white"
+          } shadow-lg hover:shadow-2xl transition-shadow duration-300 flex flex-col`}
         >
           {/* Product Image */}
           <div className="relative aspect-square overflow-hidden shrink-0">
@@ -210,15 +246,22 @@ const Products = () => {
             <div className="absolute top-4 left-4 flex flex-col space-y-2">
               {product.badge && (
                 <span
-                  className={`px-3 py-1 rounded-full text-xs font-semibold ${product.badge === "Sale"
-                    ? "bg-red-500 text-white"
-                    : product.badge === "New"
-                      ? "bg-green-500 text-white"
-                      : product.badge === "Hot"
-                        ? "bg-orange-500 text-white"
-                        : "text-gray-900"
-                    }`}
-                  style={product.badge !== "Sale" && product.badge !== "New" && product.badge !== "Hot" ? { backgroundColor: '#d3d1ce' } : {}}
+                  className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                    product.badge === "Sale"
+                      ? "bg-red-500 text-white"
+                      : product.badge === "New"
+                        ? "bg-green-500 text-white"
+                        : product.badge === "Hot"
+                          ? "bg-orange-500 text-white"
+                          : "text-gray-900"
+                  }`}
+                  style={
+                    product.badge !== "Sale" &&
+                    product.badge !== "New" &&
+                    product.badge !== "Hot"
+                      ? { backgroundColor: "#d3d1ce" }
+                      : {}
+                  }
                 >
                   {product.badge}
                 </span>
@@ -233,10 +276,11 @@ const Products = () => {
             <div className="absolute top-4 right-4 flex flex-col space-y-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-30">
               <button
                 onClick={() => toggleWishlist(product)}
-                className={`p-2 rounded-full backdrop-blur-sm transition-colors ${isInWishlist(product.id)
-                  ? "bg-red-500 text-white"
-                  : "bg-white/80 text-gray-700 hover:bg-red-500 hover:text-white"
-                  }`}
+                className={`p-2 rounded-full backdrop-blur-sm transition-colors ${
+                  isInWishlist(product.id)
+                    ? "bg-red-500 text-white"
+                    : "bg-white/80 text-gray-700 hover:bg-red-500 hover:text-white"
+                }`}
               >
                 <Heart
                   className={`w-4 h-4 ${isInWishlist(product.id) ? "fill-current" : ""}`}
@@ -245,9 +289,14 @@ const Products = () => {
               <button
                 onClick={() => openQuickView(product)}
                 className="p-2 rounded-full bg-white/80 text-gray-700 hover:text-white backdrop-blur-sm transition-colors"
-                style={{ hover: { backgroundColor: '#d3d1ce' } }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#d3d1ce'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.8)'}
+                style={{ hover: { backgroundColor: "#d3d1ce" } }}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.backgroundColor = "#d3d1ce")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.backgroundColor =
+                    "rgba(255, 255, 255, 0.8)")
+                }
               >
                 <Eye className="w-4 h-4" />
               </button>
@@ -267,8 +316,9 @@ const Products = () => {
           <div className="p-6 flex flex-col flex-grow">
             <div className="flex items-start justify-between mb-2">
               <h3
-                className={`font-semibold text-lg line-clamp-2 ${isDark ? "text-white" : "text-gray-900"
-                  }`}
+                className={`font-semibold text-lg line-clamp-2 ${
+                  isDark ? "text-white" : "text-gray-900"
+                }`}
               >
                 {product.name}
               </h3>
@@ -278,8 +328,9 @@ const Products = () => {
             </div>
 
             <p
-              className={`text-sm mb-4 line-clamp-2 ${isDark ? "text-gray-300" : "text-gray-600"
-                }`}
+              className={`text-sm mb-4 line-clamp-2 ${
+                isDark ? "text-gray-300" : "text-gray-600"
+              }`}
             >
               {product.shortDescription || product.description}
             </p>
@@ -291,10 +342,11 @@ const Products = () => {
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
-                      className={`w-4 h-4 ${i < Math.floor(product.rating)
-                        ? "text-yellow-500 fill-current"
-                        : "text-gray-300"
-                        }`}
+                      className={`w-4 h-4 ${
+                        i < Math.floor(product.rating)
+                          ? "text-yellow-500 fill-current"
+                          : "text-gray-300"
+                      }`}
                     />
                   ))}
                 </div>
@@ -310,24 +362,27 @@ const Products = () => {
             <div className="flex items-center justify-between mb-4">
               <div>
                 <span
-                  className={`text-2xl font-bold ${isDark ? "text-white" : "text-gray-900"
-                    }`}
+                  className={`text-2xl font-bold ${
+                    isDark ? "text-white" : "text-gray-900"
+                  }`}
                 >
                   {formatPrice(product.price)}
                 </span>
                 {product.originalPrice &&
                   Number(product.originalPrice) > Number(product.price) && (
                     <span
-                      className={`text-sm ml-2 line-through ${isDark ? "text-gray-500" : "text-gray-400"
-                        }`}
+                      className={`text-sm ml-2 line-through ${
+                        isDark ? "text-gray-500" : "text-gray-400"
+                      }`}
                     >
                       {formatPrice(product.originalPrice)}
                     </span>
                   )}
               </div>
               <span
-                className={`font-medium ${isOutOfStock ? "text-red-500" : "text-green-500"
-                  }`}
+                className={`font-medium ${
+                  isOutOfStock ? "text-red-500" : "text-green-500"
+                }`}
               >
                 {isOutOfStock ? "Out of Stock" : "In Stock"}
               </span>
@@ -345,7 +400,7 @@ const Products = () => {
                   <div className="flex space-x-1">
                     {[
                       ...new Set(
-                        product.variants.map((v) => v.color).filter(Boolean)
+                        product.variants.map((v) => v.color).filter(Boolean),
                       ),
                     ]
                       .slice(0, 4)
@@ -357,11 +412,22 @@ const Products = () => {
                           title={color}
                         />
                       ))}
-                    {[...new Set(product.variants.map((v) => v.color).filter(Boolean))].length > 4 && (
+                    {[
+                      ...new Set(
+                        product.variants.map((v) => v.color).filter(Boolean),
+                      ),
+                    ].length > 4 && (
                       <span
                         className={`text-xs ${isDark ? "text-gray-400" : "text-gray-500"}`}
                       >
-                        +{[...new Set(product.variants.map((v) => v.color).filter(Boolean))].length - 4}
+                        +
+                        {[
+                          ...new Set(
+                            product.variants
+                              .map((v) => v.color)
+                              .filter(Boolean),
+                          ),
+                        ].length - 4}
                       </span>
                     )}
                   </div>
@@ -373,11 +439,12 @@ const Products = () => {
             <button
               onClick={() => handleQuickAdd(product)}
               disabled={isOutOfStock}
-              className={`w-full py-3 px-4 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center space-x-2 mt-auto ${isOutOfStock
-                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                : "text-gray-900"
-                }`}
-              style={!isOutOfStock ? { backgroundColor: '#d3d1ce' } : {}}
+              className={`w-full py-3 px-4 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center space-x-2 mt-auto ${
+                isOutOfStock
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  : "text-gray-900"
+              }`}
+              style={!isOutOfStock ? { backgroundColor: "#d3d1ce" } : {}}
             >
               <ShoppingCart className="w-5 h-5" />
               <span>{isOutOfStock ? "Out of Stock" : "Add to Cart"}</span>
@@ -395,28 +462,61 @@ const Products = () => {
         className={`min-h-screen ${isDark ? "bg-gray-900" : "bg-gray-50"} pt-20`}
       >
         {/* Hero Section */}
-        <section
-          className={`py-16 ${isDark ? "bg-gray-800" : "bg-white"} border-b ${isDark ? "border-gray-700" : "border-gray-200"}`}
-        >
+        <section className="relative overflow-hidden">
           <div className="container mx-auto px-4">
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 30 }} 
               animate={{ opacity: 1, y: 0 }}
               className="text-center"
             >
-              <h1
-                className={`text-4xl md:text-6xl font-bold mb-6 ${isDark ? "text-white" : "text-gray-900"
-                  }`}
-              >
-                Our Products
-              </h1>
-              <p
-                className={`text-xl mb-8 max-w-2xl mx-auto ${isDark ? "text-gray-300" : "text-gray-600"
-                  }`}
-              >
-                Discover our curated collection of premium clothing designed for
-                comfort, style, and durability.
-              </p>
+              {/* Product page images managed from Admin ("idk what" tab) */}
+              {productPhotos.length > 0 ? (
+                <div className="mb-8 relative">
+                  {/* full-bleed, full-viewport height image (show full image without cropping) */}
+                  <div className="relative left-1/2 -translate-x-1/2 w-screen max-w-none">
+                    <div className="w-full overflow-hidden">
+                      <img
+                        src={productPhotos[currentPhoto].url}
+                        alt={productPhotos[currentPhoto].title || "Products"}
+                        className="w-full h-screen object-cover object-center"
+                      />
+                    </div>
+                  </div>
+
+                  {/* controls remain centered inside the container */}
+                  {productPhotos.length > 1 && (
+                    <div className="container mx-auto px-4 flex items-center justify-center gap-3 mt-3">
+                      <button
+                        onClick={() =>
+                          setCurrentPhoto(
+                            (i) =>
+                              (i - 1 + productPhotos.length) %
+                              productPhotos.length,
+                          )
+                        }
+                        className="px-3 py-2 rounded-full bg-white/90 shadow-sm text-sm"
+                        aria-label="Previous photo"
+                      >
+                        ‹
+                      </button>
+                      <div
+                        className={`text-sm ${isDark ? "text-gray-300" : "text-gray-600"}`}
+                      >
+                        {productPhotos[currentPhoto].title || ""}
+                      </div>
+                      <button
+                        onClick={() =>
+                          setCurrentPhoto((i) => (i + 1) % productPhotos.length)
+                        }
+                        className="px-3 py-2 rounded-full bg-white/90 shadow-sm text-sm"
+                        aria-label="Next photo"
+                      >
+                        ›
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : null}
             </motion.div>
           </div>
         </section>
@@ -425,8 +525,9 @@ const Products = () => {
         <section id="products-grid" className="py-8 scroll-mt-24">
           <div className="container mx-auto px-4">
             <div
-              className={`rounded-2xl p-6 mb-8 ${isDark ? "bg-gray-800" : "bg-white"
-                } shadow-lg`}
+              className={`rounded-2xl p-6 mb-8 ${
+                isDark ? "bg-gray-800" : "bg-white"
+              } shadow-lg`}
             >
               <div className="flex flex-wrap items-center gap-4 mb-4">
                 <div className="flex items-center space-x-2">
@@ -449,12 +550,15 @@ const Products = () => {
                     placeholder="Search products..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className={`w-full px-4 py-2 rounded-lg border focus:ring-2 ${isDark
-                      ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                      : "bg-white border-gray-300 text-gray-900 placeholder-gray-500"
-                      }`}
-                    style={{ focusRing: '#d3d1ce' }}
-                    onFocus={(e) => e.currentTarget.style.outlineColor = '#d3d1ce'}
+                    className={`w-full px-4 py-2 rounded-lg border focus:ring-2 ${
+                      isDark
+                        ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+                        : "bg-white border-gray-300 text-gray-900 placeholder-gray-500"
+                    }`}
+                    style={{ focusRing: "#d3d1ce" }}
+                    onFocus={(e) =>
+                      (e.currentTarget.style.outlineColor = "#d3d1ce")
+                    }
                   />
                 </div>
 
@@ -463,11 +567,14 @@ const Products = () => {
                   <select
                     value={selectedCategory}
                     onChange={(e) => handleCategoryChange(e.target.value)}
-                    className={`w-full px-4 py-2 rounded-lg border focus:ring-2 ${isDark
-                      ? "bg-gray-700 border-gray-600 text-white"
-                      : "bg-white border-gray-300 text-gray-900"
-                      }`}
-                    onFocus={(e) => e.currentTarget.style.outlineColor = '#d3d1ce'}
+                    className={`w-full px-4 py-2 rounded-lg border focus:ring-2 ${
+                      isDark
+                        ? "bg-gray-700 border-gray-600 text-white"
+                        : "bg-white border-gray-300 text-gray-900"
+                    }`}
+                    onFocus={(e) =>
+                      (e.currentTarget.style.outlineColor = "#d3d1ce")
+                    }
                   >
                     <option value="All">All Categories</option>
                     {categories.map((category) => (
@@ -485,11 +592,14 @@ const Products = () => {
                       const [min, max] = e.target.value.split("-").map(Number);
                       setPriceRange({ min, max });
                     }}
-                    className={`w-full px-4 py-2 rounded-lg border focus:ring-2 ${isDark
-                      ? "bg-gray-700 border-gray-600 text-white"
-                      : "bg-white border-gray-300 text-gray-900"
-                      }`}
-                    onFocus={(e) => e.currentTarget.style.outlineColor = '#d3d1ce'}
+                    className={`w-full px-4 py-2 rounded-lg border focus:ring-2 ${
+                      isDark
+                        ? "bg-gray-700 border-gray-600 text-white"
+                        : "bg-white border-gray-300 text-gray-900"
+                    }`}
+                    onFocus={(e) =>
+                      (e.currentTarget.style.outlineColor = "#d3d1ce")
+                    }
                   >
                     <option value="0-1000000">All Prices</option>
                     <option value="0-1000">Under Rs. 1,000</option>
@@ -508,11 +618,14 @@ const Products = () => {
                       setSortBy(field);
                       setSortOrder(order);
                     }}
-                    className={`w-full px-4 py-2 rounded-lg border focus:ring-2 ${isDark
-                      ? "bg-gray-700 border-gray-600 text-white"
-                      : "bg-white border-gray-300 text-gray-900"
-                      }`}
-                    onFocus={(e) => e.currentTarget.style.outlineColor = '#d3d1ce'}
+                    className={`w-full px-4 py-2 rounded-lg border focus:ring-2 ${
+                      isDark
+                        ? "bg-gray-700 border-gray-600 text-white"
+                        : "bg-white border-gray-300 text-gray-900"
+                    }`}
+                    onFocus={(e) =>
+                      (e.currentTarget.style.outlineColor = "#d3d1ce")
+                    }
                   >
                     <option value="createdAt-desc">Newest First</option>
                     <option value="createdAt-asc">Oldest First</option>
@@ -538,7 +651,10 @@ const Products = () => {
 
             {/* Products Grid */}
             {loading ? (
-              <div key="loading" className="flex items-center justify-center py-20">
+              <div
+                key="loading"
+                className="flex items-center justify-center py-20"
+              >
                 <LoadingSpinner size="large" />
               </div>
             ) : filteredProducts.length === 0 ? (
@@ -549,8 +665,9 @@ const Products = () => {
                   🛍️
                 </div>
                 <h3
-                  className={`text-2xl font-bold mb-4 ${isDark ? "text-white" : "text-gray-900"
-                    }`}
+                  className={`text-2xl font-bold mb-4 ${
+                    isDark ? "text-white" : "text-gray-900"
+                  }`}
                 >
                   No products found
                 </h3>
@@ -566,7 +683,7 @@ const Products = () => {
                     setPriceRange({ min: 0, max: 1000000 });
                     setSearchTerm("");
                   }}
-                  style={{ backgroundColor: '#d3d1ce' }}
+                  style={{ backgroundColor: "#d3d1ce" }}
                   className="text-gray-900 px-6 py-2 rounded-lg font-semibold transition-colors hover:opacity-90"
                 >
                   Clear Filters

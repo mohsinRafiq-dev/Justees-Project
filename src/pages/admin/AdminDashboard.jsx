@@ -31,12 +31,16 @@ import { getProductAnalytics } from "../../services/products.service";
 import { getCategories } from "../../services/products/admin";
 import { getSlides } from "../../services/slides.service";
 import { getAllReviews } from "../../services/reviews.service";
-import { getSiteSettings, updateSiteSettings } from "../../services/settings.service";
+import {
+  getSiteSettings,
+  updateSiteSettings,
+} from "../../services/settings.service";
 import { formatPrice } from "../../utils/validation";
 import ProductManagement from "../../components/admin/ProductManagement";
 import CategoriesManagement from "./CategoriesManagement";
 import ReviewsManagement from "./ReviewsManagement";
 import SlidesManagement from "./SlidesManagement";
+import ProductPhotosManagement from "./ProductPhotosManagement";
 import SizesManagement from "./SizesManagement";
 
 const AdminDashboard = () => {
@@ -45,7 +49,7 @@ const AdminDashboard = () => {
   const { isDark, toggleTheme } = useTheme();
   // Initialize activeTab from localStorage or default to "dashboard"
   const [activeTab, setActiveTab] = useState(() => {
-    return localStorage.getItem('adminActiveTab') || "dashboard";
+    return localStorage.getItem("adminActiveTab") || "dashboard";
   });
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -67,28 +71,39 @@ const AdminDashboard = () => {
   // Function to handle tab changes and persist to localStorage
   const handleTabChange = (tabId) => {
     setActiveTab(tabId);
-    localStorage.setItem('adminActiveTab', tabId);
+    localStorage.setItem("adminActiveTab", tabId);
   };
 
   const loadDashboardData = async () => {
     try {
       setLoading(true);
 
-      const [analyticsResult, categoriesResult, slidesResult, reviewsResult] = await Promise.all([
-        getProductAnalytics(),
-        getCategories(),
-        getSlides(),
-        getAllReviews({ limitCount: 1000 })
-      ]);
+      const [analyticsResult, categoriesResult, slidesResult, reviewsResult] =
+        await Promise.all([
+          getProductAnalytics(),
+          getCategories(),
+          getSlides(),
+          getAllReviews({ limitCount: 1000 }),
+        ]);
 
       setStats((prev) => ({
         ...prev,
-        totalProducts: analyticsResult.success ? analyticsResult.analytics.totalProducts : 0,
-        totalViews: analyticsResult.success ? analyticsResult.analytics.totalViews : 0,
-        lowStockItems: analyticsResult.success ? 
-          (analyticsResult.analytics.totalProducts - analyticsResult.analytics.outOfStock) : 0,
-        outOfStockItems: analyticsResult.success ? analyticsResult.analytics.outOfStock : 0,
-        totalCategories: categoriesResult.success ? categoriesResult.categories.length : 0,
+        totalProducts: analyticsResult.success
+          ? analyticsResult.analytics.totalProducts
+          : 0,
+        totalViews: analyticsResult.success
+          ? analyticsResult.analytics.totalViews
+          : 0,
+        lowStockItems: analyticsResult.success
+          ? analyticsResult.analytics.totalProducts -
+            analyticsResult.analytics.outOfStock
+          : 0,
+        outOfStockItems: analyticsResult.success
+          ? analyticsResult.analytics.outOfStock
+          : 0,
+        totalCategories: categoriesResult.success
+          ? categoriesResult.categories.length
+          : 0,
         totalSlides: slidesResult.success ? slidesResult.slides.length : 0,
         totalReviews: reviewsResult.success ? reviewsResult.reviews.length : 0,
       }));
@@ -111,6 +126,7 @@ const AdminDashboard = () => {
     { id: "products", name: "Products", icon: Package },
     { id: "categories", name: "Categories", icon: Tag },
     { id: "slides", name: "Slides", icon: Image },
+    { id: "productPhotos", name: "Product Photos", icon: Image },
     { id: "sizes", name: "Sizes & Colors", icon: Layers },
     { id: "reviews", name: "Reviews", icon: Star },
     { id: "settings", name: "Settings", icon: Settings },
@@ -230,7 +246,6 @@ const AdminDashboard = () => {
     );
   };
 
-
   const SiteSettingsForm = () => {
     const [settingsLoading, setSettingsLoading] = useState(false);
     const [message, setMessage] = useState({ type: "", text: "" });
@@ -245,8 +260,15 @@ const AdminDashboard = () => {
         const result = await getSiteSettings();
         if (result.success && result.settings) {
           // Support both old single text and new array format
-          if (result.settings.volumeTexts && Array.isArray(result.settings.volumeTexts)) {
-            setVolumeTexts(result.settings.volumeTexts.length > 0 ? result.settings.volumeTexts : ["Volume 1: The Debut"]);
+          if (
+            result.settings.volumeTexts &&
+            Array.isArray(result.settings.volumeTexts)
+          ) {
+            setVolumeTexts(
+              result.settings.volumeTexts.length > 0
+                ? result.settings.volumeTexts
+                : ["Volume 1: The Debut"],
+            );
           } else if (result.settings.volumeText) {
             // Migrate old single text to array format
             setVolumeTexts([result.settings.volumeText]);
@@ -284,7 +306,10 @@ const AdminDashboard = () => {
 
     const handleUpdate = async (e) => {
       e.preventDefault();
-      if (volumeTexts.length === 0 || volumeTexts.every(text => !text.trim())) {
+      if (
+        volumeTexts.length === 0 ||
+        volumeTexts.every((text) => !text.trim())
+      ) {
         setMessage({
           type: "error",
           text: "You must have at least one ticker text",
@@ -294,7 +319,10 @@ const AdminDashboard = () => {
       setSettingsLoading(true);
       setMessage({ type: "", text: "" });
 
-      const res = await updateSiteSettings({ volumeTexts, volumeText: volumeTexts[0] }); // Keep volumeText for backward compatibility
+      const res = await updateSiteSettings({
+        volumeTexts,
+        volumeText: volumeTexts[0],
+      }); // Keep volumeText for backward compatibility
       if (res.success) {
         setMessage({
           type: "success",
@@ -331,10 +359,12 @@ const AdminDashboard = () => {
             {message.text}
           </div>
         )}
-        
+
         {/* Current Ticker Texts */}
         <div className="space-y-3 mb-4">
-          <label className={`block text-sm font-medium ${isDark ? "text-gray-300" : "text-gray-700"}`}>
+          <label
+            className={`block text-sm font-medium ${isDark ? "text-gray-300" : "text-gray-700"}`}
+          >
             Current Ticker Texts
           </label>
           {isLoading ? (
@@ -342,8 +372,15 @@ const AdminDashboard = () => {
           ) : (
             <div className="space-y-2">
               {volumeTexts.map((text, index) => (
-                <div key={index} className={`flex items-center gap-2 p-3 rounded-lg ${isDark ? "bg-gray-700/50" : "bg-gray-100"}`}>
-                  <span className={`flex-1 ${isDark ? "text-white" : "text-gray-900"}`}>{text}</span>
+                <div
+                  key={index}
+                  className={`flex items-center gap-2 p-3 rounded-lg ${isDark ? "bg-gray-700/50" : "bg-gray-100"}`}
+                >
+                  <span
+                    className={`flex-1 ${isDark ? "text-white" : "text-gray-900"}`}
+                  >
+                    {text}
+                  </span>
                   <button
                     type="button"
                     onClick={() => handleRemoveText(index)}
@@ -360,7 +397,9 @@ const AdminDashboard = () => {
 
         {/* Add New Text */}
         <div className="space-y-2 mb-4">
-          <label className={`block text-sm font-medium ${isDark ? "text-gray-300" : "text-gray-700"}`}>
+          <label
+            className={`block text-sm font-medium ${isDark ? "text-gray-300" : "text-gray-700"}`}
+          >
             Add New Ticker Text
           </label>
           <div className="flex gap-2">
@@ -368,7 +407,9 @@ const AdminDashboard = () => {
               type="text"
               value={newText}
               onChange={(e) => setNewText(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddText())}
+              onKeyPress={(e) =>
+                e.key === "Enter" && (e.preventDefault(), handleAddText())
+              }
               disabled={isLoading}
               className={`flex-1 border ${isDark ? "border-gray-600 bg-gray-700/50 text-white placeholder-gray-400" : "border-gray-300 bg-white text-gray-900 placeholder-gray-500"} rounded-xl px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none transition-all disabled:opacity-50`}
               placeholder="e.g., Volume 2: The Evolution"
@@ -382,7 +423,9 @@ const AdminDashboard = () => {
               Add
             </button>
           </div>
-          <p className={`text-xs ${isDark ? "text-gray-400" : "text-gray-500"}`}>
+          <p
+            className={`text-xs ${isDark ? "text-gray-400" : "text-gray-500"}`}
+          >
             These texts will scroll across the homepage ticker bar
           </p>
         </div>
@@ -490,29 +533,41 @@ const AdminDashboard = () => {
 
       {/* Desktop Sidebar - Always Visible */}
       <div
-        className={`hidden lg:flex flex-col h-screen sticky top-0 ${sidebarOpen ? 'w-72' : 'w-20'} transition-all duration-300 glass ${isDark ? "" : "glass-light"} shadow-2xl border-r ${isDark ? "border-gray-700" : "border-gray-200"} relative`}
+        className={`hidden lg:flex flex-col h-screen sticky top-0 ${sidebarOpen ? "w-72" : "w-20"} transition-all duration-300 glass ${isDark ? "" : "glass-light"} shadow-2xl border-r ${isDark ? "border-gray-700" : "border-gray-200"} relative`}
       >
         {/* Collapse Toggle Button */}
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
           className="absolute -right-3 top-1/2 -translate-y-1/2 bg-blue-600 text-white p-1.5 rounded-full shadow-lg z-50 hover:scale-110 transition-transform"
         >
-          {sidebarOpen ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+          {sidebarOpen ? (
+            <ChevronLeft className="w-4 h-4" />
+          ) : (
+            <ChevronRight className="w-4 h-4" />
+          )}
         </button>
-        
+
         {/* Inner Content Wrapper */}
         <div className="flex flex-col h-full overflow-hidden w-full whitespace-nowrap">
-          <div className={`p-6 flex items-center ${sidebarOpen ? "justify-between" : "justify-center"}`}>
+          <div
+            className={`p-6 flex items-center ${sidebarOpen ? "justify-between" : "justify-center"}`}
+          >
             {sidebarOpen ? (
               <Link
                 to="/"
                 className="text-2xl font-bold bg-gradient-to-r from-blue-500 via-cyan-500 to-teal-500 bg-clip-text text-transparent flex items-center space-x-2 whitespace-nowrap"
               >
                 <span>Justees</span>
-                <span className={`text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}>Admin</span>
+                <span
+                  className={`text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}
+                >
+                  Admin
+                </span>
               </Link>
             ) : (
-              <Link to="/" className="text-2xl font-bold text-blue-500">J</Link>
+              <Link to="/" className="text-2xl font-bold text-blue-500">
+                J
+              </Link>
             )}
           </div>
 
@@ -535,16 +590,24 @@ const AdminDashboard = () => {
                   }`}
                 >
                   <Icon className={`w-5 h-5 ${sidebarOpen ? "mr-3" : ""}`} />
-                  {sidebarOpen && <span className="font-medium whitespace-nowrap">{item.name}</span>}
+                  {sidebarOpen && (
+                    <span className="font-medium whitespace-nowrap">
+                      {item.name}
+                    </span>
+                  )}
                 </motion.button>
               );
             })}
           </nav>
 
           {/* User Menu */}
-          <div className={`p-4 border-t ${isDark ? "border-gray-700" : "border-gray-200"}`}>
+          <div
+            className={`p-4 border-t ${isDark ? "border-gray-700" : "border-gray-200"}`}
+          >
             {sidebarOpen ? (
-              <div className={`glass ${isDark ? "" : "glass-light"} rounded-xl p-4 mb-3`}>
+              <div
+                className={`glass ${isDark ? "" : "glass-light"} rounded-xl p-4 mb-3`}
+              >
                 <div className="flex items-center space-x-3 mb-3">
                   <img
                     className="h-10 w-10 rounded-full ring-2 ring-blue-500 flex-shrink-0 object-contain bg-white p-1"
@@ -552,15 +615,33 @@ const AdminDashboard = () => {
                     alt="Justees"
                   />
                   <div className="flex-1 min-w-0">
-                    <p className={`text-sm font-medium truncate ${isDark ? "text-white" : "text-gray-900"}`}>{user?.displayName || "Admin"}</p>
-                    <p className={`text-xs truncate ${isDark ? "text-gray-400" : "text-gray-500"}`}>{user?.email}</p>
+                    <p
+                      className={`text-sm font-medium truncate ${isDark ? "text-white" : "text-gray-900"}`}
+                    >
+                      {user?.displayName || "Admin"}
+                    </p>
+                    <p
+                      className={`text-xs truncate ${isDark ? "text-gray-400" : "text-gray-500"}`}
+                    >
+                      {user?.email}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <button onClick={toggleTheme} className={`flex-1 flex items-center justify-center p-2 rounded-lg transition-all ${isDark ? "bg-gray-700 hover:bg-gray-600" : "bg-gray-200 hover:bg-gray-300"}`}>
-                    {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                  <button
+                    onClick={toggleTheme}
+                    className={`flex-1 flex items-center justify-center p-2 rounded-lg transition-all ${isDark ? "bg-gray-700 hover:bg-gray-600" : "bg-gray-200 hover:bg-gray-300"}`}
+                  >
+                    {isDark ? (
+                      <Sun className="w-4 h-4" />
+                    ) : (
+                      <Moon className="w-4 h-4" />
+                    )}
                   </button>
-                  <Link to="/" className={`flex-1 flex items-center justify-center p-2 rounded-lg transition-all ${isDark ? "bg-gray-700 hover:bg-gray-600" : "bg-gray-200 hover:bg-gray-300"}`}>
+                  <Link
+                    to="/"
+                    className={`flex-1 flex items-center justify-center p-2 rounded-lg transition-all ${isDark ? "bg-gray-700 hover:bg-gray-600" : "bg-gray-200 hover:bg-gray-300"}`}
+                  >
                     <Home className="w-4 h-4" />
                   </Link>
                 </div>
@@ -573,10 +654,20 @@ const AdminDashboard = () => {
                   alt="Justees"
                 />
                 <div className="flex flex-col items-center gap-2 w-full">
-                  <button onClick={toggleTheme} className={`p-2 rounded-lg transition-all ${isDark ? "bg-gray-700 hover:bg-gray-600" : "bg-gray-200 hover:bg-gray-300"}`}>
-                    {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                  <button
+                    onClick={toggleTheme}
+                    className={`p-2 rounded-lg transition-all ${isDark ? "bg-gray-700 hover:bg-gray-600" : "bg-gray-200 hover:bg-gray-300"}`}
+                  >
+                    {isDark ? (
+                      <Sun className="w-4 h-4" />
+                    ) : (
+                      <Moon className="w-4 h-4" />
+                    )}
                   </button>
-                  <Link to="/" className={`p-2 rounded-lg transition-all ${isDark ? "bg-gray-700 hover:bg-gray-600" : "bg-gray-200 hover:bg-gray-300"}`}>
+                  <Link
+                    to="/"
+                    className={`p-2 rounded-lg transition-all ${isDark ? "bg-gray-700 hover:bg-gray-600" : "bg-gray-200 hover:bg-gray-300"}`}
+                  >
                     <Home className="w-4 h-4" />
                   </Link>
                 </div>
@@ -602,7 +693,7 @@ const AdminDashboard = () => {
             initial={{ x: -300 }}
             animate={{ x: 0 }}
             exit={{ x: -300 }}
-            transition={{ type: 'spring', damping: 20, stiffness: 150 }}
+            transition={{ type: "spring", damping: 20, stiffness: 150 }}
             className="lg:hidden fixed inset-y-0 left-0 z-50 w-80 max-w-[85vw] glass shadow-2xl border-r border-gray-700"
           >
             {/* Inner Content Wrapper */}
@@ -613,11 +704,18 @@ const AdminDashboard = () => {
                   className="text-2xl font-bold bg-gradient-to-r from-blue-500 via-cyan-500 to-teal-500 bg-clip-text text-transparent flex items-center space-x-2 whitespace-nowrap"
                 >
                   <span>Justees</span>
-                  <span className={`text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}>Admin</span>
+                  <span
+                    className={`text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}
+                  >
+                    Admin
+                  </span>
                 </Link>
-                
+
                 {/* Mobile Close Button */}
-                <button onClick={() => setMobileMenuOpen(false)} className="p-2 text-gray-500">
+                <button
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="p-2 text-gray-500"
+                >
                   <X className="w-6 h-6" />
                 </button>
               </div>
@@ -643,15 +741,21 @@ const AdminDashboard = () => {
                       }`}
                     >
                       <Icon className="w-5 h-5 mr-3" />
-                      <span className="font-medium whitespace-nowrap">{item.name}</span>
+                      <span className="font-medium whitespace-nowrap">
+                        {item.name}
+                      </span>
                     </motion.button>
                   );
                 })}
               </nav>
 
               {/* User Menu */}
-              <div className={`p-4 border-t ${isDark ? "border-gray-700" : "border-gray-200"}`}>
-                <div className={`glass ${isDark ? "" : "glass-light"} rounded-xl p-4 mb-3`}>
+              <div
+                className={`p-4 border-t ${isDark ? "border-gray-700" : "border-gray-200"}`}
+              >
+                <div
+                  className={`glass ${isDark ? "" : "glass-light"} rounded-xl p-4 mb-3`}
+                >
                   <div className="flex items-center space-x-3 mb-3">
                     <img
                       className="h-10 w-10 rounded-full ring-2 ring-blue-500 flex-shrink-0 object-contain bg-white p-1"
@@ -659,15 +763,33 @@ const AdminDashboard = () => {
                       alt="Justees"
                     />
                     <div className="flex-1 min-w-0">
-                      <p className={`text-sm font-medium truncate ${isDark ? "text-white" : "text-gray-900"}`}>{user?.displayName || "Admin"}</p>
-                      <p className={`text-xs truncate ${isDark ? "text-gray-400" : "text-gray-500"}`}>{user?.email}</p>
+                      <p
+                        className={`text-sm font-medium truncate ${isDark ? "text-white" : "text-gray-900"}`}
+                      >
+                        {user?.displayName || "Admin"}
+                      </p>
+                      <p
+                        className={`text-xs truncate ${isDark ? "text-gray-400" : "text-gray-500"}`}
+                      >
+                        {user?.email}
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <button onClick={toggleTheme} className={`flex-1 flex items-center justify-center p-2 rounded-lg transition-all ${isDark ? "bg-gray-700 hover:bg-gray-600" : "bg-gray-200 hover:bg-gray-300"}`}>
-                      {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                    <button
+                      onClick={toggleTheme}
+                      className={`flex-1 flex items-center justify-center p-2 rounded-lg transition-all ${isDark ? "bg-gray-700 hover:bg-gray-600" : "bg-gray-200 hover:bg-gray-300"}`}
+                    >
+                      {isDark ? (
+                        <Sun className="w-4 h-4" />
+                      ) : (
+                        <Moon className="w-4 h-4" />
+                      )}
                     </button>
-                    <Link to="/" className={`flex-1 flex items-center justify-center p-2 rounded-lg transition-all ${isDark ? "bg-gray-700 hover:bg-gray-600" : "bg-gray-200 hover:bg-gray-300"}`}>
+                    <Link
+                      to="/"
+                      className={`flex-1 flex items-center justify-center p-2 rounded-lg transition-all ${isDark ? "bg-gray-700 hover:bg-gray-600" : "bg-gray-200 hover:bg-gray-300"}`}
+                    >
                       <Home className="w-4 h-4" />
                     </Link>
                   </div>
@@ -702,8 +824,7 @@ const AdminDashboard = () => {
                 <h2
                   className={`text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 ${isDark ? "text-white" : "text-gray-900"}`}
                 >
-                  Welcome back,{" "}
-                  {user?.displayName?.split(" ")[0] || "Admin"}!
+                  Welcome back, {user?.displayName?.split(" ")[0] || "Admin"}!
                 </h2>
                 <p
                   className={`text-sm sm:text-base lg:text-lg ${isDark ? "text-gray-400" : "text-gray-600"}`}
@@ -912,6 +1033,17 @@ const AdminDashboard = () => {
             </motion.div>
           )}
 
+          {activeTab === "productPhotos" && (
+            <motion.div
+              key="productPhotos"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+            >
+              <ProductPhotosManagement />
+            </motion.div>
+          )}
+
           {activeTab === "sizes" && (
             <motion.div
               key="sizes"
@@ -922,7 +1054,6 @@ const AdminDashboard = () => {
               <SizesManagement />
             </motion.div>
           )}
-
 
           {activeTab === "settings" && (
             <motion.div
