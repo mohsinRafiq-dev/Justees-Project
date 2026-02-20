@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion"; // eslint-disable-line
 import {
@@ -489,18 +489,22 @@ const Home = () => {
         style={{ backgroundColor: "#FFFFE3" }}
       >
         <div className="animate-marquee whitespace-nowrap">
-          {/* Repeat all texts multiple times for continuous scrolling */}
-          {[...Array(4)].map((_, repeatIndex) =>
-            volumeTexts.map((text, textIndex) => (
-              <span
-                key={`${repeatIndex}-${textIndex}`}
-                className="text-gray-900 text-3xl font-bold mx-12"
-                style={{ fontFamily: "Cookie, cursive" }}
-              >
-                {text}
-              </span>
-            )),
-          )}
+          {/* Repeat blocks twice so the animation never empties before looping */}
+          {[...Array(2)].map((_, block) => (
+            <React.Fragment key={block}>
+              {[...Array(12)].map((_, repeatIndex) =>
+                volumeTexts.map((text, textIndex) => (
+                  <span
+                    key={`${block}-${repeatIndex}-${textIndex}`}
+                    className="text-gray-900 text-3xl font-bold mx-6 whitespace-nowrap"
+                    style={{ fontFamily: "Cookie, cursive" }}
+                  >
+                    {text}
+                  </span>
+                )),
+              )}
+            </React.Fragment>
+          ))}
         </div>
       </div>
 
