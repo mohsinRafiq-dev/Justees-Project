@@ -71,7 +71,8 @@ const Home = () => {
   const [isRealTimeFeed, setIsRealTimeFeed] = useState(false);
 
   // Hero slides (loaded from Firestore or use default fallback slides)
-  const [heroSlides, setHeroSlides] = useState([
+  // default slides shown only if loading from backend fails
+  const DEFAULT_SLIDES = [
     {
       id: "default-1",
       title: "Welcome to Justees",
@@ -99,7 +100,9 @@ const Home = () => {
       type: "image",
       order: 2,
     },
-  ]);
+  ];
+
+  const [heroSlides, setHeroSlides] = useState([]);
 
   // Helper function to format price in Indian format
   const formatPrice = (price) => {
@@ -189,8 +192,8 @@ const Home = () => {
         console.log("[Home] Setting normalized slides:", normalized);
         setHeroSlides(normalized);
       } else {
-        console.log("[Home] No slides found in database, using default slides");
-        // Keep the default slides - don't set to empty array
+        console.log("[Home] No slides found in database, falling back to defaults");
+        setHeroSlides(DEFAULT_SLIDES);
       }
     } catch (error) {
       console.error("[Home] Error loading slides:", error);
@@ -348,8 +351,15 @@ const Home = () => {
 
   // Mobile menu is closed by default, no need for effect
 
+  const [videoKey, setVideoKey] = useState(0); // used to remount video when only one slide
+
   const nextSlide = () => {
     if (heroSlides.length === 0) return;
+    if (heroSlides.length === 1 && heroSlides[0].type === "video") {
+      // force remount of video so it restarts
+      setVideoKey((k) => k + 1);
+      return;
+    }
     setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
   };
 
@@ -526,6 +536,7 @@ const Home = () => {
                     <div className="absolute inset-0">
                       {slide.type === "video" ? (
                         <video
+                          key={videoKey}
                           className="w-full h-full object-cover"
                           src={slide.url}
                           autoPlay
