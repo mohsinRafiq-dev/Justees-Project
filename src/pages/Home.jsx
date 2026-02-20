@@ -434,7 +434,7 @@ const Home = () => {
           <div className="absolute inset-0 bg-gradient-to-t from-gray-900/90 via-gray-900/30 to-transparent" />
         </div>
 
-        <div className="relative h-full flex items-end pb-12 md:pb-24">
+        <div className="relative h-full flex items-end pb-6 md:pb-12">
           <div className="pl-8 md:pl-16 pr-8">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
@@ -446,7 +446,7 @@ const Home = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2, duration: 0.8 }}
-                className="text-4xl md:text-8xl font-bold text-white mb-4 md:mb-6 leading-tight"
+                className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-4 md:mb-6 leading-tight"
               >
                 Welcome to
                 <br />
@@ -460,7 +460,7 @@ const Home = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4, duration: 0.8 }}
-                className="text-lg md:text-3xl text-gray-200 mb-6 md:mb-8 font-light"
+                className="text-base sm:text-lg md:text-2xl lg:text-3xl text-gray-200 mb-6 md:mb-8 font-light"
               >
                 Discover Premium Quality Clothing That Defines Your Style
               </motion.p>
