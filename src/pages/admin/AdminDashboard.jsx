@@ -126,7 +126,7 @@ const AdminDashboard = () => {
     { id: "products", name: "Products", icon: Package },
     { id: "categories", name: "Categories", icon: Tag },
     { id: "slides", name: "Slides", icon: Image },
-    { id: "productPhotos", name: "Product Photos", icon: Image },
+    { id: "productPhotos", name: "Product page photos", icon: Image },
     { id: "sizes", name: "Sizes & Colors", icon: Layers },
     { id: "reviews", name: "Reviews", icon: Star },
     { id: "settings", name: "Settings", icon: Settings },

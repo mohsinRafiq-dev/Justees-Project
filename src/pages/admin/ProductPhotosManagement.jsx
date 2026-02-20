@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 
+import Cropper from "react-easy-crop";
+import { getCroppedImg } from "../../utils/cropImage";
 import { toast } from "react-hot-toast";
 import { Plus, Trash2, Upload, X, Edit3, Image } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
@@ -31,6 +33,13 @@ const ProductPhotosManagement = () => {
   });
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState("");
+  // Cropper state
+  const [showCropper, setShowCropper] = useState(false);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
+  const [cropAspect, setCropAspect] = useState(16 / 9);
+
   const [confirm, setConfirm] = useState({ open: false, id: null });
 
   useEffect(() => {
@@ -63,16 +72,69 @@ const ProductPhotosManagement = () => {
       toast.error("Image is too large (max ~5MB)");
       return;
     }
-    setSelectedFile(file);
+
+    // Read file for preview and open cropper
     const reader = new FileReader();
-    reader.onloadend = () => setPreviewUrl(reader.result);
+    reader.onloadend = () => {
+      setPreviewUrl(reader.result);
+      setShowCropper(true);
+      setCrop({ x: 0, y: 0 });
+      setZoom(1);
+      setCroppedAreaPixels(null);
+      // Reset to default 16:9 aspect for new images
+      setCropAspect(16 / 9);
+      // keep original file in state until crop applied
+      setSelectedFile(file);
+    };
     reader.readAsDataURL(file);
   };
 
   const clearFile = () => {
     setSelectedFile(null);
     setPreviewUrl("");
+    setShowCropper(false);
     setFormData((prev) => ({ ...prev, url: "" }));
+  };
+
+  const onCropComplete = (_, croppedPixels) => {
+    setCroppedAreaPixels(croppedPixels);
+  };
+
+  const applyCrop = async () => {
+    if (!previewUrl || !croppedAreaPixels) {
+      setShowCropper(false);
+      return;
+    }
+
+    // Validate crop area
+    if (croppedAreaPixels.width < 1 || croppedAreaPixels.height < 1) {
+      toast.error("Crop area too small. Please select a larger area for cropping.");
+      return;
+    }
+
+    try {
+      const blob = await getCroppedImg(
+        previewUrl,
+        croppedAreaPixels,
+        "image/jpeg",
+        0.9,
+      );
+      const file = new File(
+        [blob],
+        selectedFile ? selectedFile.name : "cropped.jpg",
+        { type: blob.type },
+      );
+      setSelectedFile(file);
+      setPreviewUrl(URL.createObjectURL(blob));
+      setShowCropper(false);
+    } catch (err) {
+      console.error("Crop failed", err);
+      if (err.message.includes('CORS')) {
+        toast.error("Cannot crop this image — CORS policy blocks access. Try re-uploading the image.");
+      } else {
+        toast.error("Failed to crop image: " + err.message);
+      }
+    }
   };
 
   const openModal = (photo = null) => {
@@ -191,7 +253,7 @@ const ProductPhotosManagement = () => {
           <h2
             className={`text-2xl sm:text-3xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}
           >
-            Product Page Photos Management
+            Product page photos
           </h2>
           <p
             className={`text-sm sm:text-base ${isDark ? "text-gray-400" : "text-gray-600"}`}
@@ -234,21 +296,126 @@ const ProductPhotosManagement = () => {
                 </label>
                 <div className="flex items-center justify-center w-full">
                   {previewUrl ? (
-                    <div
-                      className={`relative w-full h-48 rounded-lg overflow-hidden border ${isDark ? "border-gray-700" : "border-gray-200"}`}
-                    >
-                      <img
-                        src={previewUrl}
-                        alt="Preview"
-                        className="w-full h-full object-cover"
-                      />
-                      <button
-                        onClick={clearFile}
-                        className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 shadow-lg hover:bg-red-600 transition-colors"
+                    showCropper ? (
+                      <div
+                        className={`relative w-full h-64 rounded-lg overflow-hidden border ${isDark ? "border-gray-700" : "border-gray-200"}`}
                       >
-                        <X className="w-5 h-5" />
-                      </button>
-                    </div>
+                        <div className="absolute inset-0 bg-black/20 z-10 flex items-end justify-center p-3 pointer-events-none">
+                          <div className="text-xs text-white/90 bg-black/30 px-2 py-1 rounded">
+                            Drag to crop · Use slider to zoom
+                          </div>
+                        </div>
+                        <div className="absolute inset-0 z-0">
+                          <div className="p-3 flex items-center gap-2 z-10 absolute top-3 left-3">
+                            <div className="text-xs text-white/90 bg-black/50 px-2 py-1 rounded mr-2">
+                              Aspect:
+                            </div>
+                            {[
+                              { key: 'free', label: 'Free', value: undefined },
+                              { key: '1x1', label: '1:1', value: 1 },
+                              { key: '4x3', label: '4:3', value: 4 / 3 },
+                              { key: '16x9', label: '16:9', value: 16 / 9 },
+                            ].map((opt) => (
+                              <button
+                                key={opt.key}
+                                type="button"
+                                onClick={() => {
+                                  setCropAspect(opt.value);
+                                  // Reset crop area when changing aspect to make it visible
+                                  setCrop({ x: 0, y: 0 });
+                                  setZoom(1);
+                                  setCroppedAreaPixels(null);
+                                }}
+                                className={`px-2 py-1 rounded text-sm transition-all ${
+                                  cropAspect === opt.value 
+                                    ? 'bg-blue-600 text-white shadow-md' 
+                                    : 'bg-white/90 text-gray-700 hover:bg-white'
+                                }`}
+                              >
+                                {opt.label}
+                              </button>
+                            ))}
+                          </div>
+
+                          <div className="absolute bottom-16 left-4 right-4 z-10">
+                            <div className="text-xs text-white/80 bg-black/30 px-3 py-2 rounded text-center">
+                              {cropAspect === undefined ? 'Free cropping - drag corners and edges to select any area' : `Fixed ${cropAspect === 1 ? 'square' : 'aspect ratio'} - drag to position`}
+                            </div>
+                          </div>
+
+                          <Cropper
+                            image={previewUrl}
+                            crop={crop}
+                            zoom={zoom}
+                            aspect={cropAspect}
+                            restrictPosition={false}
+                            onCropChange={setCrop}
+                            onZoomChange={setZoom}
+                            onCropComplete={onCropComplete}
+                          />
+                        </div>
+
+                        <div className="absolute left-4 right-4 bottom-3 z-20 flex items-center gap-3">
+                          <input
+                            type="range"
+                            min={1}
+                            max={3}
+                            step={0.05}
+                            value={zoom}
+                            onChange={(e) => setZoom(Number(e.target.value))}
+                            className="w-full"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowCropper(false)}
+                            className="px-3 py-2 bg-white/80 rounded text-sm"
+                          >
+                            Use Original
+                          </button>
+                          <button
+                            type="button"
+                            onClick={applyCrop}
+                            className="px-3 py-2 bg-blue-600 text-white rounded text-sm"
+                          >
+                            Apply Crop
+                          </button>
+                        </div>
+
+                        <button
+                          onClick={clearFile}
+                          className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 shadow-lg hover:bg-red-600 transition-colors z-30"
+                        >
+                          <X className="w-5 h-5" />
+                        </button>
+                      </div>
+                    ) : (
+                      <div
+                        className={`relative w-full h-48 rounded-lg overflow-hidden border ${isDark ? "border-gray-700" : "border-gray-200"}`}
+                      >
+                        <img
+                          src={previewUrl}
+                          alt="Preview"
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 flex items-end justify-between p-3 gap-2">
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => setShowCropper(true)}
+                              className="px-3 py-1 bg-white/90 rounded text-sm"
+                            >
+                              Edit (Crop)
+                            </button>
+                            <button
+                              onClick={clearFile}
+                              className="px-3 py-1 bg-red-500 text-white rounded text-sm"
+                            >
+                              Remove
+                            </button>
+                          </div>
+                          <div className="text-xs text-gray-400">Preview</div>
+                        </div>
+                      </div>
+                    )
                   ) : (
                     <label
                       className={`flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer transition-colors ${isDark ? "border-gray-700 bg-gray-900/50 hover:bg-gray-900" : "border-gray-300 bg-gray-50 hover:bg-gray-100"}`}

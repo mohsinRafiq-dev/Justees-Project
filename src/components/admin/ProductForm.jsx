@@ -1,15 +1,14 @@
 import { useState, useEffect } from 'react';
+import Cropper from 'react-easy-crop';
+import { getCroppedImg, canLoadImageWithCrossOrigin } from '../../utils/cropImage';
 import { X, Upload, Trash2, Plus, Save, Eye } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { toast } from 'react-hot-toast';
 import {
   createProduct,
-  updateProduct
+  updateProduct,
+  getProductById,
 } from '../../services/products.service';
-import {
-  uploadMultipleProductImages,
-  deleteProductImage
-} from '../../services/storage.service';
 import {
   validateProductForm,
   validateVariants,
@@ -56,6 +55,15 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
   const [imagesToRemove, setImagesToRemove] = useState([]);
   const [errors, setErrors] = useState({});
   const [tagInput, setTagInput] = useState('');
+
+  // Cropper state for product images
+  const [showCropper, setShowCropper] = useState(false);
+  const [cropImage, setCropImage] = useState('');
+  const [cropTarget, setCropTarget] = useState(null); // { color, index }
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
+  const [cropAspect, setCropAspect] = useState(undefined);
   const [availableColors, setAvailableColors] = useState(DEFAULT_COLORS || []);
   const [masterColors, setMasterColors] = useState([]); // full color objects from admin (name, hex, ...)
   const [availableSizes, setAvailableSizes] = useState(DEFAULT_SIZES || []);
@@ -63,7 +71,7 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
   // Colors and sizes selected for this specific product (checkboxes in UI)
   const [selectedColors, setSelectedColors] = useState([]);
   const [selectedSizes, setSelectedSizes] = useState([]);
-  const [newColorInput, setNewColorInput] = useState('');
+
 
   const getColorHex = (name) => {
     if (!name) return name;
@@ -92,8 +100,8 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
         stockStatus: prev.stockStatus || 'in_stock',
         category: prev.category || (categoriesRes.success && categoriesRes.categories && categoriesRes.categories.length > 0 ? categoriesRes.categories[0].name : (CATEGORIES?.[0] || ''))
       }));
-    } catch (err) {
-      // console.error('Error loading sizes/colors/categories:', err);
+    } catch {
+      // ignored
     }
   };
 
@@ -326,6 +334,136 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
     }));
   };
 
+  const openCropperForNewImage = (color, index) => {
+    const file = (colorImages[color] || [])[index];
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    setCropImage(url);
+    setCropTarget({ color, index, existing: false });
+    setCrop({ x: 0, y: 0 });
+    setZoom(1);
+    setCroppedAreaPixels(null);
+    // Reset to square aspect for product images
+    setCropAspect(1);
+    setShowCropper(true);
+  };
+
+  const openCropperForExistingImage = async (color, index, imageUrl) => {
+    // try loading image with crossOrigin to detect CORS restrictions before opening cropper
+    try {
+      await canLoadImageWithCrossOrigin(imageUrl);
+      setCropImage(imageUrl);
+      setCropTarget({ color, index, existing: true, originalUrl: imageUrl });
+      setCrop({ x: 0, y: 0 });
+      setZoom(1);
+      setCroppedAreaPixels(null);
+      // Reset to square aspect for product images
+      setCropAspect(1);
+      setShowCropper(true);
+    } catch (err) {
+      console.error('Crop precheck failed', err);
+      toast.error('Cannot crop this remote image — access blocked by CORS policy. To fix: re-upload the image or ask your admin to configure Firebase Storage CORS settings.');
+    }
+  };
+
+  const onCropComplete = (_, croppedPixels) => {
+    setCroppedAreaPixels(croppedPixels);
+  };
+
+  const applyCropToNewImage = async () => {
+    if (!cropImage || !cropTarget || !croppedAreaPixels) {
+      setShowCropper(false);
+      return;
+    }
+
+    // Validate crop area
+    if (croppedAreaPixels.width < 1 || croppedAreaPixels.height < 1) {
+      toast.error("Invalid crop area. Please select a larger area.");
+      return;
+    }
+
+    try {
+      const blob = await getCroppedImg(cropImage, croppedAreaPixels, 'image/jpeg', 0.9);
+      const newFile = new File([blob], `cropped_${Date.now()}.jpg`, { type: blob.type });
+
+      // Replace the file in colorImages (so upload will include cropped file)
+      setColorImages(prev => {
+        const updated = { ...(prev || {}) };
+        const arr = [...(updated[cropTarget.color] || [])];
+        arr[cropTarget.index] = newFile;
+        updated[cropTarget.color] = arr;
+        return updated;
+      });
+
+
+      setShowCropper(false);
+      setCropImage('');
+      setCropTarget(null);
+    } catch (err) {
+      console.error('Crop failed', err);
+      if (err.message.includes('CORS')) {
+        toast.error("Cannot crop this image — CORS policy blocks access. Try re-uploading the image.");
+      } else {
+        toast.error('Failed to crop image: ' + err.message);
+      }
+    }
+  };
+
+  // Apply crop for an EXISTING image: replace preview, queue upload, mark original for removal
+  const applyCropToExistingImage = async () => {
+    if (!cropImage || !cropTarget || !croppedAreaPixels) {
+      setShowCropper(false);
+      return;
+    }
+
+    // Validate crop area
+    if (croppedAreaPixels.width < 1 || croppedAreaPixels.height < 1) {
+      toast.error("Invalid crop area. Please select a larger area.");
+      return;
+    }
+
+    try {
+      const blob = await getCroppedImg(cropImage, croppedAreaPixels, 'image/jpeg', 0.9);
+      const newFile = new File([blob], `cropped_${Date.now()}.jpg`, { type: blob.type });
+
+      // Replace the preview in existingImages
+      setExistingImages(prev => {
+        const updated = { ...(prev || {}) };
+        const arr = [...(updated[cropTarget.color] || [])];
+        arr[cropTarget.index] = URL.createObjectURL(blob);
+        updated[cropTarget.color] = arr;
+        return updated;
+      });
+
+      // Queue the new file for upload (so updateProduct will receive it)
+      setColorImages(prev => {
+        const updated = { ...(prev || {}) };
+        const arr = [...(updated[cropTarget.color] || [])];
+        arr.push(newFile);
+        updated[cropTarget.color] = arr;
+        return updated;
+      });
+
+      // Mark original for deletion (if not already marked)
+      setImagesToRemove(prev => {
+        const original = cropTarget.originalUrl;
+        if (!original) return prev;
+        return prev.includes(original) ? prev : [...prev, original];
+      });
+
+      setShowCropper(false);
+      setCropImage('');
+      setCropTarget(null);
+    } catch (err) {
+      console.error('Crop failed', err);
+      if (err.message.includes('CORS')) {
+        toast.error("Cannot crop this image — CORS policy blocks access. Try re-uploading the image.");
+      } else {
+        toast.error('Failed to crop image: ' + err.message);
+      }
+    }
+  };
+
   const handleRemoveExistingImage = (color, imageUrl) => {
     setImagesToRemove(prev => [...prev, imageUrl]);
     setExistingImages(prev => ({
@@ -444,16 +582,45 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
       if (result.success) {
         toast.success(product ? 'Product updated successfully!' : 'Product created successfully!');
 
-        // Clear form state if creating a new product
-        if (!product) {
+        // If updating an existing product, fetch fresh product (so admin UI shows new images)
+        if (product) {
+          try {
+            const fresh = await getProductById(product.id);
+            if (fresh.success && fresh.product) {
+              // normalize into existingImages map
+              const imagesByColor = {};
+              (fresh.product.images || []).forEach((img) => {
+                const color = img.color || 'default';
+                if (!imagesByColor[color]) imagesByColor[color] = [];
+                imagesByColor[color].push(img.url || img);
+              });
+              setExistingImages(imagesByColor);
+              setColorImages({});
+              setImagesToRemove([]);
+              onSave(fresh.product);
+            } else {
+              onSave({ ...product, ...productData });
+            }
+          } catch (_) {
+            onSave({ ...product, ...productData });
+          }
+        } else {
+          // created product - backend returns created images in result.product
+          if (result.product && result.product.images) {
+            const imagesByColor = {};
+            result.product.images.forEach((img) => {
+              const color = img.color || 'default';
+              if (!imagesByColor[color]) imagesByColor[color] = [];
+              imagesByColor[color].push(img.url || img);
+            });
+            setExistingImages(imagesByColor);
+          }
           setColorImages({});
-          setExistingImages({});
           setImagesToRemove([]);
           setVariants([]);
           setAvailableColors([]);
+          onSave(result.product || { ...product, ...productData });
         }
-
-        onSave(result.product || { ...product, ...productData });
       } else {
         // Show general error
         toast.error(result.error || 'Failed to save product');
@@ -476,8 +643,7 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
         }
       }
 
-    } catch (error) {
-      // console.error('Error saving product:', error);
+    } catch {
       toast.error('Error saving product');
     } finally {
       setLoading(false);
@@ -1018,13 +1184,19 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
                                     alt={`${color} ${index + 1}`}
                                     className={`w-full h-20 object-cover rounded-lg border ${isDark ? "border-gray-700" : "border-gray-300"}`}
                                   />
-                                  <button
-                                    type="button"
-                                    onClick={() => handleRemoveExistingImage(color, imageUrl)}
-                                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                                  >
-                                    <X className="w-3 h-3" />
-                                  </button>
+
+                                  <div className="absolute inset-0 flex items-start justify-between p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <div className="flex gap-2">
+                                      <button type="button" onClick={() => openCropperForExistingImage(color, index, imageUrl)} className="px-2 py-1 bg-white/90 rounded text-xs">Edit (Crop)</button>
+                                    </div>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleRemoveExistingImage(color, imageUrl)}
+                                      className="bg-red-500 text-white rounded-full p-1"
+                                    >
+                                      <X className="w-3 h-3" />
+                                    </button>
+                                  </div>
                                 </div>
                               ))}
                             </div>
@@ -1043,13 +1215,19 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
                                     alt={`${color} new ${index + 1}`}
                                     className={`w-full h-20 object-cover rounded-lg border ${isDark ? "border-gray-700" : "border-gray-300"}`}
                                   />
-                                  <button
-                                    type="button"
-                                    onClick={() => handleRemoveNewImage(color, index)}
-                                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                                  >
-                                    <X className="w-3 h-3" />
-                                  </button>
+
+                                  <div className="absolute inset-0 flex items-start justify-between p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <div className="flex gap-2">
+                                      <button type="button" onClick={() => openCropperForNewImage(color, index)} className="px-2 py-1 bg-white/90 rounded text-xs">Edit (Crop)</button>
+                                    </div>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleRemoveNewImage(color, index)}
+                                      className="bg-red-500 text-white rounded-full p-1"
+                                    >
+                                      <X className="w-3 h-3" />
+                                    </button>
+                                  </div>
                                 </div>
                               ))}
                             </div>
@@ -1062,6 +1240,65 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
               </div>
             )}
           </div>
+
+        {/* Cropper modal for product images */}
+        {showCropper && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+            <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} rounded-lg w-full max-w-3xl p-4`}>
+              <div className="mb-3 flex items-center gap-2">
+                <div className="text-xs text-white/90 bg-black/50 px-2 py-1 rounded">Aspect:</div>
+                {[
+                  { key: 'free', label: 'Free', value: undefined },
+                  { key: '1x1', label: '1:1', value: 1 },
+                  { key: '4x3', label: '4:3', value: 4 / 3 },
+                  { key: '16x9', label: '16:9', value: 16 / 9 },
+                ].map((opt) => (
+                  <button
+                    key={opt.key}
+                    type="button"
+                    onClick={() => {
+                      setCropAspect(opt.value);
+                      // Reset crop area when changing aspect to make it visible
+                      setCrop({ x: 0, y: 0 });
+                      setZoom(1);
+                      setCroppedAreaPixels(null);
+                    }}
+                    className={`px-2 py-1 rounded text-sm transition-all ${
+                      cropAspect === opt.value 
+                        ? 'bg-blue-600 text-white shadow-md' 
+                        : 'bg-white/90 text-gray-700 hover:bg-white'
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+
+              <div className="mb-2 text-xs text-white/80 bg-black/30 px-3 py-2 rounded text-center">
+                {cropAspect === undefined ? 'Free cropping - drag corners and edges to select any area' : `Fixed ${cropAspect === 1 ? 'square' : 'aspect ratio'} - drag to position`}
+              </div>
+
+              <div className="relative h-96 bg-black/10">
+                <Cropper
+                  image={cropImage}
+                  crop={crop}
+                  zoom={zoom}
+                  aspect={cropAspect}
+                  restrictPosition={false}
+                  onCropChange={setCrop}
+                  onZoomChange={setZoom}
+                  onCropComplete={onCropComplete}
+                />
+              </div>
+              <div className="flex items-center gap-4 mt-4">
+                <input type="range" min={1} max={3} step={0.05} value={zoom} onChange={(e) => setZoom(Number(e.target.value))} className="w-full" />
+                <button type="button" onClick={() => { setShowCropper(false); setCropImage(''); setCropTarget(null); }} className="px-4 py-2 bg-gray-200 rounded">Cancel</button>
+                <button type="button" onClick={() => { if (cropTarget?.existing) applyCropToExistingImage(); else applyCropToNewImage(); }} className="px-4 py-2 bg-blue-600 text-white rounded">Apply</button>
+                <button type="button" onClick={() => { setShowCropper(false); /* Use original - no change */ setCropImage(''); setCropTarget(null); }} className="px-4 py-2 bg-white/90 rounded">Use Original</button>
+              </div>
+            </div>
+          </div>
+        )}
 
           {/* Footer */}
           <div className={`border-t px-6 py-4 ${isDark ? "bg-gray-900/50 border-gray-700" : "bg-gray-50 border-gray-200"}`}>

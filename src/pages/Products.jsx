@@ -469,7 +469,7 @@ const Products = () => {
               animate={{ opacity: 1, y: 0 }}
               className="text-center"
             >
-              {/* Product page images managed from Admin ("idk what" tab) */}
+              {/* Product page images managed from Admin (Product page photos tab) */}
               {productPhotos.length > 0 ? (
                 <div className="mb-8 relative">
                   {/* full-bleed, full-viewport height image (show full image without cropping) */}
