@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion"; // eslint-disable-line
 import {
@@ -54,6 +54,9 @@ const Home = () => {
   const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const videoRefs = useRef({});
+  const [videoErrors, setVideoErrors] = useState({});
+  const [videoStates, setVideoStates] = useState({}); // Track play/pause states
   const [email, setEmail] = useState("");
   const [newsletterStatus, setNewsletterStatus] = useState(""); // 'loading', 'success', 'error'
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -284,22 +287,83 @@ const Home = () => {
     { icon: CheckCircle, value: "100", label: "Satisfaction", suffix: "%" },
   ];
 
-  // Auto-slide effect (only when we have multiple slides)
+  // Auto-slide effect for slideshow functionality
   useEffect(() => {
     if (heroSlides.length <= 1) {
       setCurrentSlide(0);
       return;
     }
 
-    // If current slide is a video, we don't auto-slide based on time
-    // Instead we wait for 'onEnded' event from the video element
-    if (heroSlides[currentSlide]?.type === "video") return;
+    // Only set timer for non-video slides (images)
+    const currentSlideData = heroSlides[currentSlide];
+    
+    if (currentSlideData?.type === "video") {
+      // For videos, don't set timer - let them play full duration
+      // The onEnded event will handle advancing to next slide
+      return;
+    }
 
+    // For images, show for 5 seconds
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
     }, 5000);
+    
     return () => clearInterval(timer);
   }, [heroSlides, currentSlide]);
+
+  // Video lifecycle management
+  useEffect(() => {
+    const currentSlideData = heroSlides[currentSlide];
+    
+    // Start all videos and keep them playing
+    heroSlides.forEach(slide => {
+      if (slide.type === "video") {
+        const videoElement = videoRefs.current[slide.id];
+        if (videoElement) {
+          // Add event listeners for video state tracking
+          const handlePlay = () => setVideoStates(prev => ({ ...prev, [slide.id]: 'playing' }));
+          const handlePause = () => setVideoStates(prev => ({ ...prev, [slide.id]: 'paused' }));
+          
+          videoElement.addEventListener('play', handlePlay);
+          videoElement.addEventListener('pause', handlePause);
+          
+          // Only attempt to play if the video is currently paused
+          if (videoElement.paused) {
+            const playPromise = videoElement.play();
+            if (playPromise !== undefined) {
+              playPromise
+                .then(() => {
+                  // Video started successfully
+                  setVideoErrors(prev => ({ ...prev, [slide.id]: false }));
+                  setVideoStates(prev => ({ ...prev, [slide.id]: 'playing' }));
+                })
+                .catch((error) => {
+                  console.warn('Video autoplay failed:', error);
+                  setVideoErrors(prev => ({ ...prev, [slide.id]: true }));
+                  setVideoStates(prev => ({ ...prev, [slide.id]: 'paused' }));
+                });
+            }
+          }
+        }
+      }
+    });
+    
+    // Keep all videos playing - don't pause any of them
+    // This ensures continuous playback even when not visible
+  }, [currentSlide, heroSlides]);
+
+  // Cleanup videos on unmount (only when leaving the page entirely)
+  useEffect(() => {
+    return () => {
+      // Only pause videos when component unmounts (navigating away from home page)
+      // This preserves resources when leaving the page
+      Object.values(videoRefs.current).forEach(video => {
+        if (video) {
+          video.pause();
+        }
+      });
+    };
+  }, []);
 
   // Auto-slide reviews
   useEffect(() => {
@@ -355,12 +419,47 @@ const Home = () => {
 
   const nextSlide = () => {
     if (heroSlides.length === 0) return;
-    if (heroSlides.length === 1 && heroSlides[0].type === "video") {
-      // force remount of video so it restarts
-      setVideoKey((k) => k + 1);
-      return;
-    }
+    
+    // Always advance to next slide, even for single video (for consistency)
     setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+    
+    // If only one slide and it's a video, ensure it keeps playing
+    if (heroSlides.length === 1 && heroSlides[0].type === "video") {
+      const videoElement = videoRefs.current[heroSlides[0].id];
+      if (videoElement && videoElement.paused) {
+        videoElement.play().catch(() => {
+          setVideoErrors(prev => ({ ...prev, [heroSlides[0].id]: true }));
+        });
+      }
+    }
+  };
+
+  const handleVideoError = (slideId) => {
+    console.error('Video failed to load for slide:', slideId);
+    setVideoErrors(prev => ({ ...prev, [slideId]: true }));
+  };
+
+  const handleVideoClick = (slideId) => {
+    const videoElement = videoRefs.current[slideId];
+    if (videoElement) {
+      if (videoElement.paused) {
+        const playPromise = videoElement.play();
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              setVideoStates(prev => ({ ...prev, [slideId]: 'playing' }));
+            })
+            .catch((error) => {
+              console.warn('Manual video play failed:', error);
+              setVideoErrors(prev => ({ ...prev, [slideId]: true }));
+              setVideoStates(prev => ({ ...prev, [slideId]: 'paused' }));
+            });
+        }
+      } else {
+        videoElement.pause();
+        setVideoStates(prev => ({ ...prev, [slideId]: 'paused' }));
+      }
+    }
   };
 
   const prevSlide = () => {
@@ -535,15 +634,58 @@ const Home = () => {
                   >
                     <div className="absolute inset-0">
                       {slide.type === "video" ? (
-                        <video
-                          key={videoKey}
-                          className="w-full h-full object-cover"
-                          src={slide.url}
-                          autoPlay
-                          muted
-                          playsInline
-                          onEnded={nextSlide}
-                        />
+                        <div className="relative w-full h-full">
+                          <video
+                            key={videoKey}
+                            ref={(el) => {
+                              if (el) {
+                                videoRefs.current[slide.id] = el;
+                              }
+                            }}
+                            className="w-full h-full object-cover cursor-pointer"
+                            src={slide.url}
+                            muted
+                            playsInline
+                            preload="metadata"
+                            loop={heroSlides.length === 1}
+                            onEnded={heroSlides.length > 1 ? nextSlide : undefined}
+                            onClick={() => handleVideoClick(slide.id)}
+                            onError={() => handleVideoError(slide.id)}
+                          />
+                          {/* Play button overlay for paused videos */}
+                          {videoStates[slide.id] === 'paused' && !videoErrors[slide.id] && (
+                            <div 
+                              className="absolute inset-0 flex items-center justify-center bg-black/20 cursor-pointer"
+                              onClick={() => handleVideoClick(slide.id)}
+                            >
+                              <div className="w-16 h-16 bg-white/80 rounded-full flex items-center justify-center hover:bg-white/90 transition-all">
+                                <svg className="w-8 h-8 text-gray-800 ml-1" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+                                </svg>
+                              </div>
+                            </div>
+                          )}
+                          {videoErrors[slide.id] && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-gray-900/50">
+                              <div className="text-center text-white">
+                                <div className="text-4xl mb-2">⚠️</div>
+                                <p className="text-sm">Video unavailable</p>
+                                <button
+                                  onClick={() => {
+                                    setVideoErrors(prev => ({ ...prev, [slide.id]: false }));
+                                    const videoElement = videoRefs.current[slide.id];
+                                    if (videoElement) {
+                                      videoElement.load();
+                                    }
+                                  }}
+                                  className="mt-2 px-3 py-1 bg-white/20 rounded text-xs hover:bg-white/30 transition-colors"
+                                >
+                                  Retry
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       ) : (
                         <LazyImage
                           src={slide.url}
