@@ -467,62 +467,60 @@ const Products = () => {
       >
         {/* Hero Section */}
         <section className="relative overflow-hidden">
-          <div className="container mx-auto px-4">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }} 
-              animate={{ opacity: 1, y: 0 }}
-              className="text-center"
-            >
-              {/* Product page images managed from Admin (Product page photos tab) */}
-              {photosLoading ? (
-                <LoadingSpinner />
-              ) : productPhotos.length > 0 ? (
-                <div className="mb-8 relative">
-                  {/* full-width hero image */}
-                  <div className="relative w-full overflow-hidden">
-                    <img
-                      src={productPhotos[currentPhoto].url}
-                      alt={productPhotos[currentPhoto].title || "Products"}
-                      className="w-full h-96 md:h-[60vh] lg:h-[70vh] object-cover object-center rounded-lg shadow-lg"
-                    />
-                  </div>
-
-                  {/* controls remain centered inside the container */}
-                  {productPhotos.length > 1 && (
-                    <div className="container mx-auto px-4 flex items-center justify-center gap-3 mt-3">
-                      <button
-                        onClick={() =>
-                          setCurrentPhoto(
-                            (i) =>
-                              (i - 1 + productPhotos.length) %
-                              productPhotos.length,
-                          )
-                        }
-                        className="px-3 py-2 rounded-full bg-white/90 shadow-sm text-sm"
-                        aria-label="Previous photo"
-                      >
-                        ‹
-                      </button>
-                      <div
-                        className={`text-sm ${isDark ? "text-gray-300" : "text-gray-600"}`}
-                      >
-                        {productPhotos[currentPhoto].title || ""}
-                      </div>
-                      <button
-                        onClick={() =>
-                          setCurrentPhoto((i) => (i + 1) % productPhotos.length)
-                        }
-                        className="px-3 py-2 rounded-full bg-white/90 shadow-sm text-sm"
-                        aria-label="Next photo"
-                      >
-                        ›
-                      </button>
-                    </div>
-                  )}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center"
+          >
+            {/* full-bleed image area (no container padding) */}
+            {photosLoading ? (
+              <LoadingSpinner />
+            ) : productPhotos.length > 0 ? (
+              <div className="mb-8 relative">
+                {/* full-width hero image */}
+                <div className="relative w-full overflow-hidden">
+                  <img
+                    src={productPhotos[currentPhoto].url}
+                    alt={productPhotos[currentPhoto].title || "Products"}
+                    className="w-full h-auto max-h-96 md:max-h-[60vh] lg:max-h-[70vh] object-contain object-center rounded-lg shadow-lg bg-transparent"
+                  />
                 </div>
-              ) : null}
-            </motion.div>
-          </div>
+
+                {/* controls remain centered inside the container */}
+                {productPhotos.length > 1 && (
+                  <div className="container mx-auto px-4 flex items-center justify-center gap-3 mt-3">
+                    <button
+                      onClick={() =>
+                        setCurrentPhoto(
+                          (i) =>
+                            (i - 1 + productPhotos.length) %
+                            productPhotos.length,
+                        )
+                      }
+                      className="px-3 py-2 rounded-full bg-white/90 shadow-sm text-sm"
+                      aria-label="Previous photo"
+                    >
+                      ‹
+                    </button>
+                    <div
+                      className={`text-sm ${isDark ? "text-gray-300" : "text-gray-600"}`}
+                    >
+                      {productPhotos[currentPhoto].title || ""}
+                    </div>
+                    <button
+                      onClick={() =>
+                        setCurrentPhoto((i) => (i + 1) % productPhotos.length)
+                      }
+                      className="px-3 py-2 rounded-full bg-white/90 shadow-sm text-sm"
+                      aria-label="Next photo"
+                    >
+                      ›
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : null}
+          </motion.div>
         </section>
 
         {/* Filters Section */}
