@@ -1123,7 +1123,7 @@ const ProductDetail = () => {
                               className={`${isDark ? "text-gray-300" : "text-gray-600"}`}
                             >
                               We offer free shipping on orders above Rs. 4,000.
-                              Standard delivery takes 3-5 business days. Express
+                              Standard delivery takes 4-7 business days. Express
                               delivery is available for an additional fee.
                             </p>
                           </div>
