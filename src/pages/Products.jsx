@@ -17,6 +17,7 @@ import { useWishlist } from "../contexts/WishlistContext";
 import { getAllProducts, getCategories } from "../services/products.service";
 import { getProductPhotos } from "../services/productPhotos.service";
 import LazyImage from "../components/common/LazyImage";
+import { MarkdownRenderer } from "../utils/markdown.jsx";
 import Navbar from "../components/common/Navbar";
 import ProductQuickView from "../components/products/ProductQuickView";
 import LoadingSpinner from "../components/common/LoadingSpinner";
@@ -331,13 +332,12 @@ const Products = () => {
               )}
             </div>
 
-            <p
+            <MarkdownRenderer
+              content={product.shortDescription || product.description}
               className={`text-sm mb-4 line-clamp-2 ${
                 isDark ? "text-gray-300" : "text-gray-600"
               }`}
-            >
-              {product.shortDescription || product.description}
-            </p>
+            />
 
             {/* Rating */}
             {product.rating > 0 && product.reviewCount > 0 && (

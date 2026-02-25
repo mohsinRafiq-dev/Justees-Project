@@ -6,6 +6,7 @@ import { useWishlist } from "../../contexts/WishlistContext";
 import { useTheme } from "../../contexts/ThemeContext";
 import LazyImage from "../common/LazyImage";
 import { formatPrice } from "../../utils/validation";
+import { MarkdownRenderer } from "../../utils/markdown.jsx";
 import { getColors } from '../../services/products.service';
 import { toast } from 'react-hot-toast';
 
@@ -198,9 +199,10 @@ const ProductQuickView = ({ product, isOpen, onClose }) => {
                   <span className="text-lg text-gray-400 line-through">{formatPrice(product.originalPrice)}</span>
                 )}
               </div>
-              <p className="text-gray-300 leading-relaxed text-sm">
-                {product.shortDescription || product.description || 'Premium quality clothing made with the finest materials. Comfortable, stylish, and built to last.'}
-              </p>
+              <MarkdownRenderer
+                content={product.shortDescription || product.description || 'Premium quality clothing made with the finest materials. Comfortable, stylish, and built to last.'}
+                className="text-gray-300 leading-relaxed text-sm"
+              />
             </div>
 
             {/* Size Selection */}

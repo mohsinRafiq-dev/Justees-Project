@@ -26,6 +26,7 @@ import { getAllProducts, getColors } from "../services/products.service";
 import { getProductReviews, addReview } from "../services/reviews.service";
 import { formatPrice } from "../utils/validation";
 import { generateWhatsAppInquiryLink } from "../utils/whatsapp";
+import { MarkdownRenderer } from "../utils/markdown.jsx";
 import Navbar from "../components/common/Navbar";
 import Footer from "../components/common/Footer";
 import LoadingSpinner from "../components/common/LoadingSpinner";
@@ -677,11 +678,10 @@ const ProductDetail = () => {
 
               {/* Short Description */}
               {product.shortDescription && (
-                <p
+                <MarkdownRenderer
+                  content={product.shortDescription}
                   className={`text-lg ${isDark ? "text-gray-300" : "text-gray-600"}`}
-                >
-                  {product.shortDescription}
-                </p>
+                />
               )}
 
               {/* Size Selection */}
@@ -973,11 +973,10 @@ const ProductDetail = () => {
                       >
                         Product Description
                       </h3>
-                      <p
+                      <MarkdownRenderer
+                        content={product.description}
                         className={`whitespace-pre-line ${isDark ? "text-gray-300" : "text-gray-600"}`}
-                      >
-                        {product.description}
-                      </p>
+                      />
 
                       {product.tags && product.tags.length > 0 && (
                         <div className="mt-6">

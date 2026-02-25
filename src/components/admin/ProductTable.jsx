@@ -13,6 +13,7 @@ import {
   ChevronUp
 } from 'lucide-react';
 import { formatPrice } from '../../utils/validation';
+import { MarkdownRenderer } from '../../utils/markdown';
 import { useTheme } from '../../contexts/ThemeContext';
 
 const ProductTable = ({
@@ -232,9 +233,10 @@ const ProductTable = ({
                           )}
                         </div>
 
-                        <p className={`text-sm truncate ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                          {product.shortDescription || product.description?.substring(0, 60) + '...'}
-                        </p>
+                        <MarkdownRenderer
+                          content={product.shortDescription || product.description?.substring(0, 60) + '...'}
+                          className={`text-sm truncate ${isDark ? 'text-gray-400' : 'text-gray-500'}`}
+                        />
 
                         <button
                           onClick={() => toggleRowExpansion(product.id)}
@@ -570,9 +572,10 @@ const ProductTable = ({
                           <h4 className={`font-medium text-sm mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>
                             Description
                           </h4>
-                          <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                            {product.description}
-                          </p>
+                          <MarkdownRenderer
+                            content={product.description}
+                            className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}
+                          />
                         </div>
                       )}
 

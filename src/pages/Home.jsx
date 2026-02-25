@@ -44,6 +44,7 @@ import {
 } from "../services/instagram.service";
 import { getSlidesForHome } from "../services/slides.service";
 import { getSiteSettings } from "../services/settings.service";
+import { MarkdownRenderer } from "../utils/markdown.jsx";
 import Navbar from "../components/common/Navbar";
 import AnimatedBackground from "../components/common/AnimatedBackground";
 import AnimatedCounter from "../components/common/AnimatedCounter";
@@ -1114,11 +1115,10 @@ const Home = () => {
                       {product.name}
                     </h3>
                     {(product.shortDescription || product.description) && (
-                      <p
+                      <MarkdownRenderer
+                        content={product.shortDescription || product.description}
                         className={`text-sm mb-3 line-clamp-2 ${isDark ? "text-gray-300" : "text-gray-600"}`}
-                      >
-                        {product.shortDescription || product.description}
-                      </p>
+                      />
                     )}
                     <div className="flex items-center justify-between">
                       <div>
