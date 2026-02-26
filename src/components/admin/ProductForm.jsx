@@ -306,14 +306,14 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
     // Validate file types and sizes
     const validFiles = fileArray.filter(file => {
       const isValidType = file.type.startsWith('image/');
-      const isValidSize = file.size <= 5 * 1024 * 1024; // 5MB limit
+      const isValidSize = file.size <= 10 * 1024 * 1024; // 10MB limit
 
       if (!isValidType) {
         toast.error(`${file.name} is not a valid image file`);
         return false;
       }
       if (!isValidSize) {
-        toast.error(`${file.name} is too large. Maximum size is 5MB`);
+        toast.error(`${file.name} is too large. Maximum size is 10MB`);
         return false;
       }
       return true;
@@ -1166,7 +1166,7 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
                                 Click to upload images for {color}
                               </p>
                               <p className={`text-xs mt-1 ${isDark ? "text-gray-500" : "text-gray-400"}`}>
-                                PNG, JPG, WEBP up to 5MB each
+                                PNG, JPG, WEBP up to 10MB each
                               </p>
                             </div>
                           </label>

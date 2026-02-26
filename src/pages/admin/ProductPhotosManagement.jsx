@@ -68,8 +68,8 @@ const ProductPhotosManagement = () => {
       toast.error("Only images are allowed");
       return;
     }
-    if (file.size > 6 * 1024 * 1024) {
-      toast.error("Image is too large (max ~5MB)");
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Image is too large (max ~10MB)");
       return;
     }
 
@@ -430,7 +430,7 @@ const ProductPhotosManagement = () => {
                         <p
                           className={`text-xs mt-1 ${isDark ? "text-gray-500" : "text-gray-500"}`}
                         >
-                          Images (JPG/PNG/WebP) max 5MB
+                          Images (JPG/PNG/WebP) max 10MB
                         </p>
                       </div>
                       <input

@@ -85,8 +85,8 @@ const SlidesManagement = () => {
     if (!file) return;
 
     // Validate basic size/type in UI (upload will validate too)
-    if (file.type.startsWith("image/") && file.size > 6 * 1024 * 1024) {
-      toast.error("Image is too large (max ~5MB)");
+    if (file.type.startsWith("image/") && file.size > 10 * 1024 * 1024) {
+      toast.error("Image is too large (max ~10MB)");
       return;
     }
     if (file.type.startsWith("video/") && file.size > 90 * 1024 * 1024) {
@@ -514,7 +514,7 @@ const SlidesManagement = () => {
                         <p
                           className={`text-xs mt-1 ${isDark ? "text-gray-500" : "text-gray-500"}`}
                         >
-                          Images (JPG/PNG/WebP) max 5MB, Videos (MP4/WebM/MOV)
+                          Images (JPG/PNG/WebP) max 10MB, Videos (MP4/WebM/MOV)
                           max ~80MB
                         </p>
                       </div>

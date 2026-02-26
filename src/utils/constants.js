@@ -71,7 +71,7 @@ export const VALIDATION = {
   MAX_PRODUCT_NAME_LENGTH: 100,
   MIN_PRICE: 0,
   MAX_PRICE: 1000000,
-  MAX_IMAGE_SIZE: 5 * 1024 * 1024, // 5MB
+  MAX_IMAGE_SIZE: 10 * 1024 * 1024, // 10MB
   ALLOWED_IMAGE_TYPES: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'],
 };
 

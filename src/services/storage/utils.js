@@ -51,14 +51,14 @@ export const generateFileName = (originalName, productId = null) => {
 
 export const validateImage = (file) => {
   const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-  const maxSize = 5 * 1024 * 1024; // 5MB
+  const maxSize = 10 * 1024 * 1024; // 10MB
 
   if (!allowedTypes.includes(file.type)) {
     return { valid: false, error: 'Invalid file type. Only JPEG, PNG, and WebP are allowed.' };
   }
 
   if (file.size > maxSize) {
-    return { valid: false, error: 'File size too large. Maximum size is 5MB.' };
+    return { valid: false, error: 'File size too large. Maximum size is 10MB.' };
   }
 
   return { valid: true };
@@ -73,12 +73,12 @@ export const validateMedia = (file, options = {}) => {
   const imageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
   const videoTypes = ['video/mp4', 'video/webm', 'video/quicktime']; // quicktime allows .mov
 
-  const maxImageSize = 5 * 1024 * 1024; // 5MB
+  const maxImageSize = 10 * 1024 * 1024; // 10MB
   const maxVideoSize = 80 * 1024 * 1024; // 80MB
 
   if (allowImages && imageTypes.includes(file.type)) {
     if (file.size > maxImageSize) {
-      return { valid: false, error: 'Image size too large. Maximum is 5MB.' };
+      return { valid: false, error: 'Image size too large. Maximum is 10MB.' };
     }
     return { valid: true, type: 'image' };
   }
