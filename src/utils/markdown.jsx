@@ -19,8 +19,18 @@ marked.setOptions({
  */
 export const convertMarkdownToHtml = (text) => {
   if (!text) return '';
-  // marked automatically escapes and converts; we use parse to allow tags
-  return marked.parse(text);
+  // Before handing off to marked we swap the emphasis rules:
+  // *single* -> bold, **double** -> italic
+  // Replace double first to avoid nested conflicts.
+  let transformed = text
+    // convert **italic** (user wants double for italic)
+    .replace(/\*\*(.*?)\*\*/g, '<em>$1</em>')
+    // convert *bold* (single asterisk for bold)
+    .replace(/\*(.*?)\*/g, '<strong>$1</strong>');
+
+  // marked will parse the rest of markdown (lists, headers, etc.) and
+  // will leave HTML tags intact.
+  return marked.parse(transformed);
 };
 
 /**
