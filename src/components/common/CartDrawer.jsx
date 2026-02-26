@@ -11,6 +11,8 @@ const CartDrawer = () => {
         updateQuantity, 
         removeFromCart, 
         getCartTotal, 
+        getDeliveryFee,
+        getCartFinalTotal,
         isCartOpen, 
         closeCart 
     } = useCart();
@@ -30,7 +32,12 @@ const CartDrawer = () => {
         });
 
         message += "------------------\n";
-        message += `*Total: ${formatPrice(getCartTotal())}*\n\n`;
+        const baseTotal = getCartTotal();
+        const delivery = getDeliveryFee();
+        if (delivery > 0) {
+            message += `*Delivery Fee:* ${formatPrice(delivery)}\n`;
+        }
+        message += `*Total: ${formatPrice(getCartFinalTotal())}*\n\n`;
         message += "Please confirm my order.";
 
         const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
@@ -164,10 +171,29 @@ const CartDrawer = () => {
                         {cartItems.length > 0 && (
                             <div className={`p-4 border-t ${isDark ? 'border-gray-800 bg-gray-900' : 'border-gray-100 bg-white'}`}>
                                 <div className="flex justify-between items-center mb-4">
-                                    <span className="text-gray-500">Total</span>
+                                    <span className="text-gray-500">Subtotal</span>
                                     <span className="text-2xl font-bold">{formatPrice(getCartTotal())}</span>
                                 </div>
 
+                                {getDeliveryFee() > 0 && (
+                                    <>
+                                      <p className="text-xs text-gray-400 mb-2">
+                                        Orders under Rs. 4000 incur a delivery fee of Rs. 300.
+                                      </p>
+                                      {/* additional informational line */}
+                                      <p className="text-xs text-gray-400 mb-2">
+                                        Smart Choice: PKR 500 Advance, FREE Delivery
+                                      </p>
+                                      <div className="flex justify-between items-center mb-2">
+                                          <span className="text-gray-500">Delivery</span>
+                                          <span className="text-lg font-medium">{formatPrice(getDeliveryFee())}</span>
+                                      </div>
+                                    </>
+                                )}
+                                <div className="flex justify-between items-center mb-4">
+                                    <span className="text-gray-500">Total</span>
+                                    <span className="text-2xl font-bold">{formatPrice(getCartFinalTotal())}</span>
+                                </div>
                                 <button
                                     onClick={handleWhatsAppCheckout}
                                     className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-green-500/30 transition-all flex items-center justify-center gap-2"

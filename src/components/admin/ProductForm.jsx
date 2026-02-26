@@ -848,11 +848,14 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
                           ? `bg-gray-900 border-gray-700 text-white focus:ring-blue-500/50 ${errors.description ? 'border-red-500/50' : ''}` 
                           : `bg-white border-gray-300 focus:ring-blue-500 ${errors.description ? 'border-red-500' : ''}`
                       } border focus:ring-2`}
-                    placeholder="Enter product description"
+                    placeholder="Enter product description (markdown supported; use **bold** or *italic*)"
                   />
                   {errors.description && (
                     <p className="text-red-500 text-sm mt-1">{errors.description}</p>
                   )}
+                  <p className="text-xs text-gray-400 mt-1">
+                    Markdown formatting is supported (e.g. **bold**, *italic*, lists).
+                  </p>
                 </div>
 
                 {/* Short Description */}

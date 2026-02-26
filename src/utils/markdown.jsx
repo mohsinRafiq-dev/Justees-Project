@@ -4,20 +4,23 @@
  * @param {string} text - The markdown text to convert
  * @returns {string} HTML string
  */
+import { marked } from 'marked';
+
+// Configure marked to treat single line breaks as <br>
+marked.setOptions({
+  breaks: true,
+});
+
+/**
+ * Convert markdown text to HTML using a full parser.
+ * marked handles **bold**, *italic*, lists, headers, links, etc.
+ * @param {string} text
+ * @returns {string} HTML string
+ */
 export const convertMarkdownToHtml = (text) => {
   if (!text) return '';
-  
-  return text
-    // Convert **bold** to <strong>bold</strong>
-    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-    // Convert __bold__ to <strong>bold</strong>
-    .replace(/__(.*?)__/g, '<strong>$1</strong>')
-    // Convert *italic* to <em>italic</em> (only if not already part of **)
-    .replace(/(?<!\*)\*(?!\*)(.*?)(?<!\*)\*(?!\*)/g, '<em>$1</em>')
-    // Convert _italic_ to <em>italic</em> (only if not already part of __)
-    .replace(/(?<!_)_(?!_)(.*?)(?<!_)_(?!_)/g, '<em>$1</em>')
-    // Convert line breaks to <br> tags
-    .replace(/\n/g, '<br/>');
+  // marked automatically escapes and converts; we use parse to allow tags
+  return marked.parse(text);
 };
 
 /**
@@ -29,9 +32,8 @@ export const convertMarkdownToHtml = (text) => {
  */
 export const MarkdownRenderer = ({ content, className = '' }) => {
   const htmlContent = convertMarkdownToHtml(content);
-  
   return (
-    <div 
+    <div
       className={className}
       dangerouslySetInnerHTML={{ __html: htmlContent }}
     />

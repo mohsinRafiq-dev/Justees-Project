@@ -12,15 +12,26 @@ export const generateWhatsAppOrderLink = (product, options = {}) => {
   // Format price in Indian format
   const formatPrice = (price) => `Rs. ${price.toLocaleString('en-IN')}`;
   
+  // Compute totals and delivery
+  const baseTotal = product.price * quantity;
+  const deliveryFee = baseTotal > 0 && baseTotal < 4000 ? 300 : 0;
+  const finalTotal = baseTotal + deliveryFee;
+
   // Construct the message
-  const message = `Hi ${BUSINESS_NAME}! I'm interested in ordering:
+  let message = `Hi ${BUSINESS_NAME}! I'm interested in ordering:
 
 *Product:* ${product.name}
 *Price:* ${formatPrice(product.price)}
 *Size:* ${size}
 *Color:* ${color}
 *Quantity:* ${quantity}
-*Total:* ${formatPrice(product.price * quantity)}
+*Subtotal:* ${formatPrice(baseTotal)}
+`;
+  if (deliveryFee > 0) {
+    message += `*Delivery Fee:* ${formatPrice(deliveryFee)}
+`;
+  }
+  message += `*Total:* ${formatPrice(finalTotal)}
 
 Please let me know the next steps!`;
 
