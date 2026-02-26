@@ -220,7 +220,8 @@ const Home = () => {
   // Load site settings (volume ticker text)
   const loadSiteSettings = async () => {
     try {
-      const result = await getSiteSettings();
+      // always pull fresh settings from server to avoid cached WebView data
+      const result = await getSiteSettings({ serverOnly: true });
       if (result.success && result.settings) {
         // Support both new array format and old single text format
         if (
