@@ -42,8 +42,14 @@ import {
   getInstagramProfileUrl,
   getInstagramHandle,
 } from "../services/instagram.service";
-import { getSlidesForHome, subscribeSlidesForHome } from "../services/slides.service";
-import { getSiteSettings, subscribeSiteSettings } from "../services/settings.service";
+import {
+  getSlidesForHome,
+  subscribeSlidesForHome,
+} from "../services/slides.service";
+import {
+  getSiteSettings,
+  subscribeSiteSettings,
+} from "../services/settings.service";
 import { MarkdownRenderer } from "../utils/markdown.jsx";
 import Navbar from "../components/common/Navbar";
 import AnimatedBackground from "../components/common/AnimatedBackground";
@@ -188,7 +194,7 @@ const Home = () => {
       if (res.success && res.slides.length > 0) {
         // Normalize slides to expected props
         const sorted = res.slides.sort(
-          (a, b) => (a.order || 0) - (b.order || 0)
+          (a, b) => (a.order || 0) - (b.order || 0),
         );
         const normalized = sorted.map((s, idx) => ({
           id: s.id || idx,
@@ -292,7 +298,7 @@ const Home = () => {
 
     // Only set timer for non-video slides (images)
     const currentSlideData = heroSlides[currentSlide];
-    
+
     if (currentSlideData?.type === "video") {
       // For videos, don't set timer - let them play full duration
       // The onEnded event will handle advancing to next slide
@@ -303,26 +309,28 @@ const Home = () => {
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
     }, 5000);
-    
+
     return () => clearInterval(timer);
   }, [heroSlides, currentSlide]);
 
   // Video lifecycle management
   useEffect(() => {
     const currentSlideData = heroSlides[currentSlide];
-    
+
     // Start all videos and keep them playing
-    heroSlides.forEach(slide => {
+    heroSlides.forEach((slide) => {
       if (slide.type === "video") {
         const videoElement = videoRefs.current[slide.id];
         if (videoElement) {
           // Add event listeners for video state tracking
-          const handlePlay = () => setVideoStates(prev => ({ ...prev, [slide.id]: 'playing' }));
-          const handlePause = () => setVideoStates(prev => ({ ...prev, [slide.id]: 'paused' }));
-          
-          videoElement.addEventListener('play', handlePlay);
-          videoElement.addEventListener('pause', handlePause);
-          
+          const handlePlay = () =>
+            setVideoStates((prev) => ({ ...prev, [slide.id]: "playing" }));
+          const handlePause = () =>
+            setVideoStates((prev) => ({ ...prev, [slide.id]: "paused" }));
+
+          videoElement.addEventListener("play", handlePlay);
+          videoElement.addEventListener("pause", handlePause);
+
           // Only attempt to play if the video is currently paused
           if (videoElement.paused) {
             const playPromise = videoElement.play();
@@ -330,20 +338,23 @@ const Home = () => {
               playPromise
                 .then(() => {
                   // Video started successfully
-                  setVideoErrors(prev => ({ ...prev, [slide.id]: false }));
-                  setVideoStates(prev => ({ ...prev, [slide.id]: 'playing' }));
+                  setVideoErrors((prev) => ({ ...prev, [slide.id]: false }));
+                  setVideoStates((prev) => ({
+                    ...prev,
+                    [slide.id]: "playing",
+                  }));
                 })
                 .catch((error) => {
-                  console.warn('Video autoplay failed:', error);
-                  setVideoErrors(prev => ({ ...prev, [slide.id]: true }));
-                  setVideoStates(prev => ({ ...prev, [slide.id]: 'paused' }));
+                  console.warn("Video autoplay failed:", error);
+                  setVideoErrors((prev) => ({ ...prev, [slide.id]: true }));
+                  setVideoStates((prev) => ({ ...prev, [slide.id]: "paused" }));
                 });
             }
           }
         }
       }
     });
-    
+
     // Keep all videos playing - don't pause any of them
     // This ensures continuous playback even when not visible
   }, [currentSlide, heroSlides]);
@@ -353,7 +364,7 @@ const Home = () => {
     return () => {
       // Only pause videos when component unmounts (navigating away from home page)
       // This preserves resources when leaving the page
-      Object.values(videoRefs.current).forEach(video => {
+      Object.values(videoRefs.current).forEach((video) => {
         if (video) {
           video.pause();
         }
@@ -399,7 +410,7 @@ const Home = () => {
         setInstagramPosts(result.posts || []);
         setIsRealTimeFeed(result.isRealTime || false);
       } catch (error) {
-        console.error('Failed to load Instagram posts:', error);
+        console.error("Failed to load Instagram posts:", error);
         setInstagramPosts([]);
       } finally {
         setInstagramLoading(false);
@@ -415,24 +426,24 @@ const Home = () => {
 
   const nextSlide = () => {
     if (heroSlides.length === 0) return;
-    
+
     // Always advance to next slide, even for single video (for consistency)
     setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
-    
+
     // If only one slide and it's a video, ensure it keeps playing
     if (heroSlides.length === 1 && heroSlides[0].type === "video") {
       const videoElement = videoRefs.current[heroSlides[0].id];
       if (videoElement && videoElement.paused) {
         videoElement.play().catch(() => {
-          setVideoErrors(prev => ({ ...prev, [heroSlides[0].id]: true }));
+          setVideoErrors((prev) => ({ ...prev, [heroSlides[0].id]: true }));
         });
       }
     }
   };
 
   const handleVideoError = (slideId) => {
-    console.error('Video failed to load for slide:', slideId);
-    setVideoErrors(prev => ({ ...prev, [slideId]: true }));
+    console.error("Video failed to load for slide:", slideId);
+    setVideoErrors((prev) => ({ ...prev, [slideId]: true }));
   };
 
   const handleVideoClick = (slideId) => {
@@ -443,17 +454,17 @@ const Home = () => {
         if (playPromise !== undefined) {
           playPromise
             .then(() => {
-              setVideoStates(prev => ({ ...prev, [slideId]: 'playing' }));
+              setVideoStates((prev) => ({ ...prev, [slideId]: "playing" }));
             })
             .catch((error) => {
-              console.warn('Manual video play failed:', error);
-              setVideoErrors(prev => ({ ...prev, [slideId]: true }));
-              setVideoStates(prev => ({ ...prev, [slideId]: 'paused' }));
+              console.warn("Manual video play failed:", error);
+              setVideoErrors((prev) => ({ ...prev, [slideId]: true }));
+              setVideoStates((prev) => ({ ...prev, [slideId]: "paused" }));
             });
         }
       } else {
         videoElement.pause();
-        setVideoStates(prev => ({ ...prev, [slideId]: 'paused' }));
+        setVideoStates((prev) => ({ ...prev, [slideId]: "paused" }));
       }
     }
   };
@@ -644,23 +655,34 @@ const Home = () => {
                             playsInline
                             preload="metadata"
                             loop={heroSlides.length === 1}
-                            onEnded={heroSlides.length > 1 ? nextSlide : undefined}
+                            onEnded={
+                              heroSlides.length > 1 ? nextSlide : undefined
+                            }
                             onClick={() => handleVideoClick(slide.id)}
                             onError={() => handleVideoError(slide.id)}
                           />
                           {/* Play button overlay for paused videos */}
-                          {videoStates[slide.id] === 'paused' && !videoErrors[slide.id] && (
-                            <div 
-                              className="absolute inset-0 flex items-center justify-center bg-black/20 cursor-pointer"
-                              onClick={() => handleVideoClick(slide.id)}
-                            >
-                              <div className="w-16 h-16 bg-white/80 rounded-full flex items-center justify-center hover:bg-white/90 transition-all">
-                                <svg className="w-8 h-8 text-gray-800 ml-1" fill="currentColor" viewBox="0 0 20 20">
-                                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
-                                </svg>
+                          {videoStates[slide.id] === "paused" &&
+                            !videoErrors[slide.id] && (
+                              <div
+                                className="absolute inset-0 flex items-center justify-center bg-black/20 cursor-pointer"
+                                onClick={() => handleVideoClick(slide.id)}
+                              >
+                                <div className="w-16 h-16 bg-white/80 rounded-full flex items-center justify-center hover:bg-white/90 transition-all">
+                                  <svg
+                                    className="w-8 h-8 text-gray-800 ml-1"
+                                    fill="currentColor"
+                                    viewBox="0 0 20 20"
+                                  >
+                                    <path
+                                      fillRule="evenodd"
+                                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
+                                      clipRule="evenodd"
+                                    />
+                                  </svg>
+                                </div>
                               </div>
-                            </div>
-                          )}
+                            )}
                           {videoErrors[slide.id] && (
                             <div className="absolute inset-0 flex items-center justify-center bg-gray-900/50">
                               <div className="text-center text-white">
@@ -668,8 +690,12 @@ const Home = () => {
                                 <p className="text-sm">Video unavailable</p>
                                 <button
                                   onClick={() => {
-                                    setVideoErrors(prev => ({ ...prev, [slide.id]: false }));
-                                    const videoElement = videoRefs.current[slide.id];
+                                    setVideoErrors((prev) => ({
+                                      ...prev,
+                                      [slide.id]: false,
+                                    }));
+                                    const videoElement =
+                                      videoRefs.current[slide.id];
                                     if (videoElement) {
                                       videoElement.load();
                                     }
@@ -1111,7 +1137,9 @@ const Home = () => {
                     </h3>
                     {(product.shortDescription || product.description) && (
                       <MarkdownRenderer
-                        content={product.shortDescription || product.description}
+                        content={
+                          product.shortDescription || product.description
+                        }
                         className={`text-sm mb-3 line-clamp-2 ${isDark ? "text-gray-300" : "text-gray-600"}`}
                       />
                     )}
@@ -1200,7 +1228,11 @@ const Home = () => {
         animate={{ scale: 1 }}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
-        onClick={() => openWhatsAppInquiry("Hello Justees,I have a question about your brand.\nLooking forward to hearing from you.")}
+        onClick={() =>
+          openWhatsAppInquiry(
+            "Hello Justees,I have a question about your brand.\nLooking forward to hearing from you.",
+          )
+        }
         className="fixed bottom-6 right-6 bg-green-500 hover:bg-green-600 text-white p-4 rounded-full shadow-2xl transition-all transform hover:scale-110 z-50 animate-bounce"
         aria-label="Chat on WhatsApp"
       >
@@ -1447,7 +1479,7 @@ const Home = () => {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Follow us on Instagram"
-              className={`inline-flex items-center gap-2 px-5 py-2 rounded-full font-semibold w-max transition-transform transform hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-400 ${isDark ? 'bg-pink-600 text-white hover:bg-pink-500' : 'bg-pink-50 text-pink-700 hover:bg-pink-100'}`}
+              className={`inline-flex items-center gap-2 px-5 py-2 rounded-full font-semibold w-max transition-transform transform hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-400 ${isDark ? "bg-pink-600 text-white hover:bg-pink-500" : "bg-pink-50 text-pink-700 hover:bg-pink-100"}`}
             >
               <Instagram className="w-5 h-5" />
               <span>Follow Us</span>
@@ -1487,13 +1519,13 @@ const Home = () => {
           {/* Desktop View - 7 Letter Images */}
           <div className="hidden md:grid grid-cols-4 lg:grid-cols-7 gap-2">
             {[
-              { src: '/Justees Pics/J.jpeg', alt: 'J' },
-              { src: '/Justees Pics/U.jpeg', alt: 'U' },
-              { src: '/Justees Pics/S 1.jpeg', alt: 'S1' },
-              { src: '/Justees Pics/T.jpeg', alt: 'T' },
-              { src: '/Justees Pics/E 1.jpeg', alt: 'E1' },
-              { src: '/Justees Pics/E 2.jpeg', alt: 'E2' },
-              { src: '/Justees Pics/S 2.jpeg', alt: 'S2' },
+              { src: "/Justees Pics/J.jpeg", alt: "J" },
+              { src: "/Justees Pics/U.jpeg", alt: "U" },
+              { src: "/Justees Pics/S 1.jpeg", alt: "S1" },
+              { src: "/Justees Pics/T.jpeg", alt: "T" },
+              { src: "/Justees Pics/E 1.jpeg", alt: "E1" },
+              { src: "/Justees Pics/E 2.jpeg", alt: "E2" },
+              { src: "/Justees Pics/S 2.jpeg", alt: "S2" },
             ].map((image, index) => (
               <motion.a
                 key={index}
