@@ -74,21 +74,21 @@ const Home = () => {
   const REVIEWS_PER_PAGE = 6;
   const totalSlides = Math.ceil(reviews.length / REVIEWS_PER_PAGE);
   const [volumeTexts, setVolumeTexts] = useState(() => {
-    // Try to get cached settings from localStorage first
+    // Quick localStorage check for instant display, then backend loads immediately
     try {
       const cached = localStorage.getItem("justees_ticker_texts");
       if (cached) {
         const parsed = JSON.parse(cached);
-        if (Array.isArray(parsed) && parsed.length > 0) {
+        if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].trim()) {
           return parsed;
         }
       }
     } catch (error) {
       // Ignore cache errors
     }
-    // Fallback to generic default
-    return ["Justees Collection ✦ Premium Fashion ✦ New Arrivals"];
-  }); // Array of ticker texts with smart default
+    // Minimal fallback - backend loads immediately anyway
+    return ["Justees Collection"];
+  }); // Ticker texts with instant backend loading
 
   // Instagram Posts State
   const [instagramPosts, setInstagramPosts] = useState([]);
@@ -235,11 +235,11 @@ const Home = () => {
     };
   }, []);
 
-  // Load site settings (volume ticker text) a single time
+  // Load site settings immediately for fast ticker display
   const loadSiteSettings = async () => {
     try {
-      // always pull fresh settings from server to avoid cached WebView data
-      const result = await getSiteSettings({ serverOnly: true });
+      // Use cache-first approach for speed, then server for accuracy
+      const result = await getSiteSettings();
       if (result.success && result.settings) {
         // Support both new array format and old single text format
         if (
@@ -248,19 +248,33 @@ const Home = () => {
           result.settings.volumeTexts.length > 0
         ) {
           setVolumeTexts(result.settings.volumeTexts);
+          // Cache for next page load
+          localStorage.setItem(
+            "justees_ticker_texts",
+            JSON.stringify(result.settings.volumeTexts),
+          );
         } else if (result.settings.volumeText) {
           // Fallback to old single text format
-          setVolumeTexts([result.settings.volumeText]);
+          const textArray = [result.settings.volumeText];
+          setVolumeTexts(textArray);
+          // Cache for next page load
+          localStorage.setItem(
+            "justees_ticker_texts",
+            JSON.stringify(textArray),
+          );
         }
       }
     } catch (error) {
       console.error("Error loading site settings:", error);
-      // Keep default fallback value on error
+      // Keep cached/default fallback value on error
     }
   };
 
   // Set up real-time listener for site settings
   useEffect(() => {
+    // Load settings immediately for fast initial display
+    loadSiteSettings();
+    
     const unsubscribe = subscribeSiteSettings((result) => {
       if (result.success && result.settings) {
         // Support both new array format and old single text format
@@ -285,10 +299,8 @@ const Home = () => {
             JSON.stringify(textArray),
           );
         }
-      } else {
-        // listener failed (permissions/index issue etc) – fetch once
-        loadSiteSettings();
       }
+      // Remove fallback call since we already load immediately above
     });
 
     // Cleanup listener on unmount
