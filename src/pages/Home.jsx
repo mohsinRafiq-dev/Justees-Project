@@ -73,7 +73,22 @@ const Home = () => {
   const [currentReviewSlide, setCurrentReviewSlide] = useState(0);
   const REVIEWS_PER_PAGE = 6;
   const totalSlides = Math.ceil(reviews.length / REVIEWS_PER_PAGE);
-  const [volumeTexts, setVolumeTexts] = useState([""]); // Array of ticker texts
+  const [volumeTexts, setVolumeTexts] = useState(() => {
+    // Try to get cached settings from localStorage first
+    try {
+      const cached = localStorage.getItem("justees_ticker_texts");
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      }
+    } catch (error) {
+      // Ignore cache errors
+    }
+    // Fallback to generic default
+    return ["Justees Collection ✦ Premium Fashion ✦ New Arrivals"];
+  }); // Array of ticker texts with smart default
 
   // Instagram Posts State
   const [instagramPosts, setInstagramPosts] = useState([]);
@@ -255,9 +270,20 @@ const Home = () => {
           result.settings.volumeTexts.length > 0
         ) {
           setVolumeTexts(result.settings.volumeTexts);
+          // Cache for next page load
+          localStorage.setItem(
+            "justees_ticker_texts",
+            JSON.stringify(result.settings.volumeTexts),
+          );
         } else if (result.settings.volumeText) {
           // Fallback to old single text format
-          setVolumeTexts([result.settings.volumeText]);
+          const textArray = [result.settings.volumeText];
+          setVolumeTexts(textArray);
+          // Cache for next page load
+          localStorage.setItem(
+            "justees_ticker_texts",
+            JSON.stringify(textArray),
+          );
         }
       } else {
         // listener failed (permissions/index issue etc) – fetch once
@@ -639,15 +665,17 @@ const Home = () => {
           {[...Array(2)].map((_, block) => (
             <React.Fragment key={block}>
               {[...Array(12)].map((_, repeatIndex) =>
-                volumeTexts.map((text, textIndex) => (
-                  <span
-                    key={`${block}-${repeatIndex}-${textIndex}`}
-                    className="text-gray-900 text-3xl font-bold mx-6 whitespace-nowrap"
-                    style={{ fontFamily: "Cookie, cursive" }}
-                  >
-                    {text}
-                  </span>
-                )),
+                volumeTexts
+                  .filter((text) => text.trim())
+                  .map((text, textIndex) => (
+                    <span
+                      key={`${block}-${repeatIndex}-${textIndex}`}
+                      className="text-gray-900 text-3xl font-bold mx-6 whitespace-nowrap"
+                      style={{ fontFamily: "Cookie, cursive" }}
+                    >
+                      {text}
+                    </span>
+                  )),
               )}
             </React.Fragment>
           ))}
