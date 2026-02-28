@@ -22,160 +22,66 @@ const FALLBACK_IMAGES = [
 ];
 
 /**
- * Fetch Instagram posts using multiple automatic methods
+ * Fetch Instagram posts using official API or fallback images
  * @param {number} limit - Number of posts to fetch (default: 6)
  * @returns {Promise<Object>} - Object with success status and posts array
  */
 export const getInstagramPosts = async (limit = 6) => {
-  try {
-    // Try Method 1: RapidAPI Instagram API (Free tier available)
+  // Only try official Instagram API if credentials are configured
+  if (INSTAGRAM_ACCESS_TOKEN && INSTAGRAM_USER_ID) {
     try {
-      const response = await fetch(`https://instagram-scraper-api2.p.rapidapi.com/v1/posts_by_username?username=${INSTAGRAM_USERNAME}&limit=${limit}`, {
-        method: 'GET',
-        headers: {
-          'X-RapidAPI-Key': 'demo-key', // Replace with your RapidAPI key for higher limits
-          'X-RapidAPI-Host': 'instagram-scraper-api2.p.rapidapi.com'
-        }
-      });
+      const fields = 'id,caption,media_type,media_url,permalink,thumbnail_url,timestamp';
+      const url = `https://graph.instagram.com/me/media?fields=${fields}&access_token=${INSTAGRAM_ACCESS_TOKEN}&limit=${limit}`;
+
+      const response = await fetch(url);
       
       if (response.ok) {
         const data = await response.json();
-        if (data.data && data.data.items && data.data.items.length > 0) {
-          return {
-            success: true,
-            posts: data.data.items.slice(0, limit).map((item) => ({
-              id: item.id,
-              media_url: item.image_versions2?.candidates?.[0]?.url || item.thumbnail_url,
-              permalink: `https://instagram.com/p/${item.code}`,
-              caption: item.caption?.text || '',
-              media_type: item.media_type === 2 ? 'VIDEO' : 'IMAGE',
-            })),
-            isRealTime: true,
-          };
-        }
-      }
-    } catch (rapidApiError) {
-      console.warn('RapidAPI method failed, trying next method...', rapidApiError);
-
-    // Try Method 2: Instagram web scraping (Free but may be blocked)
-    try {
-      const response = await fetch(`https://www.instagram.com/${INSTAGRAM_USERNAME}/?__a=1&__d=dis`);
-      if (response.ok) {
-        const data = await response.json();
-        const posts = data?.graphql?.user?.edge_owner_to_timeline_media?.edges?.slice(0, limit) || [];
         
-        if (posts.length > 0) {
+        if (!data.error && data.data && data.data.length > 0) {
+          const posts = data.data
+            .filter(post => ['IMAGE', 'VIDEO', 'CAROUSEL_ALBUM'].includes(post.media_type))
+            .slice(0, limit)
+            .map(post => ({
+              id: post.id,
+              media_url: post.media_type === 'VIDEO' ? post.thumbnail_url : post.media_url,
+              permalink: post.permalink,
+              caption: post.caption || '',
+              media_type: post.media_type,
+              timestamp: post.timestamp,
+            }));
+
           return {
             success: true,
-            posts: posts.map((edge, index) => ({
-              id: edge.node.id,
-              media_url: edge.node.display_url,
-              permalink: `https://instagram.com/p/${edge.node.shortcode}`,
-              caption: edge.node.edge_media_to_caption?.edges?.[0]?.node?.text || '',
-              media_type: edge.node.__typename === 'GraphVideo' ? 'VIDEO' : 'IMAGE',
-            })),
+            posts,
             isRealTime: true,
           };
         }
       }
-    } catch (jsonpError) {
-      console.warn('Instagram JSONP method failed, trying fallback...', jsonpError);
+    } catch (error) {
+      // Silent fallback to curated images - no console spam
     }
-
-    // Try Method 2: Instagram web scraping (Free but may be blocked)
-    try {
-      const response = await fetch(`https://www.instagram.com/web/search/topsearch/?query=${INSTAGRAM_USERNAME}`);
-      if (response.ok) {
-        // This method may not work consistently due to Instagram's anti-scraping measures
-        console.log('Instagram web scraping method - results may vary');
-      }
-    } catch (webError) {
-      console.warn('Instagram web method failed...', webError);
-    }
-
-    // Method 3: Check if API is configured
-    if (!INSTAGRAM_ACCESS_TOKEN || !INSTAGRAM_USER_ID) {
-      // console.log('Instagram API not configured. Using fallback images.');
-      return {
-        success: true,
-        posts: FALLBACK_IMAGES.map((url, index) => ({
-          id: `fallback-${index}`,
-          media_url: url,
-          permalink: `https://instagram.com/${INSTAGRAM_USERNAME}`,
-          caption: 'Justees Official',
-          media_type: 'IMAGE',
-        })),
-        isRealTime: false,
-      };
-    }
-
-    // Fetch from Instagram Basic Display API
-    const fields = 'id,caption,media_type,media_url,permalink,thumbnail_url,timestamp';
-    const url = `https://graph.instagram.com/me/media?fields=${fields}&access_token=${INSTAGRAM_ACCESS_TOKEN}&limit=${limit}`;
-
-    const response = await fetch(url);
-    
-    if (!response.ok) {
-      throw new Error(`Instagram API error: ${response.status}`);
-    }
-
-    const data = await response.json();
-
-    if (data.error) {
-      throw new Error(data.error.message);
-    }
-
-    // Filter only images and videos
-    const posts = data.data
-      .filter(post => post.media_type === 'IMAGE' || post.media_type === 'VIDEO' || post.media_type === 'CAROUSEL_ALBUM')
-      .slice(0, limit)
-      .map(post => ({
-        id: post.id,
-        media_url: post.media_type === 'VIDEO' ? post.thumbnail_url : post.media_url,
-        permalink: post.permalink,
-        caption: post.caption || '',
-        media_type: post.media_type,
-        timestamp: post.timestamp,
-      }));
-
-    return {
-      success: true,
-      posts,
-      isRealTime: true,
-    };
-  } catch (error) {
-    // console.error('Error fetching Instagram posts:', error);
-    
-    // Return fallback images on error
-    return {
-      success: true,
-      posts: FALLBACK_IMAGES.map((url, index) => ({
-        id: `fallback-${index}`,
-        media_url: url,
-        permalink: `https://instagram.com/${INSTAGRAM_USERNAME}`,
-        caption: 'Justees Official',
-        media_type: 'IMAGE',
-      })),
-      isRealTime: false,
-      error: error.message,
-    };
   }
-};
 
+  // Return curated fallback images (clean, no API errors)
+  return {
+    success: true,
+    posts: FALLBACK_IMAGES.slice(0, limit).map((url, index) => ({
+      id: `fallback-${index}`,
+      media_url: url,
+      permalink: `https://instagram.com/${INSTAGRAM_USERNAME}`,
+      caption: 'Justees Official',
+      media_type: 'IMAGE',
+    })),
+    isRealTime: false,
+  };
+};
 /**
  * Get the Instagram profile URL
  * @returns {string} - Instagram profile URL
  */
 export const getInstagramProfileUrl = () => {
   return `https://instagram.com/${INSTAGRAM_USERNAME}`;
-};
-
-/**
- * Get the Instagram username
- * @returns {string} - Instagram username
- */
-export const getInstagramUsername = () => {
-  return INSTAGRAM_USERNAME;
 };
 
 /**

@@ -25,7 +25,7 @@ import { useWishlist } from "../contexts/WishlistContext";
 import { getAllProducts, getColors } from "../services/products.service";
 import { getProductReviews, addReview } from "../services/reviews.service";
 import { formatPrice } from "../utils/validation";
-import { generateWhatsAppInquiryLink } from "../utils/whatsapp";
+import { generateWhatsAppInquiryLink, generateWhatsAppOrderLink } from "../utils/whatsapp";
 import { MarkdownRenderer } from "../utils/markdown.jsx";
 import Navbar from "../components/common/Navbar";
 import Footer from "../components/common/Footer";
@@ -261,17 +261,26 @@ const ProductDetail = () => {
   };
 
 
-  const handleWhatsAppInquiry = () => {
-    let message = '';
+  // When the user clicks "Order on WhatsApp" we'll either send a quick inquiry if the
+  // product is out of stock, or create a full order message (including delivery fee)
+  // using the helper from utils/whatsapp.js.
+  const handleWhatsAppOrder = () => {
     if (isOutOfStock()) {
-      message = `Hi, I'm interested in ${product.name}, but it's currently out of stock. When will it be restocked?`;
-    } else {
-      message = `Hi, I'm interested in ${product.name}${selectedSize ? ` (Size: ${selectedSize})` : ""
-        }${selectedColor ? ` (Color: ${selectedColor})` : ""}. Price: ${formatPrice(product.price)}`;
+      const message = `Hi, I'm interested in ${product.name}, but it's currently out of stock. When will it be restocked?`;
+      const whatsappLink = generateWhatsAppInquiryLink(message);
+      window.open(whatsappLink, "_blank");
+      return;
     }
 
-    const whatsappLink = generateWhatsAppInquiryLink(message);
-    window.open(whatsappLink, "_blank");
+    // for available products use order link which calculates subtotal + delivery
+    const options = {
+      size: selectedSize || 'M',
+      color: selectedColor || 'N/A',
+      quantity,
+    };
+
+    const whatsappOrderLink = generateWhatsAppOrderLink(product, options);
+    window.open(whatsappOrderLink, "_blank");
   };
 
   const { 
@@ -842,7 +851,7 @@ const ProductDetail = () => {
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  onClick={handleWhatsAppInquiry}
+                  onClick={handleWhatsAppOrder}
                   className="flex-1 py-4 px-8 rounded-2xl border-2 border-green-500 bg-green-500 hover:bg-green-600 text-white font-bold transition-colors flex items-center justify-center gap-3 shadow-lg shadow-green-500/20"
                   title="Chat on WhatsApp"
                 >
