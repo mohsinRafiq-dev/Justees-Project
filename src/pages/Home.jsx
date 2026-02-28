@@ -67,7 +67,7 @@ const Home = () => {
   const [currentReviewSlide, setCurrentReviewSlide] = useState(0);
   const REVIEWS_PER_PAGE = 6;
   const totalSlides = Math.ceil(reviews.length / REVIEWS_PER_PAGE);
-  const [volumeTexts, setVolumeTexts] = useState(["Volume 1: The Debut"]); // Array of ticker texts
+  const [volumeTexts, setVolumeTexts] = useState([""]); // Array of ticker texts
 
   // Instagram Posts State
   const [instagramPosts, setInstagramPosts] = useState([]);
