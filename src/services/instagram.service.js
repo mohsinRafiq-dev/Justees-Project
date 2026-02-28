@@ -55,8 +55,7 @@ export const getInstagramPosts = async (limit = 6) => {
         }
       }
     } catch (rapidApiError) {
-      console.log('RapidAPI method failed, trying next method...');
-    }
+      console.warn('RapidAPI method failed, trying next method...', rapidApiError);
 
     // Try Method 2: Instagram web scraping (Free but may be blocked)
     try {
@@ -80,7 +79,7 @@ export const getInstagramPosts = async (limit = 6) => {
         }
       }
     } catch (jsonpError) {
-      console.log('Instagram JSONP method failed, trying fallback...');
+      console.warn('Instagram JSONP method failed, trying fallback...', jsonpError);
     }
 
     // Try Method 2: Instagram web scraping (Free but may be blocked)
@@ -91,7 +90,7 @@ export const getInstagramPosts = async (limit = 6) => {
         console.log('Instagram web scraping method - results may vary');
       }
     } catch (webError) {
-      console.log('Instagram web method failed...');
+      console.warn('Instagram web method failed...', webError);
     }
 
     // Method 3: Check if API is configured

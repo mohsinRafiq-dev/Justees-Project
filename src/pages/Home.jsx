@@ -174,6 +174,9 @@ const Home = () => {
 
     loadFeaturedProducts();
     loadReviews();
+    // also fetch settings once immediately as a fallback in case the
+    // real-time listener fails (e.g. due to rules not yet deployed)
+    loadSiteSettings();
   }, []);
 
   // Load recent reviews
@@ -217,6 +220,30 @@ const Home = () => {
     };
   }, []);
 
+  // Load site settings (volume ticker text) a single time
+  const loadSiteSettings = async () => {
+    try {
+      // always pull fresh settings from server to avoid cached WebView data
+      const result = await getSiteSettings({ serverOnly: true });
+      if (result.success && result.settings) {
+        // Support both new array format and old single text format
+        if (
+          result.settings.volumeTexts &&
+          Array.isArray(result.settings.volumeTexts) &&
+          result.settings.volumeTexts.length > 0
+        ) {
+          setVolumeTexts(result.settings.volumeTexts);
+        } else if (result.settings.volumeText) {
+          // Fallback to old single text format
+          setVolumeTexts([result.settings.volumeText]);
+        }
+      }
+    } catch (error) {
+      console.error("Error loading site settings:", error);
+      // Keep default fallback value on error
+    }
+  };
+
   // Set up real-time listener for site settings
   useEffect(() => {
     const unsubscribe = subscribeSiteSettings((result) => {
@@ -232,6 +259,9 @@ const Home = () => {
           // Fallback to old single text format
           setVolumeTexts([result.settings.volumeText]);
         }
+      } else {
+        // listener failed (permissions/index issue etc) – fetch once
+        loadSiteSettings();
       }
     });
 

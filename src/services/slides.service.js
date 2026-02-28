@@ -179,7 +179,14 @@ export const subscribeSlidesForHome = (callback, limitCount = 10) => {
         callback({ success: true, slides });
       },
       (error) => {
-        console.error("Error listening to slides:", error);
+        // If Firestore tells us an index is missing we silently fallback instead of
+        // spamming the console. Developers can still create the index via the
+        // provided link in the error message if they choose to improve performance.
+        if (error.code === 'failed-precondition' || error.message?.includes('index')) {
+          console.warn('Slides listener falling back due to index requirement');
+        } else {
+          console.error("Error listening to slides:", error);
+        }
         // Fallback to basic query without ordering
         const basicQuery = query(
           collection(db, SLIDES_COLLECTION),
