@@ -11,6 +11,7 @@ import {
   orderBy,
   limit,
   Timestamp,
+  onSnapshot,
 } from "firebase/firestore";
 import { db } from "./firebase";
 
@@ -149,5 +150,67 @@ export const getSlidesForHome = async (limitCount = 10) => {
   } catch (error) {
     console.error("Error getting slides for home:", error);
     return { success: false, error: error.message, slides: [] };
+  }
+};
+
+/**
+ * Subscribe to visible slides changes in real-time
+ * @param {Function} callback - Callback function to receive updated slides
+ * @param {number} limitCount - Maximum number of slides to retrieve
+ * @returns {Function} Unsubscribe function to stop listening
+ */
+export const subscribeSlidesForHome = (callback, limitCount = 10) => {
+  // Try with composite index first
+  try {
+    const q = query(
+      collection(db, SLIDES_COLLECTION),
+      where("isVisible", "==", true),
+      orderBy("order", "asc"),
+      limit(limitCount)
+    );
+    
+    return onSnapshot(
+      q,
+      (querySnapshot) => {
+        const slides = [];
+        querySnapshot.forEach((docSnap) => {
+          slides.push({ id: docSnap.id, ...docSnap.data() });
+        });
+        callback({ success: true, slides });
+      },
+      (error) => {
+        console.error("Error listening to slides:", error);
+        // Fallback to basic query without ordering
+        const basicQuery = query(
+          collection(db, SLIDES_COLLECTION),
+          limit(limitCount * 2)
+        );
+        
+        return onSnapshot(
+          basicQuery,
+          (querySnapshot) => {
+            const allSlides = [];
+            querySnapshot.forEach((docSnap) => {
+              const slideData = { id: docSnap.id, ...docSnap.data() };
+              if (slideData.isVisible !== false) {
+                allSlides.push(slideData);
+              }
+            });
+            const sortedSlides = allSlides
+              .sort((a, b) => (a.order || 0) - (b.order || 0))
+              .slice(0, limitCount);
+            callback({ success: true, slides: sortedSlides });
+          },
+          (error) => {
+            console.error("Error listening to slides (fallback):", error);
+            callback({ success: false, error: error.message, slides: [] });
+          }
+        );
+      }
+    );
+  } catch (error) {
+    console.error("Error setting up slides listener:", error);
+    // Return a no-op unsubscribe function
+    return () => {};
   }
 };

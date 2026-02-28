@@ -42,8 +42,8 @@ import {
   getInstagramProfileUrl,
   getInstagramHandle,
 } from "../services/instagram.service";
-import { getSlidesForHome } from "../services/slides.service";
-import { getSiteSettings } from "../services/settings.service";
+import { getSlidesForHome, subscribeSlidesForHome } from "../services/slides.service";
+import { getSiteSettings, subscribeSiteSettings } from "../services/settings.service";
 import { MarkdownRenderer } from "../utils/markdown.jsx";
 import Navbar from "../components/common/Navbar";
 import AnimatedBackground from "../components/common/AnimatedBackground";
@@ -168,42 +168,7 @@ const Home = () => {
 
     loadFeaturedProducts();
     loadReviews();
-    loadSlides();
-    loadSiteSettings();
   }, []);
-
-  // Load slides from Firestore
-  const loadSlides = async () => {
-    try {
-      console.log("[Home] Loading slides...");
-      const res = await getSlidesForHome(10);
-      console.log("[Home] Slides result:", res);
-
-      if (res.success && res.slides.length > 0) {
-        // Normalize slides to expected props (url, type, title...)
-        const sorted = res.slides.sort(
-          (a, b) => (a.order || 0) - (b.order || 0),
-        );
-        const normalized = sorted.map((s, idx) => ({
-          id: s.id || idx,
-          title: s.title || "",
-          subtitle: s.subtitle || "",
-          description: s.description || "",
-          url: s.url || "",
-          type: s.type || "image",
-          order: s.order || idx,
-        }));
-        console.log("[Home] Setting normalized slides:", normalized);
-        setHeroSlides(normalized);
-      } else {
-        console.log("[Home] No slides found in database, falling back to defaults");
-        setHeroSlides(DEFAULT_SLIDES);
-      }
-    } catch (error) {
-      console.error("[Home] Error loading slides:", error);
-      // Keep the default slides on error
-    }
-  };
 
   // Load recent reviews
   const loadReviews = async () => {
@@ -217,11 +182,38 @@ const Home = () => {
     }
   };
 
-  // Load site settings (volume ticker text)
-  const loadSiteSettings = async () => {
-    try {
-      // always pull fresh settings from server to avoid cached WebView data
-      const result = await getSiteSettings({ serverOnly: true });
+  // Set up real-time listener for slides
+  useEffect(() => {
+    const unsubscribe = subscribeSlidesForHome((res) => {
+      if (res.success && res.slides.length > 0) {
+        // Normalize slides to expected props
+        const sorted = res.slides.sort(
+          (a, b) => (a.order || 0) - (b.order || 0)
+        );
+        const normalized = sorted.map((s, idx) => ({
+          id: s.id || idx,
+          title: s.title || "",
+          subtitle: s.subtitle || "",
+          description: s.description || "",
+          url: s.url || "",
+          type: s.type || "image",
+          order: s.order || idx,
+        }));
+        setHeroSlides(normalized);
+      } else {
+        setHeroSlides(DEFAULT_SLIDES);
+      }
+    }, 10);
+
+    // Cleanup listener on unmount
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
+  // Set up real-time listener for site settings
+  useEffect(() => {
+    const unsubscribe = subscribeSiteSettings((result) => {
       if (result.success && result.settings) {
         // Support both new array format and old single text format
         if (
@@ -235,11 +227,13 @@ const Home = () => {
           setVolumeTexts([result.settings.volumeText]);
         }
       }
-    } catch (error) {
-      console.error("Error loading site settings:", error);
-      // Keep default fallback value on error
-    }
-  };
+    });
+
+    // Cleanup listener on unmount
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
   // Categories
   const [categories, setCategories] = useState([]);
