@@ -280,6 +280,19 @@ const ProductDetail = () => {
     };
 
     const whatsappOrderLink = generateWhatsAppOrderLink(product, options);
+
+    // Track checkout/initiate checkout action for Meta (optional)
+    import("../utils/metaPixel").then(({ trackEvent }) => {
+      trackEvent("InitiateCheckout", {
+        value: product.price * quantity,
+        currency: "PKR",
+        content_ids: [product.id],
+        content_type: "product",
+        contents: [{ id: product.id, quantity, item_price: product.price }],
+        num_items: quantity,
+      });
+    });
+
     window.open(whatsappOrderLink, "_blank");
   };
 

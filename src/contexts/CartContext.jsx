@@ -32,6 +32,16 @@ export const CartProvider = ({ children }) => {
 
   const addToCart = (product, options = {}) => {
     const { size, color, quantity = 1 } = options;
+    try {
+      const value = product.price * quantity;
+      const contents = [{ id: product.id, quantity, item_price: product.price }];
+      const content_ids = [product.id];
+      import("../utils/metaPixel").then(({ trackAddToCart }) => {
+        trackAddToCart({ value, currency: 'PKR', contents, content_ids });
+      });
+    } catch (err) {
+      // ignore tracking errors
+    }
 
     // Use selected values or fall back to product defaults if available
     const finalSize = size || (product.variants && product.variants.length > 0 ? product.variants[0].size : 'M');
