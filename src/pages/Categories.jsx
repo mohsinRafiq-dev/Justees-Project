@@ -67,7 +67,7 @@ const Categories = () => {
               animate={{ opacity: 1, y: 0 }}
               className="text-center max-w-3xl mx-auto"
             >
-              <h1 className="text-5xl md:text-6xl font-bold mb-6" style={{ color: '#000000' }}>
+              <h1 className="text-5xl md:text-6xl font-bold mb-6" style={{ color: isDark ? 'white' : '#000000' }}>
                 Explore Our Categories
               </h1>
               <p className={`text-xl ${isDark ? "text-gray-400" : "text-black"} mb-8`}>
@@ -121,10 +121,10 @@ const Categories = () => {
                           {category.description || `Explore our collection of ${category.name}`}
                         </p>
                         <div className="flex items-center justify-between">
-                          <span className="font-semibold transition-colors" style={{ color: '#000000' }}>
+                          <span className="font-semibold transition-colors" style={{ color: isDark ? 'white' : '#000000' }}>
                             Shop Now
                           </span>
-                          <ShoppingBag className="w-5 h-5 transition-colors" style={{ color: '#000000' }} />
+                          <ShoppingBag className="w-5 h-5 transition-colors" style={{ color: isDark ? 'white' : '#000000' }} />
                         </div>
                       </div>
                     </Link>

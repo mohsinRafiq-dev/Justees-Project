@@ -58,7 +58,7 @@ const About = () => {
             animate={{ opacity: 1, y: 0 }}
             className="text-center max-w-4xl mx-auto"
           >
-            <h1 className="text-5xl md:text-6xl font-bold mb-6" style={{ color: '#000000', fontFamily: 'Cookie, cursive' }}>
+            <h1 className="text-5xl md:text-6xl font-bold mb-6" style={{ color: isDark ? 'white' : '#000000', fontFamily: 'Cookie, cursive' }}>
               About Justees
             </h1>
             <p className={`text-xl ${isDark ? "text-gray-400" : "text-black"} leading-relaxed space-y-2`}>
@@ -84,7 +84,7 @@ const About = () => {
               viewport={{ once: true }}
               className="text-center mb-16"
             >
-              <h2 className="text-5xl md:text-6xl font-bold mb-6" style={{ color: '#000000', fontFamily: 'Cookie, cursive' }}>
+              <h2 className="text-5xl md:text-6xl font-bold mb-6" style={{ color: isDark ? 'white' : '#000000', fontFamily: 'Cookie, cursive' }}>
                 Our Story
               </h2>
               <div className={`space-y-6 text-lg ${isDark ? "text-gray-400" : "text-black"} text-left`}>
@@ -103,7 +103,7 @@ const About = () => {
                   This isn't just streetwear. It's a statement of presence. And when you wear 
                   JUSTEES, you're not just buying clothing you're stepping into a mindset. 🖤
                 </p>
-                <p className="text-4xl md:text-5xl font-bold text-center mt-8" style={{ fontFamily: 'Cookie, cursive', color: '#000000' }}>
+                <p className="text-4xl md:text-5xl font-bold text-center mt-8" style={{ fontFamily: 'Cookie, cursive', color: isDark ? 'white' : '#000000' }}>
                   WELCOME TO JUSTEES LEAGUE !
                 </p>
               </div>
@@ -140,7 +140,7 @@ const About = () => {
                 whileHover={{ y: -10 }}
                 className={`p-8 rounded-xl ${isDark ? 'bg-gray-900' : 'bg-gray-50'} text-center`}
               >
-                <value.icon className="w-12 h-12 mx-auto mb-4" style={{ color: '#000000' }} />
+                <value.icon className="w-12 h-12 mx-auto mb-4" style={{ color: isDark ? 'white' : '#000000' }} />
                 <h3 className={`text-xl font-bold mb-3 ${isDark ? 'text-white' : 'text-gray-900'}`}>
                   {value.title}
                 </h3>
@@ -180,7 +180,7 @@ const About = () => {
                 transition={{ delay: index * 0.1 }}
                 className="text-center"
               >
-                <h3 className="text-5xl font-bold mb-2" style={{ color: '#000000' }}>
+                <h3 className="text-5xl font-bold mb-2" style={{ color: isDark ? 'white' : '#000000' }}>
                   {stat.number}
                 </h3>
                 <p className={isDark ? "text-gray-400" : "text-black"}>

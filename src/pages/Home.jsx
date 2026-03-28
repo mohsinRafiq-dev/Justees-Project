@@ -627,58 +627,138 @@ const Home = () => {
       {/* Navbar */}
       <Navbar />
 
-      {/* Hero Section - Static Grey */}
-      <section className="relative h-[60vh] md:h-screen overflow-hidden bg-gradient-to-br from-gray-800 via-gray-700 to-gray-600">
-        <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "url('data:image/svg+xml...')" }} />
-        <div className="absolute inset-0 bg-gradient-to-r from-gray-900/90 via-gray-800/40 to-gray-900/50" />
-        
+      {/* Hero Section - Video/Image Carousel */}
+      <section className="relative h-[60vh] md:h-screen overflow-hidden bg-black">
+        <AnimatePresence mode="wait">
+          {heroSlides.length > 0 && (
+            <motion.div
+              key={currentSlide}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.8 }}
+              className="absolute inset-0"
+            >
+              {heroSlides[currentSlide]?.type === "video" ? (
+                <video
+                  ref={(el) => (videoRefs.current[currentSlide] = el)}
+                  src={heroSlides[currentSlide]?.url}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="w-full h-full object-cover"
+                  onError={() => {
+                    setVideoErrors((prev) => ({
+                      ...prev,
+                      [currentSlide]: true,
+                    }));
+                  }}
+                />
+              ) : (
+                <img
+                  src={heroSlides[currentSlide]?.url}
+                  alt={heroSlides[currentSlide]?.title}
+                  className="w-full h-full object-cover"
+                />
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-r from-gray-900/70 via-gray-800/40 to-gray-900/60" />
+
+        {/* Content */}
         <div className="relative h-full flex items-end pb-6 md:pb-12">
           <div className="pl-8 md:pl-16 pr-8">
             <motion.div
+              key={`content-${currentSlide}`}
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
               className="max-w-xl"
             >
-              <motion.h1
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2, duration: 0.8 }}
-                className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-4 md:mb-6 leading-tight"
-              >
-                Welcome to
-                <br />
-                <span
-                  style={{ color: "#d3d1ce", fontFamily: "Cookie, cursive" }}
-                >
-                  Justees
-                </span>
-              </motion.h1>
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4, duration: 0.8 }}
-                className="text-base sm:text-lg md:text-2xl lg:text-3xl text-white mb-6 md:mb-8 font-light"
-              >
-                Discover Premium Quality Clothing That Defines Your Style
-              </motion.p>
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6, duration: 0.8 }}
-                className="flex flex-wrap gap-4"
-              >
-                <Link
-                  to="/products#products-grid"
-                  style={{ backgroundColor: "#d3d1ce" }}
-                  className="text-gray-900 px-8 py-4 rounded-full text-lg font-semibold hover:shadow-2xl transition-all transform hover:scale-105"
-                >
-                  Shop Now
-                </Link>
-              </motion.div>
+              {heroSlides.length > 0 && (
+                <>
+                  <motion.h1
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3, duration: 0.8 }}
+                    className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-4 md:mb-6 leading-tight"
+                  >
+                    {heroSlides[currentSlide]?.title || "Welcome to Justees"}
+                  </motion.h1>
+                  <motion.p
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4, duration: 0.8 }}
+                    className="text-base sm:text-lg md:text-2xl lg:text-3xl text-white mb-6 md:mb-8 font-light"
+                  >
+                    {heroSlides[currentSlide]?.subtitle ||
+                      "Discover Premium Quality Clothing"}
+                  </motion.p>
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5, duration: 0.8 }}
+                    className="flex flex-wrap gap-4"
+                  >
+                    <Link
+                      to="/products#products-grid"
+                      style={{ backgroundColor: "#d3d1ce" }}
+                      className="text-gray-900 px-8 py-4 rounded-full text-lg font-semibold hover:shadow-2xl transition-all transform hover:scale-105"
+                    >
+                      Shop Now
+                    </Link>
+                  </motion.div>
+                </>
+              )}
             </motion.div>
           </div>
         </div>
+
+        {/* Navigation Arrows */}
+        {heroSlides.length > 1 && (
+          <>
+            <button
+              onClick={() =>
+                setCurrentSlide(
+                  (prev) =>
+                    (prev - 1 + heroSlides.length) % heroSlides.length,
+                )
+              }
+              className="absolute left-4 md:left-8 top-1/2 transform -translate-y-1/2 z-20 bg-white/20 hover:bg-white/40 text-white p-3 rounded-full transition-all group"
+            >
+              <ChevronLeft className="w-6 h-6 md:w-8 md:h-8" />
+            </button>
+            <button
+              onClick={() =>
+                setCurrentSlide((prev) => (prev + 1) % heroSlides.length)
+              }
+              className="absolute right-4 md:right-8 top-1/2 transform -translate-y-1/2 z-20 bg-white/20 hover:bg-white/40 text-white p-3 rounded-full transition-all group"
+            >
+              <ChevronRight className="w-6 h-6 md:w-8 md:h-8" />
+            </button>
+          </>
+        )}
+
+        {/* Slide Indicators */}
+        {heroSlides.length > 1 && (
+          <div className="absolute bottom-6 md:bottom-8 left-1/2 transform -translate-x-1/2 flex gap-2 z-20">
+            {heroSlides.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentSlide(index)}
+                className={`h-2 rounded-full transition-all ${
+                  index === currentSlide
+                    ? "w-8 bg-white"
+                    : "w-2 bg-white/50 hover:bg-white/75"
+                }`}
+              />
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Moving Volume Name Ticker */}
@@ -705,7 +785,7 @@ const Home = () => {
           >
             <h2
               className="text-2xl md:text-3xl font-bold mb-2"
-              style={{ color: "#000000" }}
+              style={{ color: isDark ? "white" : "#000000" }}
             >
               Shop by Category
             </h2>
@@ -771,7 +851,7 @@ const Home = () => {
           >
             <h2
               className="text-4xl font-bold mb-4"
-              style={{ color: "#000000" }}
+              style={{ color: isDark ? "white" : "#000000" }}
             >
               Featured Products
             </h2>
@@ -1060,7 +1140,7 @@ const Home = () => {
                 />
                 <h3
                   className="text-4xl font-bold mb-2"
-                  style={{ color: "#000000" }}
+                  style={{ color: isDark ? "white" : "#000000" }}
                 >
                   <AnimatedCounter end={stat.value} suffix={stat.suffix} />
                 </h3>
