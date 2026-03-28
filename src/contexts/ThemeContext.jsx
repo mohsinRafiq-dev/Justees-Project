@@ -13,7 +13,12 @@ export const useTheme = () => {
 export const ThemeProvider = ({ children }) => {
   const [isDark, setIsDark] = useState(() => {
     const saved = localStorage.getItem('theme');
-    return saved ? saved === 'dark' : false;
+    // Default to light mode ('light') if nothing is saved
+    if (!saved) {
+      localStorage.setItem('theme', 'light');
+      return false;
+    }
+    return saved === 'dark';
   });
 
   useEffect(() => {
