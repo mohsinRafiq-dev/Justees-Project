@@ -60,6 +60,7 @@ const Home = () => {
   const { isDark } = useTheme();
   const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [currentCategorySlide, setCurrentCategorySlide] = useState(0);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const videoRefs = useRef({});
   const [videoErrors, setVideoErrors] = useState({});
@@ -71,7 +72,7 @@ const Home = () => {
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [currentReviewSlide, setCurrentReviewSlide] = useState(0);
-  const REVIEWS_PER_PAGE = 3;
+  const REVIEWS_PER_PAGE = 1; // Show 1 review per slide on mobile
   const totalSlides = Math.ceil(reviews.length / REVIEWS_PER_PAGE);
   const [volumeTexts, setVolumeTexts] = useState(() => {
     // Quick localStorage check for instant display, then backend loads immediately
@@ -803,32 +804,63 @@ const Home = () => {
               Shop by Category
             </h2>
           </motion.div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {categories.map((category, index) => (
+
+          {/* Horizontal Categories Carousel */}
+          <div className="relative">
+            {/* Categories Container with overflow */}
+            <div className="overflow-hidden px-4 md:px-0">
               <motion.div
-                key={index}
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                whileHover={{ scale: 1.05 }}
+                animate={{ x: -currentCategorySlide * 100 }}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                className="flex gap-4"
               >
-                <Link
-                  to={`/products?category=${encodeURIComponent(category.name)}#products-grid`}
-                  className="group relative overflow-hidden rounded-lg aspect-square hover:shadow-xl transition-all block w-full text-left"
-                >
-                  <LazyImage
-                    src={category.image}
-                    alt={category.name}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/30 to-transparent opacity-80 group-hover:opacity-100 transition-opacity" />
-                  <div className="absolute bottom-0 left-0 right-0 p-3 text-white">
-                    <h3 className="text-sm md:text-lg font-bold">{category.name}</h3>
-                  </div>
-                </Link>
+                {categories.map((category, index) => (
+                  <motion.div
+                    key={`${index}`}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: index * 0.05 }}
+                    className="flex-shrink-0 w-48 md:w-56"
+                  >
+                    <Link
+                      to={`/products?category=${encodeURIComponent(category.name)}#products-grid`}
+                      className="group relative overflow-hidden rounded-lg aspect-square hover:shadow-xl transition-all block w-full text-left"
+                    >
+                      <LazyImage
+                        src={category.image}
+                        alt={category.name}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/30 to-transparent opacity-80 group-hover:opacity-100 transition-opacity" />
+                      <div className="absolute bottom-0 left-0 right-0 p-3 text-white">
+                        <h3 className="text-sm md:text-lg font-bold">{category.name}</h3>
+                      </div>
+                    </Link>
+                  </motion.div>
+                ))}
               </motion.div>
-            ))}
+            </div>
+
+            {/* Navigation Buttons - Bottom on Mobile, Sides on Desktop */}
+            <div className="flex md:absolute md:inset-y-0 md:inset-x-0 md:items-center md:justify-between mt-4 md:mt-0 gap-4 md:gap-0 justify-center md:px-0">
+              {currentCategorySlide > 0 && (
+                <button
+                  onClick={() => setCurrentCategorySlide((prev) => Math.max(0, prev - 1))}
+                  className="bg-white/80 hover:bg-white dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-900 dark:text-white p-2 md:p-3 rounded-full transition-all shadow-lg"
+                >
+                  <ChevronLeft className="w-6 h-6" />
+                </button>
+              )}
+              
+              {currentCategorySlide < categories.length - 1 && (
+                <button
+                  onClick={() => setCurrentCategorySlide((prev) => Math.min(categories.length - 1, prev + 1))}
+                  className="bg-white/80 hover:bg-white dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-900 dark:text-white p-2 md:p-3 rounded-full transition-all shadow-lg"
+                >
+                  <ChevronRight className="w-6 h-6" />
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </section>
@@ -1051,6 +1083,131 @@ const Home = () => {
           </motion.div>
         </div>
       </section>
+
+      {/* Customer Reviews Section */}
+      {reviews.length > 0 && (
+        <section className={`py-20 ${isDark ? "bg-gray-900" : "bg-gray-50"}`}>
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <h2
+                className={`text-4xl font-bold mb-4 ${isDark ? "text-white" : "text-gray-900"}`}
+              >
+                What Our Customers Say
+              </h2>
+              <p
+                className={`${isDark ? "text-gray-400" : "text-black"} text-lg`}
+              >
+                Real reviews from real customers
+              </p>
+            </div>
+            <div className="relative overflow-hidden px-4 py-8">
+              <div className="max-w-7xl mx-auto">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={currentReviewSlide}
+                    initial={{ opacity: 0, x: 50 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -50 }}
+                    transition={{ duration: 0.5, ease: "easeInOut" }}
+                    className="flex justify-center"
+                  >
+                    {reviews
+                      .slice(
+                        currentReviewSlide * REVIEWS_PER_PAGE,
+                        (currentReviewSlide + 1) * REVIEWS_PER_PAGE,
+                      )
+                      .map((review, index) => (
+                        <motion.div
+                          key={review.id}
+                          initial={{ opacity: 0, y: 30 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.1 }}
+                          className={`w-full max-w-2xl p-8 rounded-2xl ${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"} border shadow-lg hover:shadow-xl transition-all`}
+                        >
+                          <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center space-x-1">
+                              {[...Array(5)].map((_, i) => (
+                                <Star
+                                  key={i}
+                                  className={`w-5 h-5 ${
+                                    i < Number(review.rating)
+                                      ? "text-yellow-500 fill-current"
+                                      : isDark
+                                        ? "text-gray-600"
+                                        : "text-gray-400"
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                            <Quote
+                              className={`w-8 h-8 ${isDark ? "text-gray-700" : "text-gray-700"}`}
+                            />
+                          </div>
+                          <p
+                            className={`mb-6 ${isDark ? "text-gray-300" : "text-gray-700"} leading-relaxed`}
+                          >
+                            "{review.review}"
+                          </p>
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h4
+                                className={`font-semibold ${isDark ? "text-white" : "text-gray-900"}`}
+                              >
+                                {review.customerName}
+                              </h4>
+                              {review.productName ? (
+                                <button
+                                  onClick={() =>
+                                    navigate(`/products/${review.productId}`)
+                                  }
+                                  className={`text-sm font-medium ${isDark ? "text-blue-400 hover:text-blue-300" : "text-blue-600 hover:text-blue-700"} transition-colors`}
+                                >
+                                  Product: {review.productName}
+                                </button>
+                              ) : (
+                                <p
+                                  className={`text-sm ${isDark ? "text-gray-400" : "text-black"}`}
+                                >
+                                  General Review
+                                </p>
+                              )}
+                            </div>
+                            <div
+                              className={`text-xs ${isDark ? "text-gray-500" : "text-black"}`}
+                            >
+                              {review.createdAt?.toDate
+                                ? new Date(
+                                    review.createdAt.toDate(),
+                                  ).toLocaleDateString()
+                                : ""}
+                            </div>
+                          </div>
+                        </motion.div>
+                      ))}
+                  </motion.div>
+                </AnimatePresence>
+
+                {/* Navigation Dots */}
+                {totalSlides > 1 && (
+                  <div className="flex justify-center mt-12 gap-3">
+                    {[...Array(totalSlides)].map((_, i) => (
+                      <button
+                        key={i}
+                        onClick={() => setCurrentReviewSlide(i)}
+                        className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
+                          currentReviewSlide === i
+                            ? `w-8 ${isDark ? "bg-blue-400" : "bg-blue-600"}`
+                            : `${isDark ? "bg-gray-700" : "bg-gray-200"}`
+                        }`}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Features */}
       <section
@@ -1279,130 +1436,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Customer Reviews Section */}
-      {reviews.length > 0 && (
-        <section className={`py-20 ${isDark ? "bg-gray-900" : "bg-gray-50"}`}>
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-12">
-              <h2
-                className={`text-4xl font-bold mb-4 ${isDark ? "text-white" : "text-gray-900"}`}
-              >
-                What Our Customers Say
-              </h2>
-              <p
-                className={`${isDark ? "text-gray-400" : "text-black"} text-lg`}
-              >
-                Real reviews from real customers
-              </p>
-            </div>
-            <div className="relative overflow-hidden px-4 py-8">
-              <div className="max-w-7xl mx-auto">
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={currentReviewSlide}
-                    initial={{ opacity: 0, x: 50 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -50 }}
-                    transition={{ duration: 0.5, ease: "easeInOut" }}
-                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-                  >
-                    {reviews
-                      .slice(
-                        currentReviewSlide * REVIEWS_PER_PAGE,
-                        (currentReviewSlide + 1) * REVIEWS_PER_PAGE,
-                      )
-                      .map((review, index) => (
-                        <motion.div
-                          key={review.id}
-                          initial={{ opacity: 0, y: 30 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: index * 0.1 }}
-                          className={`p-8 rounded-2xl ${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"} border shadow-lg hover:shadow-xl transition-all`}
-                        >
-                          <div className="flex items-center justify-between mb-4">
-                            <div className="flex items-center space-x-1">
-                              {[...Array(5)].map((_, i) => (
-                                <Star
-                                  key={i}
-                                  className={`w-5 h-5 ${
-                                    i < Number(review.rating)
-                                      ? "text-yellow-500 fill-current"
-                                      : isDark
-                                        ? "text-gray-600"
-                                        : "text-gray-400"
-                                  }`}
-                                />
-                              ))}
-                            </div>
-                            <Quote
-                              className={`w-8 h-8 ${isDark ? "text-gray-700" : "text-gray-700"}`}
-                            />
-                          </div>
-                          <p
-                            className={`mb-6 ${isDark ? "text-gray-300" : "text-gray-700"} leading-relaxed`}
-                          >
-                            "{review.review}"
-                          </p>
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <h4
-                                className={`font-semibold ${isDark ? "text-white" : "text-gray-900"}`}
-                              >
-                                {review.customerName}
-                              </h4>
-                              {review.productName ? (
-                                <button
-                                  onClick={() =>
-                                    navigate(`/products/${review.productId}`)
-                                  }
-                                  className={`text-sm font-medium ${isDark ? "text-blue-400 hover:text-blue-300" : "text-blue-600 hover:text-blue-700"} transition-colors`}
-                                >
-                                  Product: {review.productName}
-                                </button>
-                              ) : (
-                                <p
-                                  className={`text-sm ${isDark ? "text-gray-400" : "text-black"}`}
-                                >
-                                  General Review
-                                </p>
-                              )}
-                            </div>
-                            <div
-                              className={`text-xs ${isDark ? "text-gray-500" : "text-black"}`}
-                            >
-                              {review.createdAt?.toDate
-                                ? new Date(
-                                    review.createdAt.toDate(),
-                                  ).toLocaleDateString()
-                                : ""}
-                            </div>
-                          </div>
-                        </motion.div>
-                      ))}
-                  </motion.div>
-                </AnimatePresence>
 
-                {/* Navigation Dots */}
-                {totalSlides > 1 && (
-                  <div className="flex justify-center mt-12 gap-3">
-                    {[...Array(totalSlides)].map((_, i) => (
-                      <button
-                        key={i}
-                        onClick={() => setCurrentReviewSlide(i)}
-                        className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
-                          currentReviewSlide === i
-                            ? `w-8 ${isDark ? "bg-blue-400" : "bg-blue-600"}`
-                            : `${isDark ? "bg-gray-700" : "bg-gray-200"}`
-                        }`}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
 
       {/* Instagram Feed Section */}
       <section className={`py-20 ${isDark ? "bg-gray-800" : "bg-white"}`}>
