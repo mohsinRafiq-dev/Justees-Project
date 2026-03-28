@@ -443,7 +443,7 @@ const ReviewsManagement = () => {
                               key={i}
                               className={`w-4 h-4 ${i < review.rating
                                 ? "text-yellow-500 fill-current"
-                                : isDark ? "text-gray-600" : "text-gray-300"
+                                : isDark ? "text-gray-600" : "text-black"
                                 }`}
                             />
                           ))}
@@ -579,7 +579,7 @@ const ReviewsManagement = () => {
                         key={i}
                         className={`w-4 h-4 ${i < review.rating
                           ? "text-yellow-500 fill-current"
-                          : isDark ? "text-gray-600" : "text-gray-300"
+                          : isDark ? "text-gray-600" : "text-black"
                           }`}
                       />
                     ))}

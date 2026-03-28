@@ -284,7 +284,7 @@ const ProductManagement = () => {
           <h1 className={`text-2xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
             Access Denied
           </h1>
-          <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+          <p className={`${isDark ? "text-gray-400" : "text-black"}`}>
             You don't have permission to access this page.
           </p>
         </div>
@@ -302,7 +302,7 @@ const ProductManagement = () => {
               <h1 className={`text-2xl sm:text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
                 Product Management
               </h1>
-              <p className={`mt-2 text-sm sm:text-base ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+              <p className={`mt-2 text-sm sm:text-base ${isDark ? "text-gray-400" : "text-black"}`}>
                 Manage your product catalog, inventory, and settings
               </p>
             </div>
@@ -328,7 +328,7 @@ const ProductManagement = () => {
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className={`text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                  <p className={`text-sm font-medium ${isDark ? "text-gray-400" : "text-black"}`}>
                     Total Products
                   </p>
                   <p className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
@@ -349,7 +349,7 @@ const ProductManagement = () => {
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className={`text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Low Stock</p>
+                  <p className={`text-sm font-medium ${isDark ? "text-gray-400" : "text-black"}`}>Low Stock</p>
                   <p className="text-2xl font-bold text-orange-500">
                     {
                       products.filter(
@@ -373,7 +373,7 @@ const ProductManagement = () => {
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className={`text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                  <p className={`text-sm font-medium ${isDark ? "text-gray-400" : "text-black"}`}>
                     Out of Stock
                   </p>
                   <p className="text-2xl font-bold text-red-500">
@@ -394,7 +394,7 @@ const ProductManagement = () => {
             {/* Search */}
             <div className="lg:col-span-2">
               <div className="relative">
-                <Search className={`absolute left-3 top-3 h-5 w-5 ${isDark ? 'text-gray-400' : 'text-gray-500'}`} />
+                <Search className={`absolute left-3 top-3 h-5 w-5 ${isDark ? "text-gray-400" : "text-black"}`} />
                 <input
                   type="text"
                   placeholder="Search products..."
@@ -467,11 +467,11 @@ const ProductManagement = () => {
             </div>
           ) : filteredProducts.length === 0 ? (
             <div className="text-center py-12">
-              <Package className={`w-12 h-12 mx-auto mb-4 ${isDark ? 'text-gray-600' : 'text-gray-400'}`} />
+              <Package className={`w-12 h-12 mx-auto mb-4 ${isDark ? "text-gray-600" : "text-black"}`} />
               <h3 className={`text-lg font-semibold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
                 No products found
               </h3>
-              <p className={`mb-4 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+              <p className={`mb-4 ${isDark ? "text-gray-400" : "text-black"}`}>
                 {searchTerm ||
                 categoryFilter !== "All" ||
                 statusFilter !== "All"

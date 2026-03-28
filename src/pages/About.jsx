@@ -58,10 +58,10 @@ const About = () => {
             animate={{ opacity: 1, y: 0 }}
             className="text-center max-w-4xl mx-auto"
           >
-            <h1 className="text-5xl md:text-6xl font-bold mb-6" style={{ color: '#d3d1ce', fontFamily: 'Cookie, cursive' }}>
+            <h1 className="text-5xl md:text-6xl font-bold mb-6" style={{ color: '#000000', fontFamily: 'Cookie, cursive' }}>
               About Justees
             </h1>
-            <p className={`text-xl ${isDark ? 'text-gray-400' : 'text-gray-600'} leading-relaxed space-y-2`}>
+            <p className={`text-xl ${isDark ? "text-gray-400" : "text-black"} leading-relaxed space-y-2`}>
               JUSTEES was created for the generation that refuses to Blend in.<br />
               We don't follow seasons, We don't chase noise, We design for presence.<br /><br />
               For Gen Z, it's self expression.<br />
@@ -84,10 +84,10 @@ const About = () => {
               viewport={{ once: true }}
               className="text-center mb-16"
             >
-              <h2 className="text-5xl md:text-6xl font-bold mb-6" style={{ color: '#d3d1ce', fontFamily: 'Cookie, cursive' }}>
+              <h2 className="text-5xl md:text-6xl font-bold mb-6" style={{ color: '#000000', fontFamily: 'Cookie, cursive' }}>
                 Our Story
               </h2>
-              <div className={`space-y-6 text-lg ${isDark ? 'text-gray-400' : 'text-gray-600'} text-left`}>
+              <div className={`space-y-6 text-lg ${isDark ? "text-gray-400" : "text-black"} text-left`}>
                 <p>
                   Our story began with a simple idea to create clothing that feels as powerful 
                   as the person wearing it. ✨ In a world full of noise and fast trends, we 
@@ -103,7 +103,7 @@ const About = () => {
                   This isn't just streetwear. It's a statement of presence. And when you wear 
                   JUSTEES, you're not just buying clothing you're stepping into a mindset. 🖤
                 </p>
-                <p className="text-4xl md:text-5xl font-bold text-center mt-8" style={{ fontFamily: 'Cookie, cursive', color: '#d3d1ce' }}>
+                <p className="text-4xl md:text-5xl font-bold text-center mt-8" style={{ fontFamily: 'Cookie, cursive', color: '#000000' }}>
                   WELCOME TO JUSTEES LEAGUE !
                 </p>
               </div>
@@ -124,7 +124,7 @@ const About = () => {
             <h2 className={`text-4xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
               Our Values
             </h2>
-            <p className={`text-xl ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+            <p className={`text-xl ${isDark ? "text-gray-400" : "text-black"}`}>
               The principles that guide everything we do
             </p>
           </motion.div>
@@ -140,11 +140,11 @@ const About = () => {
                 whileHover={{ y: -10 }}
                 className={`p-8 rounded-xl ${isDark ? 'bg-gray-900' : 'bg-gray-50'} text-center`}
               >
-                <value.icon className="w-12 h-12 mx-auto mb-4" style={{ color: '#d3d1ce' }} />
+                <value.icon className="w-12 h-12 mx-auto mb-4" style={{ color: '#000000' }} />
                 <h3 className={`text-xl font-bold mb-3 ${isDark ? 'text-white' : 'text-gray-900'}`}>
                   {value.title}
                 </h3>
-                <p className={isDark ? 'text-gray-400' : 'text-gray-600'}>
+                <p className={isDark ? "text-gray-400" : "text-black"}>
                   {value.description}
                 </p>
               </motion.div>
@@ -165,7 +165,7 @@ const About = () => {
             <h2 className={`text-4xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
               Our Impact
             </h2>
-            <p className={`text-xl ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+            <p className={`text-xl ${isDark ? "text-gray-400" : "text-black"}`}>
               Numbers that speak for themselves
             </p>
           </motion.div>
@@ -180,10 +180,10 @@ const About = () => {
                 transition={{ delay: index * 0.1 }}
                 className="text-center"
               >
-                <h3 className="text-5xl font-bold mb-2" style={{ color: '#d3d1ce' }}>
+                <h3 className="text-5xl font-bold mb-2" style={{ color: '#000000' }}>
                   {stat.number}
                 </h3>
-                <p className={isDark ? 'text-gray-400' : 'text-gray-600'}>
+                <p className={isDark ? "text-gray-400" : "text-black"}>
                   {stat.label}
                 </p>
               </motion.div>
@@ -203,7 +203,7 @@ const About = () => {
             <h2 className={`text-4xl font-bold mb-6 ${isDark ? 'text-white' : 'text-gray-900'}`}>
               Join the Justees League
             </h2>
-            <p className={`text-xl ${isDark ? 'text-gray-400' : 'text-gray-600'} mb-8`}>
+            <p className={`text-xl ${isDark ? "text-gray-400" : "text-black"} mb-8`}>
               Experience the difference quality and care can make
             </p>
             <a

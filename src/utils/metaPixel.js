@@ -4,7 +4,8 @@
 const PIXEL_ID = import.meta.env.VITE_META_PIXEL_ID;
 
 // Install pixel script if not already present
-export const initMetaPixel = () => {
+export const initMetaPixel = () => 
+  {
   if (!PIXEL_ID) {
     console.warn('[MetaPixel] VITE_META_PIXEL_ID is not set; tracking disabled.');
     return;

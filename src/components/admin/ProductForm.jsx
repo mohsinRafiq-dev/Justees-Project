@@ -984,7 +984,7 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
             {activeTab === 'variants' && (
               <div className="space-y-6">
                 <h3 className={`text-lg font-bold ${isDark ? "text-white" : "text-gray-900"}`}>Stock Management</h3>
-                <p className={`${isDark ? "text-gray-400" : "text-gray-600"}`}>Add colors and set stock levels for different sizes</p>
+                <p className={`${isDark ? "text-gray-400" : "text-black"}`}>Add colors and set stock levels for different sizes</p>
 
                 {/* Color & Size Selection (choose from admin-managed lists) */}
                 <div className={`border rounded-lg p-4 ${isDark ? "border-gray-700 bg-gray-900/50" : "border-gray-200 bg-white"}`}>
@@ -1020,7 +1020,7 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
                         <span className="text-sm font-medium">{size}</span>
                       </label>
                     )) : (
-                      <p className={`text-sm ${isDark ? "text-gray-500" : "text-gray-400"}`}>No sizes available. Add sizes on the Sizes & Colors page.</p>
+                      <p className={`text-sm ${isDark ? "text-gray-500" : "text-black"}`}>No sizes available. Add sizes on the Sizes & Colors page.</p>
                     )}
                   </div>
                 </div>
@@ -1106,7 +1106,7 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
                 {/* Variants Summary */}
                 <div className={`rounded-lg p-4 ${isDark ? "bg-white/5 border border-white/10" : "bg-gray-50"}`}>
                   <h4 className={`font-medium mb-2 ${isDark ? "text-white" : "text-gray-900"}`}>Stock Summary</h4>
-                  <div className={`text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}>
+                  <div className={`text-sm ${isDark ? "text-gray-400" : "text-black"}`}>
                     Total Variants: {variants.length} | 
                     Total Stock: {variants.reduce((sum, v) => sum + (parseInt(v.stock) || 0), 0)} units
                   </div>
@@ -1118,7 +1118,7 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
             {activeTab === 'images' && (
               <div className="space-y-6">
                 <h3 className={`text-lg font-bold ${isDark ? "text-white" : "text-gray-900"}`}>Product Images</h3>
-                <p className={`${isDark ? "text-gray-400" : "text-gray-600"}`}>Upload images for each color variant. You can add multiple images per color.</p>
+                <p className={`${isDark ? "text-gray-400" : "text-black"}`}>Upload images for each color variant. You can add multiple images per color.</p>
                 {errors.images && (
                   <p className="text-red-500 text-sm mt-2">{errors.images}</p>
                 )}
@@ -1126,7 +1126,7 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
                 {selectedColors.length === 0 ? (
                   <div className={`text-center py-8 rounded-lg border-2 border-dashed ${isDark ? "bg-gray-900/50 border-gray-700" : "bg-gray-50 border-gray-300"}`}>
                     <div className="text-gray-500 mb-2 text-2xl">📦</div>
-                    <p className={`${isDark ? "text-gray-400" : "text-gray-600"}`}>Please select colors in the "Variants & Stock" tab first</p>
+                    <p className={`${isDark ? "text-gray-400" : "text-black"}`}>Please select colors in the "Variants & Stock" tab first</p>
                     <button
                       type="button"
                       onClick={() => setActiveTab('variants')}
@@ -1164,11 +1164,11 @@ const ProductForm = ({ product, onSave, onCancel, loading: externalLoading }) =>
                             }`}
                           >
                             <div className="text-center">
-                              <Upload className={`w-8 h-8 mx-auto mb-2 ${isDark ? "text-gray-500" : "text-gray-400"}`} />
+                              <Upload className={`w-8 h-8 mx-auto mb-2 ${isDark ? "text-gray-500" : "text-black"}`} />
                               <p className="text-sm font-medium">
                                 Click to upload images for {color}
                               </p>
-                              <p className={`text-xs mt-1 ${isDark ? "text-gray-500" : "text-gray-400"}`}>
+                              <p className={`text-xs mt-1 ${isDark ? "text-gray-500" : "text-black"}`}>
                                 PNG, JPG, WEBP up to 10MB each
                               </p>
                             </div>

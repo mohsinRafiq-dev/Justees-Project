@@ -127,7 +127,7 @@ const ProductTable = ({
               </div>
             </th>
 
-            <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+            <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${isDark ? "text-gray-400" : "text-black"}`}>
               Category
             </th>
 
@@ -155,7 +155,7 @@ const ProductTable = ({
               </div>
             </th>
 
-            <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+            <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${isDark ? "text-gray-400" : "text-black"}`}>
               Status
             </th>
 
@@ -171,7 +171,7 @@ const ProductTable = ({
               </div>
             </th>
 
-            <th className={`px-6 py-3 text-right text-xs font-medium uppercase tracking-wider ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+            <th className={`px-6 py-3 text-right text-xs font-medium uppercase tracking-wider ${isDark ? "text-gray-400" : "text-black"}`}>
               Actions
             </th>
           </tr>
@@ -213,7 +213,7 @@ const ProductTable = ({
                           />
                         ) : (
                           <div className={`h-12 w-12 rounded-lg flex items-center justify-center ${isDark ? 'bg-white/5' : 'bg-gray-200'}`}>
-                            <Package className={`w-6 h-6 ${isDark ? 'text-gray-600' : 'text-gray-400'}`} />
+                            <Package className={`w-6 h-6 ${isDark ? "text-gray-600" : "text-black"}`} />
                           </div>
                         )}
                       </div>
@@ -235,7 +235,7 @@ const ProductTable = ({
 
                         <MarkdownRenderer
                           content={product.shortDescription || product.description?.substring(0, 60) + '...'}
-                          className={`text-sm truncate ${isDark ? 'text-gray-400' : 'text-gray-500'}`}
+                          className={`text-sm truncate ${isDark ? "text-gray-400" : "text-black"}`}
                         />
 
                         <button
@@ -293,7 +293,7 @@ const ProductTable = ({
                   </td>
 
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className={`flex items-center space-x-1 text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                    <div className={`flex items-center space-x-1 text-sm ${isDark ? "text-gray-400" : "text-black"}`}>
                       <TrendingUp className="w-4 h-4" />
                       <span>{product.views || 0}</span>
                     </div>
@@ -368,7 +368,7 @@ const ProductTable = ({
                               <h4 className={`font-medium mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>Product Details</h4>
                               <dl className="space-y-2">
                                 <div>
-                                  <dt className={`text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Created</dt>
+                                  <dt className={`text-sm font-medium ${isDark ? "text-gray-400" : "text-black"}`}>Created</dt>
                                   <dd className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-900'}`}>
                                     {product.createdAt ? new Date(product.createdAt).toLocaleDateString() : 'N/A'}
                                   </dd>
@@ -454,7 +454,7 @@ const ProductTable = ({
                       <h3 className={`font-semibold text-base truncate ${isDark ? 'text-white' : 'text-gray-900'}`}>
                         {product.name}
                       </h3>
-                      <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                      <p className={`text-sm ${isDark ? "text-gray-400" : "text-black"}`}>
                         {product.category}
                       </p>
                     </div>
@@ -487,7 +487,7 @@ const ProductTable = ({
                       </span>
                     )}
                     {product.views > 0 && (
-                      <span className={`px-2 py-1 text-xs rounded-full ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                      <span className={`px-2 py-1 text-xs rounded-full ${isDark ? "text-gray-400" : "text-black"}`}>
                         <Eye className="w-3 h-3 inline mr-1" />
                         {product.views} views
                       </span>
@@ -574,7 +574,7 @@ const ProductTable = ({
                           </h4>
                           <MarkdownRenderer
                             content={product.description}
-                            className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}
+                            className={`text-sm ${isDark ? "text-gray-400" : "text-black"}`}
                           />
                         </div>
                       )}

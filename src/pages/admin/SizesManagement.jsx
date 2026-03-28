@@ -204,7 +204,7 @@ const SizesManagement = () => {
           >
             Access Denied
           </h2>
-          <p className={`${isDark ? "text-gray-400" : "text-gray-600"}`}>
+          <p className={`${isDark ? "text-gray-400" : "text-black"}`}>
             You do not have permission to view this page.
           </p>
         </div>
@@ -221,7 +221,7 @@ const SizesManagement = () => {
           Sizes & Colors
         </h2>
         <p
-          className={`text-sm sm:text-base ${isDark ? "text-gray-400" : "text-gray-600"}`}
+          className={`text-sm sm:text-base ${isDark ? "text-gray-400" : "text-black"}`}
         >
           Manage product sizes and available colors
         </p>
@@ -262,7 +262,7 @@ const SizesManagement = () => {
               <LoadingSpinner />
             </div>
           ) : sizes.length === 0 ? (
-            <p className={`${isDark ? "text-gray-500" : "text-gray-600"}`}>
+            <p className={`${isDark ? "text-gray-500" : "text-black"}`}>
               No sizes defined.
             </p>
           ) : (
@@ -394,7 +394,7 @@ const SizesManagement = () => {
               <LoadingSpinner />
             </div>
           ) : colors.length === 0 ? (
-            <p className={`${isDark ? "text-gray-500" : "text-gray-600"}`}>
+            <p className={`${isDark ? "text-gray-500" : "text-black"}`}>
               No colors defined.
             </p>
           ) : (

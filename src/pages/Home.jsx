@@ -71,7 +71,7 @@ const Home = () => {
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [currentReviewSlide, setCurrentReviewSlide] = useState(0);
-  const REVIEWS_PER_PAGE = 6;
+  const REVIEWS_PER_PAGE = 3;
   const totalSlides = Math.ceil(reviews.length / REVIEWS_PER_PAGE);
   const [volumeTexts, setVolumeTexts] = useState(() => {
     // Quick localStorage check for instant display, then backend loads immediately
@@ -597,6 +597,26 @@ const Home = () => {
     openQuickView(product);
   };
 
+  // Generate ticker items
+  const tickerItems = [];
+  for (let i = 0; i < 24; i++) {
+    const block = Math.floor(i / 12);
+    const repeatIndex = i % 12;
+    volumeTexts
+      .filter((text) => text.trim())
+      .forEach((text, textIndex) => {
+        tickerItems.push(
+          <span
+            key={`${block}-${repeatIndex}-${textIndex}`}
+            className="text-gray-900 text-3xl font-bold mx-6 whitespace-nowrap"
+            style={{ fontFamily: "Cookie, cursive" }}
+          >
+            {text}
+          </span>
+        );
+      });
+  }
+
   return (
     <div
       className={`min-h-screen transition-colors duration-300 ${isDark ? "bg-gray-900" : "bg-gray-50"}`}
@@ -607,17 +627,11 @@ const Home = () => {
       {/* Navbar */}
       <Navbar />
 
-      {/* Main Hero Banner */}
-      <section className="relative h-[70vh] md:h-screen overflow-hidden">
-        <div className="absolute inset-0">
-          <LazyImage
-            src="/JUSTEES_1920x1080.png"
-            alt="Justees Hero"
-            className="w-full h-full object-cover object-center"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-gray-900/90 via-gray-900/30 to-transparent" />
-        </div>
-
+      {/* Hero Section - Static Grey */}
+      <section className="relative h-[60vh] md:h-screen overflow-hidden bg-gradient-to-br from-gray-800 via-gray-700 to-gray-600">
+        <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "url('data:image/svg+xml...')" }} />
+        <div className="absolute inset-0 bg-gradient-to-r from-gray-900/90 via-gray-800/40 to-gray-900/50" />
+        
         <div className="relative h-full flex items-end pb-6 md:pb-12">
           <div className="pl-8 md:pl-16 pr-8">
             <motion.div
@@ -644,7 +658,7 @@ const Home = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4, duration: 0.8 }}
-                className="text-base sm:text-lg md:text-2xl lg:text-3xl text-gray-200 mb-6 md:mb-8 font-light"
+                className="text-base sm:text-lg md:text-2xl lg:text-3xl text-white mb-6 md:mb-8 font-light"
               >
                 Discover Premium Quality Clothing That Defines Your Style
               </motion.p>
@@ -673,358 +687,30 @@ const Home = () => {
         style={{ backgroundColor: "#FFFFE3" }}
       >
         <div className="animate-marquee whitespace-nowrap">
-          {/* Repeat blocks twice so the animation never empties before looping */}
-          {[...Array(2)].map((_, block) => (
-            <React.Fragment key={block}>
-              {[...Array(12)].map((_, repeatIndex) =>
-                volumeTexts
-                  .filter((text) => text.trim())
-                  .map((text, textIndex) => (
-                    <span
-                      key={`${block}-${repeatIndex}-${textIndex}`}
-                      className="text-gray-900 text-3xl font-bold mx-6 whitespace-nowrap"
-                      style={{ fontFamily: "Cookie, cursive" }}
-                    >
-                      {text}
-                    </span>
-                  )),
-              )}
-            </React.Fragment>
-          ))}
-        </div>
-      </div>
-
-      {/* Hero Slider Section - Only show if slides exist */}
-      {heroSlides.length > 0 && (
-        <section className="relative h-[60vh] md:h-screen overflow-hidden">
-          <AnimatePresence mode="wait">
-            {heroSlides.map(
-              (slide, index) =>
-                index === currentSlide && (
-                  <motion.div
-                    key={slide.id}
-                    initial={{ opacity: 0, scale: 1.1 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    transition={{ duration: 1 }}
-                    className="absolute inset-0"
-                  >
-                    <div className="absolute inset-0">
-                      {slide.type === "video" ? (
-                        <div className="relative w-full h-full">
-                          <video
-                            key={videoKey}
-                            ref={(el) => {
-                              if (el) {
-                                videoRefs.current[slide.id] = el;
-                              }
-                            }}
-                            className="w-full h-full object-cover cursor-pointer"
-                            src={slide.url}
-                            muted
-                            playsInline
-                            preload="metadata"
-                            loop={heroSlides.length === 1}
-                            onEnded={
-                              heroSlides.length > 1 ? nextSlide : undefined
-                            }
-                            onClick={() => handleVideoClick(slide.id)}
-                            onError={() => handleVideoError(slide.id)}
-                          />
-                          {/* Play button overlay for paused videos */}
-                          {videoStates[slide.id] === "paused" &&
-                            !videoErrors[slide.id] && (
-                              <div
-                                className="absolute inset-0 flex items-center justify-center bg-black/20 cursor-pointer"
-                                onClick={() => handleVideoClick(slide.id)}
-                              >
-                                <div className="w-16 h-16 bg-white/80 rounded-full flex items-center justify-center hover:bg-white/90 transition-all">
-                                  <svg
-                                    className="w-8 h-8 text-gray-800 ml-1"
-                                    fill="currentColor"
-                                    viewBox="0 0 20 20"
-                                  >
-                                    <path
-                                      fillRule="evenodd"
-                                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
-                                      clipRule="evenodd"
-                                    />
-                                  </svg>
-                                </div>
-                              </div>
-                            )}
-                          {videoErrors[slide.id] && (
-                            <div className="absolute inset-0 flex items-center justify-center bg-gray-900/50">
-                              <div className="text-center text-white">
-                                <div className="text-4xl mb-2">⚠️</div>
-                                <p className="text-sm">Video unavailable</p>
-                                <button
-                                  onClick={() => {
-                                    setVideoErrors((prev) => ({
-                                      ...prev,
-                                      [slide.id]: false,
-                                    }));
-                                    const videoElement =
-                                      videoRefs.current[slide.id];
-                                    if (videoElement) {
-                                      videoElement.load();
-                                    }
-                                  }}
-                                  className="mt-2 px-3 py-1 bg-white/20 rounded text-xs hover:bg-white/30 transition-colors"
-                                >
-                                  Retry
-                                </button>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      ) : (
-                        <LazyImage
-                          src={slide.url}
-                          alt={slide.title || "Slide"}
-                          className="w-full h-full object-cover"
-                        />
-                      )}
-                      <div className="absolute inset-0 bg-gradient-to-r from-gray-900/90 via-gray-800/40 to-gray-900/50" />
-                    </div>
-                    <div className="relative h-full flex items-center">
-                      <div className="container mx-auto px-4">
-                        {(slide.title ||
-                          slide.subtitle ||
-                          slide.description) && (
-                          <motion.div
-                            initial={{ x: -100, opacity: 0 }}
-                            animate={{ x: 0, opacity: 1 }}
-                            transition={{ delay: 0.3, duration: 0.8 }}
-                            className="max-w-2xl"
-                          >
-                            {slide.subtitle && (
-                              <motion.p
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                transition={{ delay: 0.5 }}
-                                className={`${isDark ? "text-gray-300" : "text-gray-100"} text-lg mb-2 font-medium`}
-                              >
-                                {slide.subtitle}
-                              </motion.p>
-                            )}
-
-                            {slide.title && (
-                              <motion.h1
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.6 }}
-                                className="text-6xl md:text-7xl font-bold text-white mb-4 leading-tight"
-                              >
-                                {slide.title.split(" ").map((word, i) => (
-                                  <motion.span
-                                    key={i}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: 0.7 + i * 0.1 }}
-                                    className="inline-block mr-4"
-                                  >
-                                    {word}
-                                  </motion.span>
-                                ))}
-                              </motion.h1>
-                            )}
-
-                            {slide.description && (
-                              <motion.p
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                transition={{ delay: 1 }}
-                                className="text-xl text-gray-300 mb-8"
-                              >
-                                {slide.description}
-                              </motion.p>
-                            )}
-
-                            {slide.title && (
-                              <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 1.2 }}
-                              >
-                                <Link
-                                  to={`/products?category=${encodeURIComponent(slide.title)}#products-grid`}
-                                  style={{ backgroundColor: "#d3d1ce" }}
-                                  className="inline-block text-gray-900 px-8 py-4 rounded-full font-semibold hover:shadow-2xl transition-all transform hover:scale-105"
-                                >
-                                  Explore Collection
-                                </Link>
-                              </motion.div>
-                            )}
-                          </motion.div>
-                        )}
-                      </div>
-                    </div>
-                  </motion.div>
-                ),
-            )}
-          </AnimatePresence>
-
-          {/* Slider Controls - Only show if multiple slides */}
-          {heroSlides.length > 1 && (
-            <>
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={prevSlide}
-                className="absolute left-4 top-1/2 -translate-y-1/2 glass p-3 rounded-full hover:bg-white/30 transition-all z-10"
-              >
-                <ChevronLeft className="w-6 h-6 text-white" />
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={nextSlide}
-                className="absolute right-4 top-1/2 -translate-y-1/2 glass p-3 rounded-full hover:bg-white/30 transition-all z-10"
-              >
-                <ChevronRight className="w-6 h-6 text-white" />
-              </motion.button>
-
-              {/* Slider Indicators */}
-              <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex space-x-2 z-10">
-                {heroSlides.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setCurrentSlide(index)}
-                    className={`h-2 rounded-full transition-all ${
-                      index === currentSlide
-                        ? "w-8 bg-white"
-                        : "w-2 bg-white/50"
-                    }`}
-                  />
-                ))}
-              </div>
-            </>
-          )}
-        </section>
-      )}
-
-      {/* Features */}
-      <section
-        className={`py-16 ${isDark ? "bg-gray-800 border-gray-700" : "bg-gray-100 border-gray-200"} border-t`}
-      >
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            {[
-              {
-                icon: Truck,
-                title: "Free Shipping",
-                desc: "On orders over Rs. 4,000",
-              },
-              {
-                icon: Shield,
-                title: "Secure Payment",
-                desc: "100% secure checkout",
-              },
-              {
-                icon: RefreshCw,
-                title: "Easy Returns",
-                desc: "7-day return policy",
-              },
-              {
-                icon: Headphones,
-                title: "24/7 Support",
-                desc: "Dedicated support team",
-              },
-            ].map((feature, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                whileHover={{ y: -10, scale: 1.05 }}
-                className={`text-center p-6 rounded-lg ${isDark ? "bg-gray-700/50 hover:bg-gray-700" : "bg-white hover:shadow-lg"} transition-all cursor-pointer`}
-              >
-                <feature.icon
-                  className="w-12 h-12 mx-auto mb-4"
-                  style={{ color: isDark ? "white" : "#d3d1ce" }}
-                />
-                <h3
-                  className={`text-lg font-semibold mb-2 ${isDark ? "text-white" : "text-gray-900"}`}
-                >
-                  {feature.title}
-                </h3>
-                <p className={isDark ? "text-gray-400" : "text-gray-600"}>
-                  {feature.desc}
-                </p>
-              </motion.div>
-            ))}
-          </div>
-
-          {/* Trust Badges */}
-          <div
-            className={`mt-12 flex flex-wrap justify-center items-center gap-8 pt-8 border-t ${isDark ? "border-gray-700" : "border-gray-200"}`}
-          >
-            {[
-              { icon: Lock, text: "SSL Secured" },
-              { icon: Shield, text: "Verified Business" },
-              { icon: CheckCircle, text: "Money Back Guarantee" },
-              { icon: Award, text: "Premium Quality" },
-            ].map((badge, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className={`flex items-center space-x-2 ${isDark ? "text-gray-400" : "text-gray-600"}`}
-              >
-                <badge.icon className="w-5 h-5" />
-                <span className="text-sm">{badge.text}</span>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Smart Choice Ticker */}
-      <div
-        className="relative overflow-hidden py-3"
-        style={{ backgroundColor: "#d3d1ce" }}
-      >
-        <div className="animate-marquee-slow whitespace-nowrap">
-          {[...Array(12)].map((_, index) => (
-            <span
-              key={index}
-              className="text-gray-900 text-2xl md:text-3xl font-bold mx-12 uppercase tracking-wide"
-            >
-              Smart Choice: PKR 500 Advance, FREE Delivery
-            </span>
-          ))}
+          {tickerItems}
         </div>
       </div>
 
       {/* Categories */}
       <section
         id="categories-section"
-        className={`py-20 ${isDark ? "bg-gray-900" : "bg-gray-50"}`}
+        className={`py-8 ${isDark ? "bg-gray-900" : "bg-gray-50"}`}
       >
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-12"
+            className="text-center mb-8"
           >
             <h2
-              className="text-4xl font-bold mb-4"
-              style={{ color: "#d3d1ce" }}
+              className="text-2xl md:text-3xl font-bold mb-2"
+              style={{ color: "#000000" }}
             >
               Shop by Category
             </h2>
-            <p
-              className={`${isDark ? "text-gray-400" : "text-gray-600"} text-lg`}
-            >
-              Discover your perfect style
-            </p>
           </motion.div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {categories.map((category, index) => (
               <motion.div
                 key={index}
@@ -1036,17 +722,16 @@ const Home = () => {
               >
                 <Link
                   to={`/products?category=${encodeURIComponent(category.name)}#products-grid`}
-                  className="group relative overflow-hidden rounded-lg aspect-square hover:shadow-2xl transition-all block w-full text-left"
+                  className="group relative overflow-hidden rounded-lg aspect-square hover:shadow-xl transition-all block w-full text-left"
                 >
                   <LazyImage
                     src={category.image}
                     alt={category.name}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/50 to-transparent opacity-90 group-hover:opacity-100 transition-opacity" />
-                  <div className="absolute bottom-0 left-0 right-0 p-6 text-white transform translate-y-2 group-hover:translate-y-0 transition-transform">
-                    <h3 className="text-2xl font-bold mb-1">{category.name}</h3>
-                    <p className="text-gray-300">{category.count}</p>
+                  <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/30 to-transparent opacity-80 group-hover:opacity-100 transition-opacity" />
+                  <div className="absolute bottom-0 left-0 right-0 p-3 text-white">
+                    <h3 className="text-sm md:text-lg font-bold">{category.name}</h3>
                   </div>
                 </Link>
               </motion.div>
@@ -1054,6 +739,23 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+      {/* Smart Choice Ticker */}
+      <div
+        className="relative overflow-hidden py-3"
+        style={{ backgroundColor: "#FFFFE3" }}
+      >
+        <div className="animate-marquee-slow whitespace-nowrap">
+          {[...Array(12)].map((_, index) => (
+            <span
+              key={index}
+              className="text-gray-900 text-3xl font-bold mx-6 whitespace-nowrap"
+            >
+              Smart Choice: PKR 500 Advance, FREE Delivery
+            </span>
+          ))}
+        </div>
+      </div>
 
       {/* Featured Products */}
       <section
@@ -1069,12 +771,12 @@ const Home = () => {
           >
             <h2
               className="text-4xl font-bold mb-4"
-              style={{ color: "#d3d1ce" }}
+              style={{ color: "#000000" }}
             >
               Featured Products
             </h2>
             <p
-              className={`${isDark ? "text-gray-400" : "text-gray-600"} text-lg`}
+              className={`${isDark ? "text-gray-400" : "text-black"} text-lg`}
             >
               Our best-selling items
             </p>
@@ -1196,7 +898,7 @@ const Home = () => {
                   </div>
                   <div className="p-6">
                     <p
-                      className={`${isDark ? "text-gray-400" : "text-gray-500"} text-sm mb-1`}
+                      className={`${isDark ? "text-gray-400" : "text-black"} text-sm mb-1`}
                     >
                       {product.category}
                     </p>
@@ -1210,7 +912,7 @@ const Home = () => {
                         content={
                           product.shortDescription || product.description
                         }
-                        className={`text-sm mb-3 line-clamp-2 ${isDark ? "text-gray-300" : "text-gray-600"}`}
+                        className={`text-sm mb-3 line-clamp-2 ${isDark ? "text-gray-300" : "text-black"}`}
                       />
                     )}
                     <div className="flex items-center justify-between">
@@ -1223,14 +925,14 @@ const Home = () => {
                         {product.originalPrice &&
                           product.originalPrice !== product.price && (
                             <span
-                              className={`text-sm line-through ml-2 ${isDark ? "text-gray-400" : "text-gray-500"}`}
+                              className={`text-sm line-through ml-2 ${isDark ? "text-gray-400" : "text-black"}`}
                             >
                               {formatPrice(product.originalPrice)}
                             </span>
                           )}
                       </div>
                       <span
-                        className={`text-sm ${isDark ? "text-gray-400" : "text-gray-500"}`}
+                        className={`text-sm ${isDark ? "text-gray-400" : "text-black"}`}
                       >
                         Stock: {getProductStock(product)}
                       </span>
@@ -1257,6 +959,85 @@ const Home = () => {
         </div>
       </section>
 
+      {/* Features */}
+      <section
+        className={`py-16 ${isDark ? "bg-gray-800 border-gray-700" : "bg-gray-100 border-gray-200"} border-t`}
+      >
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            {[
+              {
+                icon: Truck,
+                title: "Free Shipping",
+                desc: "On orders over Rs. 4,000",
+              },
+              {
+                icon: Shield,
+                title: "Secure Payment",
+                desc: "100% secure checkout",
+              },
+              {
+                icon: RefreshCw,
+                title: "Easy Returns",
+                desc: "7-day return policy",
+              },
+              {
+                icon: Headphones,
+                title: "24/7 Support",
+                desc: "Dedicated support team",
+              },
+            ].map((feature, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+                whileHover={{ y: -10, scale: 1.05 }}
+                className={`text-center p-6 rounded-lg ${isDark ? "bg-gray-700/50 hover:bg-gray-700" : "bg-white hover:shadow-lg"} transition-all cursor-pointer`}
+              >
+                <feature.icon
+                  className="w-12 h-12 mx-auto mb-4"
+                  style={{ color: isDark ? "white" : "#000000" }}
+                />
+                <h3
+                  className={`text-lg font-semibold mb-2 ${isDark ? "text-white" : "text-gray-900"}`}
+                >
+                  {feature.title}
+                </h3>
+                <p className={isDark ? "text-gray-400" : "text-black"}>
+                  {feature.desc}
+                </p>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Trust Badges */}
+          <div
+            className={`mt-12 flex flex-wrap justify-center items-center gap-8 pt-8 border-t ${isDark ? "border-gray-700" : "border-gray-200"}`}
+          >
+            {[
+              { icon: Lock, text: "SSL Secured" },
+              { icon: Shield, text: "Verified Business" },
+              { icon: CheckCircle, text: "Money Back Guarantee" },
+              { icon: Award, text: "Premium Quality" },
+            ].map((badge, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className={`flex items-center space-x-2 ${isDark ? "text-gray-400" : "text-black"}`}
+              >
+                <badge.icon className="w-5 h-5" />
+                <span className="text-sm">{badge.text}</span>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Stats Section */}
       <section
         className={`py-16 ${isDark ? "bg-gray-900 border-gray-800" : "bg-gray-100 border-gray-200"} border-t`}
@@ -1275,15 +1056,15 @@ const Home = () => {
               >
                 <stat.icon
                   className="w-12 h-12 mx-auto mb-4"
-                  style={{ color: isDark ? "white" : "#d3d1ce" }}
+                  style={{ color: isDark ? "white" : "#000000" }}
                 />
                 <h3
                   className="text-4xl font-bold mb-2"
-                  style={{ color: "#d3d1ce" }}
+                  style={{ color: "#000000" }}
                 >
                   <AnimatedCounter end={stat.value} suffix={stat.suffix} />
                 </h3>
-                <p className={isDark ? "text-gray-400" : "text-gray-600"}>
+                <p className={isDark ? "text-gray-400" : "text-black"}>
                   {stat.label}
                 </p>
               </motion.div>
@@ -1345,7 +1126,7 @@ const Home = () => {
               Why Choose Justees?
             </h2>
             <p
-              className={`${isDark ? "text-gray-400" : "text-gray-600"} text-lg`}
+              className={`${isDark ? "text-gray-400" : "text-black"} text-lg`}
             >
               Experience the difference
             </p>
@@ -1356,14 +1137,14 @@ const Home = () => {
             >
               <Award
                 className="w-16 h-16 mx-auto mb-4"
-                style={{ color: isDark ? "white" : "#d3d1ce" }}
+                style={{ color: isDark ? "white" : "#000000" }}
               />
               <h3
                 className={`text-xl font-bold mb-3 ${isDark ? "text-white" : "text-gray-900"}`}
               >
                 Premium Quality
               </h3>
-              <p className={isDark ? "text-gray-400" : "text-gray-600"}>
+              <p className={isDark ? "text-gray-400" : "text-black"}>
                 We use only the finest materials to ensure durability and
                 comfort in every piece.
               </p>
@@ -1373,14 +1154,14 @@ const Home = () => {
             >
               <Truck
                 className="w-16 h-16 mx-auto mb-4"
-                style={{ color: isDark ? "white" : "#d3d1ce" }}
+                style={{ color: isDark ? "white" : "#000000" }}
               />
               <h3
                 className={`text-xl font-bold mb-3 ${isDark ? "text-white" : "text-gray-900"}`}
               >
                 Fast Delivery
               </h3>
-              <p className={isDark ? "text-gray-400" : "text-gray-600"}>
+              <p className={isDark ? "text-gray-400" : "text-black"}>
                 Quick and reliable shipping to get your orders to you as fast as
                 possible.
               </p>
@@ -1390,14 +1171,14 @@ const Home = () => {
             >
               <CheckCircle
                 className="w-16 h-16 mx-auto mb-4"
-                style={{ color: isDark ? "white" : "#d3d1ce" }}
+                style={{ color: isDark ? "white" : "#000000" }}
               />
               <h3
                 className={`text-xl font-bold mb-3 ${isDark ? "text-white" : "text-gray-900"}`}
               >
                 100% Satisfaction
               </h3>
-              <p className={isDark ? "text-gray-400" : "text-gray-600"}>
+              <p className={isDark ? "text-gray-400" : "text-black"}>
                 Not happy? We offer easy returns and exchanges within 7 days.
               </p>
             </div>
@@ -1416,7 +1197,7 @@ const Home = () => {
                 What Our Customers Say
               </h2>
               <p
-                className={`${isDark ? "text-gray-400" : "text-gray-600"} text-lg`}
+                className={`${isDark ? "text-gray-400" : "text-black"} text-lg`}
               >
                 Real reviews from real customers
               </p>
@@ -1455,13 +1236,13 @@ const Home = () => {
                                       ? "text-yellow-500 fill-current"
                                       : isDark
                                         ? "text-gray-600"
-                                        : "text-gray-300"
+                                        : "text-gray-400"
                                   }`}
                                 />
                               ))}
                             </div>
                             <Quote
-                              className={`w-8 h-8 ${isDark ? "text-gray-700" : "text-gray-200"}`}
+                              className={`w-8 h-8 ${isDark ? "text-gray-700" : "text-gray-700"}`}
                             />
                           </div>
                           <p
@@ -1487,14 +1268,14 @@ const Home = () => {
                                 </button>
                               ) : (
                                 <p
-                                  className={`text-sm ${isDark ? "text-gray-400" : "text-gray-500"}`}
+                                  className={`text-sm ${isDark ? "text-gray-400" : "text-black"}`}
                                 >
                                   General Review
                                 </p>
                               )}
                             </div>
                             <div
-                              className={`text-xs ${isDark ? "text-gray-500" : "text-gray-400"}`}
+                              className={`text-xs ${isDark ? "text-gray-500" : "text-black"}`}
                             >
                               {review.createdAt?.toDate
                                 ? new Date(
@@ -1540,7 +1321,7 @@ const Home = () => {
               Follow Us on Instagram
             </h2>
             <p
-              className={`${isDark ? "text-gray-400" : "text-gray-600"} text-lg mb-6`}
+              className={`${isDark ? "text-gray-400" : "text-black"} text-lg mb-6`}
             >
               {getInstagramHandle()} - Tag us in your photos!
             </p>
@@ -1634,7 +1415,7 @@ const Home = () => {
             Join the Justees League
           </h2>
           <p
-            className={`text-xl ${isDark ? "text-gray-400" : "text-gray-600"} mb-8 max-w-2xl mx-auto`}
+            className={`text-xl ${isDark ? "text-gray-400" : "text-black"} mb-8 max-w-2xl mx-auto`}
           >
             Get exclusive access to new arrivals, special offers, and style
             inspiration

@@ -242,7 +242,7 @@ const CategoriesManagement = () => {
           >
             Access Denied
           </h2>
-          <p className={`${isDark ? "text-gray-400" : "text-gray-600"}`}>
+          <p className={`${isDark ? "text-gray-400" : "text-black"}`}>
             You do not have permission to view this page.
           </p>
         </div>
@@ -259,7 +259,7 @@ const CategoriesManagement = () => {
           >
             Categories
           </h2>
-          <p className={`${isDark ? "text-gray-400" : "text-gray-600"}`}>
+          <p className={`${isDark ? "text-gray-400" : "text-black"}`}>
             Create and manage product categories
           </p>
         </div>
@@ -290,7 +290,7 @@ const CategoriesManagement = () => {
               {/* Image Upload */}
               <div>
                 <label
-                  className={`block text-sm font-medium mb-2 ${isDark ? "text-gray-300" : "text-gray-700"}`}
+                  className={`block text-sm font-medium mb-2 ${isDark ? "text-gray-300" : "text-black"}`}
                 >
                   Category Image
                 </label>
@@ -422,12 +422,12 @@ const CategoriesManagement = () => {
                       <div className="flex flex-col items-center justify-center pt-5 pb-6">
                         <Upload className="w-10 h-10 mb-3 text-gray-400" />
                         <p
-                          className={`text-sm font-semibold ${isDark ? "text-gray-400" : "text-gray-500"}`}
+                          className={`text-sm font-semibold ${isDark ? "text-gray-400" : "text-black"}`}
                         >
                           Click to upload image
                         </p>
                         <p
-                          className={`text-xs mt-1 ${isDark ? "text-gray-500" : "text-gray-500"}`}
+                          className={`text-xs mt-1 ${isDark ? "text-gray-500" : "text-black"}`}
                         >
                           PNG, JPG (MAX. 10MB)
                         </p>
@@ -446,7 +446,7 @@ const CategoriesManagement = () => {
               {/* Name Input */}
               <div>
                 <label
-                  className={`block text-sm font-medium mb-2 ${isDark ? "text-gray-300" : "text-gray-700"}`}
+                  className={`block text-sm font-medium mb-2 ${isDark ? "text-gray-300" : "text-black"}`}
                 >
                   Category Name *
                 </label>
@@ -467,7 +467,7 @@ const CategoriesManagement = () => {
               {/* Description Input */}
               <div>
                 <label
-                  className={`block text-sm font-medium mb-2 ${isDark ? "text-gray-300" : "text-gray-700"}`}
+                  className={`block text-sm font-medium mb-2 ${isDark ? "text-gray-300" : "text-black"}`}
                 >
                   Description
                 </label>
@@ -537,7 +537,7 @@ const CategoriesManagement = () => {
           </div>
         ) : categories.length === 0 ? (
           <div className="p-12 text-center">
-            <p className={`${isDark ? "text-gray-400" : "text-gray-600"}`}>
+            <p className={`${isDark ? "text-gray-400" : "text-black"}`}>
               No categories found.
             </p>
           </div>
@@ -572,7 +572,7 @@ const CategoriesManagement = () => {
                     </h3>
                     {c.description && (
                       <p
-                        className={`text-sm line-clamp-2 sm:line-clamp-1 ${isDark ? "text-gray-400" : "text-gray-500"}`}
+                        className={`text-sm line-clamp-2 sm:line-clamp-1 ${isDark ? "text-gray-400" : "text-black"}`}
                       >
                         {c.description}
                       </p>

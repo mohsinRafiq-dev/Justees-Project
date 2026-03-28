@@ -423,7 +423,7 @@ const ProductDetail = () => {
             <Link
               to="/products"
               className="hover:underline"
-              style={{ color: '#d3d1ce' }}
+              style={{ color: isDark ? "white" : "#000000" }}
             >
               Return to products
             </Link>
@@ -450,25 +450,25 @@ const ProductDetail = () => {
           <div className="flex items-center space-x-2 text-sm">
             <Link
               to="/"
-              className={`hover:text-blue-600 ${isDark ? "text-gray-400" : "text-gray-600"}`}
+              className={`hover:text-blue-600 ${isDark ? "text-gray-400" : "text-black"}`}
             >
               Home
             </Link>
-            <span className={isDark ? "text-gray-600" : "text-gray-400"}>/</span>
+            <span className={isDark ? "text-gray-600" : "text-black"}>/</span>
             <Link
               to="/products"
-              className={`hover:text-blue-600 ${isDark ? "text-gray-400" : "text-gray-600"}`}
+              className={`hover:text-blue-600 ${isDark ? "text-gray-400" : "text-black"}`}
             >
               Products
             </Link>
-            <span className={isDark ? "text-gray-600" : "text-gray-400"}>/</span>
+            <span className={isDark ? "text-gray-600" : "text-black"}>/</span>
             <Link
               to={`/categories?category=${product.category}`}
-              className={`hover:text-blue-600 ${isDark ? "text-gray-400" : "text-gray-600"}`}
+              className={`hover:text-blue-600 ${isDark ? "text-gray-400" : "text-black"}`}
             >
               {product.category}
             </Link>
-            <span className={isDark ? "text-gray-600" : "text-gray-400"}>/</span>
+            <span className={isDark ? "text-gray-600" : "text-black"}>/</span>
             <span className={isDark ? "text-gray-300" : "text-gray-900"}>
               {product.name}
             </span>
@@ -607,7 +607,7 @@ const ProductDetail = () => {
                           ))}
                         </div>
                         <span
-                          className={`text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}
+                          className={`text-sm ${isDark ? "text-gray-400" : "text-black"}`}
                         >
                           ({reviewCount} reviews)
                         </span>
@@ -652,8 +652,8 @@ const ProductDetail = () => {
                         ? "bg-gray-800 text-gray-300"
                         : "bg-gray-100 text-gray-600"
                         }
-                      style={selectedVariant?.id === variant.id ? { ring: '4px solid #d3d1ce' } : {}}
-                      onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#d3d1ce'; e.currentTarget.style.color = 'white'; }}
+                      style={selectedVariant?.id === variant.id ? { ring: '4px solid #000000' } : {}}
+                      onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#d3d1ce'; e.currentTarget.style.color = 'black'; }}
                       onMouseLeave={(e) => { 
                         if (selectedVariant?.id !== variant.id) {
                           e.currentTarget.style.backgroundColor = isDark ? '#1f2937' : '#f3f4f6';
@@ -679,7 +679,7 @@ const ProductDetail = () => {
                     Number(product.originalPrice) > Number(product.price) && (
                       <>
                         <span
-                          className={`text-2xl line-through ${isDark ? "text-gray-500" : "text-gray-400"}`}
+                          className={`text-2xl line-through ${isDark ? "text-gray-500" : "text-black"}`}
                         >
                           {formatPrice(product.originalPrice)}
                         </span>
@@ -702,7 +702,7 @@ const ProductDetail = () => {
               {product.shortDescription && (
                 <MarkdownRenderer
                   content={product.shortDescription}
-                  className={`text-lg ${isDark ? "text-gray-300" : "text-gray-600"}`}
+                  className={`text-lg ${isDark ? "text-gray-300" : "text-black"}`}
                 />
               )}
 
@@ -891,7 +891,7 @@ const ProductDetail = () => {
                       Smart Choice
                     </p>
                     <p
-                      className={`text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}
+                      className={`text-sm ${isDark ? "text-gray-400" : "text-black"}`}
                     >
                       PKR 500 Advance, FREE Delivery
                     </p>
@@ -908,7 +908,7 @@ const ProductDetail = () => {
                       Free Delivery
                     </p>
                     <p
-                      className={`text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}
+                      className={`text-sm ${isDark ? "text-gray-400" : "text-black"}`}
                     >
                       On orders above Rs. 4,000
                     </p>
@@ -925,7 +925,7 @@ const ProductDetail = () => {
                       Easy Returns
                     </p>
                     <p
-                      className={`text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}
+                      className={`text-sm ${isDark ? "text-gray-400" : "text-black"}`}
                     >
                       7-day return policy
                     </p>
@@ -942,7 +942,7 @@ const ProductDetail = () => {
                       Secure Payment
                     </p>
                     <p
-                      className={`text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}
+                      className={`text-sm ${isDark ? "text-gray-400" : "text-black"}`}
                     >
                       100% secure checkout
                     </p>
@@ -997,7 +997,7 @@ const ProductDetail = () => {
                       </h3>
                       <MarkdownRenderer
                         content={product.description}
-                        className={`whitespace-pre-line ${isDark ? "text-gray-300" : "text-gray-600"}`}
+                        className={`whitespace-pre-line ${isDark ? "text-gray-300" : "text-black"}`}
                       />
 
                       {product.tags && product.tags.length > 0 && (
@@ -1041,7 +1041,7 @@ const ProductDetail = () => {
                           className={`p-4 rounded-lg ${isDark ? "bg-gray-700" : "bg-gray-50"}`}
                         >
                           <span
-                            className={`text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}
+                            className={`text-sm ${isDark ? "text-gray-400" : "text-black"}`}
                           >
                             Category
                           </span>
@@ -1055,7 +1055,7 @@ const ProductDetail = () => {
                           className={`p-4 rounded-lg ${isDark ? "bg-gray-700" : "bg-gray-50"}`}
                         >
                           <span
-                            className={`text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}
+                            className={`text-sm ${isDark ? "text-gray-400" : "text-black"}`}
                           >
                             Availability
                           </span>
@@ -1070,7 +1070,7 @@ const ProductDetail = () => {
                             className={`p-4 rounded-lg ${isDark ? "bg-gray-700" : "bg-gray-50"}`}
                           >
                             <span
-                              className={`text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}
+                              className={`text-sm ${isDark ? "text-gray-400" : "text-black"}`}
                             >
                               Brand
                             </span>
@@ -1086,7 +1086,7 @@ const ProductDetail = () => {
                             className={`p-4 rounded-lg ${isDark ? "bg-gray-700" : "bg-gray-50"}`}
                           >
                             <span
-                              className={`text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}
+                              className={`text-sm ${isDark ? "text-gray-400" : "text-black"}`}
                             >
                               Available Sizes
                             </span>
@@ -1102,7 +1102,7 @@ const ProductDetail = () => {
                             className={`p-4 rounded-lg ${isDark ? "bg-gray-700" : "bg-gray-50"}`}
                           >
                             <span
-                              className={`text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}
+                              className={`text-sm ${isDark ? "text-gray-400" : "text-black"}`}
                             >
                               Available Colors
                             </span>
@@ -1141,7 +1141,7 @@ const ProductDetail = () => {
                               Shipping Information
                             </h4>
                             <p
-                              className={`${isDark ? "text-gray-300" : "text-gray-600"}`}
+                              className={`${isDark ? "text-gray-300" : "text-black"}`}
                             >
                               We offer free shipping on orders above Rs. 4,000.
                               Standard delivery takes 4-7 business days. Express
@@ -1160,7 +1160,7 @@ const ProductDetail = () => {
                               Return Policy
                             </h4>
                             <p
-                              className={`${isDark ? "text-gray-300" : "text-gray-600"}`}
+                              className={`${isDark ? "text-gray-300" : "text-black"}`}
                             >
                               You can return any item within 7 days of delivery
                               for a full refund. Items must be unused and in
@@ -1203,7 +1203,7 @@ const ProductDetail = () => {
                       ));
                     })()}
                   </div>
-                  <span className={`text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}>
+                  <span className={`text-sm ${isDark ? "text-gray-400" : "text-black"}`}>
                     Based on {reviewCount} reviews
                   </span>
                 </div>
@@ -1255,13 +1255,13 @@ const ProductDetail = () => {
                                   ))}
                                 </div>
                                 <div
-                                  className={`text-[10px] uppercase font-bold tracking-widest ${isDark ? "text-gray-500" : "text-gray-400"}`}
+                                  className={`text-[10px] uppercase font-bold tracking-widest ${isDark ? "text-gray-500" : "text-black"}`}
                                 >
                                   Customer
                                 </div>
                               </div>
                               <p
-                                className={`mb-6 italic leading-relaxed text-sm ${isDark ? "text-gray-300" : "text-gray-600"}`}
+                                className={`mb-6 italic leading-relaxed text-sm ${isDark ? "text-gray-300" : "text-black"}`}
                               >
                                 "{review.review}"
                               </p>
@@ -1278,7 +1278,7 @@ const ProductDetail = () => {
                                     {review.customerName}
                                   </h4>
                                   <p
-                                    className={`text-[10px] ${isDark ? "text-gray-500" : "text-gray-400"}`}
+                                    className={`text-[10px] ${isDark ? "text-gray-500" : "text-black"}`}
                                   >
                                     {review.createdAt?.toDate
                                       ? new Date(
@@ -1345,7 +1345,7 @@ const ProductDetail = () => {
                 Share Your Story
               </h2>
               <p
-                className={`${isDark ? "text-gray-400" : "text-gray-600"
+                className={`${isDark ? "text-gray-400" : "text-black"
                   } text-lg`}
               >
                 How was your experience with {product.name}?
@@ -1364,7 +1364,7 @@ const ProductDetail = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label
-                        className={`block text-xs uppercase tracking-widest font-bold mb-3 ${isDark ? "text-gray-500" : "text-gray-400"
+                        className={`block text-xs uppercase tracking-widest font-bold mb-3 ${isDark ? "text-gray-500" : "text-black"
                           }`}
                       >
                         Your Name *
@@ -1388,7 +1388,7 @@ const ProductDetail = () => {
                     </div>
                     <div>
                       <label
-                        className={`block text-xs uppercase tracking-widest font-bold mb-3 ${isDark ? "text-gray-500" : "text-gray-400"
+                        className={`block text-xs uppercase tracking-widest font-bold mb-3 ${isDark ? "text-gray-500" : "text-black"
                           }`}
                       >
                         Email Address *
@@ -1452,7 +1452,7 @@ const ProductDetail = () => {
 
                   <div>
                     <label
-                      className={`block text-xs uppercase tracking-widest font-bold mb-3 ${isDark ? "text-gray-500" : "text-gray-400"
+                      className={`block text-xs uppercase tracking-widest font-bold mb-3 ${isDark ? "text-gray-500" : "text-black"
                         }`}
                     >
                       Your Story *
@@ -1518,7 +1518,7 @@ const ProductDetail = () => {
                 >
                   Recommended for You
                 </h2>
-                <div className={`text-sm ${isDark ? "text-gray-500" : "text-gray-400"}`}>
+                <div className={`text-sm ${isDark ? "text-gray-500" : "text-black"}`}>
                   Hand-picked based on your interests
                 </div>
               </div>
@@ -1596,7 +1596,7 @@ const RelatedProductCard = ({ product, isDark }) => {
             {product.originalPrice &&
               Number(product.originalPrice) > Number(product.price) && (
                 <span
-                  className={`text-sm line-through ${isDark ? "text-gray-500" : "text-gray-400"}`}
+                  className={`text-sm line-through ${isDark ? "text-gray-500" : "text-black"}`}
                 >
                   {formatPrice(product.originalPrice)}
                 </span>

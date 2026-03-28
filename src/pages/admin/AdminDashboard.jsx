@@ -209,7 +209,7 @@ const AdminDashboard = () => {
         <form onSubmit={handleUpdate} className="space-y-4">
           <div>
             <label
-              className={`block text-sm font-medium mb-1 ${isDark ? "text-gray-300" : "text-gray-700"}`}
+              className={`block text-sm font-medium mb-1 ${isDark ? "text-gray-300" : "text-black"}`}
             >
               New Password
             </label>
@@ -363,7 +363,7 @@ const AdminDashboard = () => {
         {/* Current Ticker Texts */}
         <div className="space-y-3 mb-4">
           <label
-            className={`block text-sm font-medium ${isDark ? "text-gray-300" : "text-gray-700"}`}
+            className={`block text-sm font-medium ${isDark ? "text-gray-300" : "text-black"}`}
           >
             Current Ticker Texts
           </label>
@@ -398,7 +398,7 @@ const AdminDashboard = () => {
         {/* Add New Text */}
         <div className="space-y-2 mb-4">
           <label
-            className={`block text-sm font-medium ${isDark ? "text-gray-300" : "text-gray-700"}`}
+            className={`block text-sm font-medium ${isDark ? "text-gray-300" : "text-black"}`}
           >
             Add New Ticker Text
           </label>
@@ -424,7 +424,7 @@ const AdminDashboard = () => {
             </button>
           </div>
           <p
-            className={`text-xs ${isDark ? "text-gray-400" : "text-gray-500"}`}
+            className={`text-xs ${isDark ? "text-gray-400" : "text-black"}`}
           >
             These texts will scroll across the homepage ticker bar
           </p>
@@ -450,7 +450,7 @@ const AdminDashboard = () => {
       <div className="flex items-center justify-between">
         <div className="flex-1">
           <p
-            className={`text-sm font-medium ${isDark ? "text-gray-400" : "text-gray-600"} mb-2`}
+            className={`text-sm font-medium ${isDark ? "text-gray-400" : "text-black"} mb-2`}
           >
             {title}
           </p>
@@ -559,7 +559,7 @@ const AdminDashboard = () => {
               >
                 <span>Justees</span>
                 <span
-                  className={`text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}
+                  className={`text-sm ${isDark ? "text-gray-400" : "text-black"}`}
                 >
                   Admin
                 </span>
@@ -621,7 +621,7 @@ const AdminDashboard = () => {
                       {user?.displayName || "Admin"}
                     </p>
                     <p
-                      className={`text-xs truncate ${isDark ? "text-gray-400" : "text-gray-500"}`}
+                      className={`text-xs truncate ${isDark ? "text-gray-400" : "text-black"}`}
                     >
                       {user?.email}
                     </p>
@@ -705,7 +705,7 @@ const AdminDashboard = () => {
                 >
                   <span>Justees</span>
                   <span
-                    className={`text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}
+                    className={`text-sm ${isDark ? "text-gray-400" : "text-black"}`}
                   >
                     Admin
                   </span>
@@ -769,7 +769,7 @@ const AdminDashboard = () => {
                         {user?.displayName || "Admin"}
                       </p>
                       <p
-                        className={`text-xs truncate ${isDark ? "text-gray-400" : "text-gray-500"}`}
+                        className={`text-xs truncate ${isDark ? "text-gray-400" : "text-black"}`}
                       >
                         {user?.email}
                       </p>
@@ -827,7 +827,7 @@ const AdminDashboard = () => {
                   Welcome back, {user?.displayName?.split(" ")[0] || "Admin"}!
                 </h2>
                 <p
-                  className={`text-sm sm:text-base lg:text-lg ${isDark ? "text-gray-400" : "text-gray-600"}`}
+                  className={`text-sm sm:text-base lg:text-lg ${isDark ? "text-gray-400" : "text-black"}`}
                 >
                   Here's what's happening with your store today.
                 </p>
@@ -975,7 +975,7 @@ const AdminDashboard = () => {
                               {action.title}
                             </p>
                             <p
-                              className={`text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}
+                              className={`text-sm ${isDark ? "text-gray-400" : "text-black"}`}
                             >
                               {action.description}
                             </p>
@@ -1081,7 +1081,7 @@ const AdminDashboard = () => {
                       Site Settings
                     </h3>
                     <p
-                      className={`text-sm mt-1 ${isDark ? "text-gray-400" : "text-gray-600"}`}
+                      className={`text-sm mt-1 ${isDark ? "text-gray-400" : "text-black"}`}
                     >
                       Customize your website content and appearance
                     </p>
@@ -1103,7 +1103,7 @@ const AdminDashboard = () => {
                       Security Settings
                     </h3>
                     <p
-                      className={`text-sm mt-1 ${isDark ? "text-gray-400" : "text-gray-600"}`}
+                      className={`text-sm mt-1 ${isDark ? "text-gray-400" : "text-black"}`}
                     >
                       Manage your account security and preferences
                     </p>

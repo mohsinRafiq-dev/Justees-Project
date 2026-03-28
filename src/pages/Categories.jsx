@@ -67,10 +67,10 @@ const Categories = () => {
               animate={{ opacity: 1, y: 0 }}
               className="text-center max-w-3xl mx-auto"
             >
-              <h1 className="text-5xl md:text-6xl font-bold mb-6" style={{ color: '#d3d1ce' }}>
+              <h1 className="text-5xl md:text-6xl font-bold mb-6" style={{ color: '#000000' }}>
                 Explore Our Categories
               </h1>
-              <p className={`text-xl ${isDark ? 'text-gray-400' : 'text-gray-600'} mb-8`}>
+              <p className={`text-xl ${isDark ? "text-gray-400" : "text-black"} mb-8`}>
                 Discover premium clothing across all our carefully curated categories
               </p>
             </motion.div>
@@ -86,7 +86,7 @@ const Categories = () => {
               </div>
             ) : categories.length === 0 ? (
               <div className="text-center py-20">
-                <p className={`text-xl ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                <p className={`text-xl ${isDark ? "text-gray-400" : "text-black"}`}>
                   No categories found. Check back soon!
                 </p>
               </div>
@@ -117,14 +117,14 @@ const Categories = () => {
                         </div>
                       </div>
                       <div className={`p-6 ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
-                        <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'} mb-4 line-clamp-2 min-h-[3rem]`}>
+                        <p className={`${isDark ? "text-gray-400" : "text-black"} mb-4 line-clamp-2 min-h-[3rem]`}>
                           {category.description || `Explore our collection of ${category.name}`}
                         </p>
                         <div className="flex items-center justify-between">
-                          <span className="font-semibold transition-colors" style={{ color: '#d3d1ce' }}>
+                          <span className="font-semibold transition-colors" style={{ color: '#000000' }}>
                             Shop Now
                           </span>
-                          <ShoppingBag className="w-5 h-5 transition-colors" style={{ color: '#d3d1ce' }} />
+                          <ShoppingBag className="w-5 h-5 transition-colors" style={{ color: '#000000' }} />
                         </div>
                       </div>
                     </Link>
@@ -146,7 +146,7 @@ const Categories = () => {
               <h2 className={`text-4xl font-bold mb-6 ${isDark ? 'text-white' : 'text-gray-900'}`}>
                 Can't Find What You're Looking For?
               </h2>
-              <p className={`text-xl ${isDark ? 'text-gray-400' : 'text-gray-600'} mb-8`}>
+              <p className={`text-xl ${isDark ? "text-gray-400" : "text-black"} mb-8`}>
                 Browse all our products or contact us for assistance
               </p>
               <Link

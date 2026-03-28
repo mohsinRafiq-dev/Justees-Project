@@ -17,7 +17,6 @@ import { useWishlist } from "../contexts/WishlistContext";
 import { getAllProducts, getCategories } from "../services/products.service";
 import { getProductPhotos } from "../services/productPhotos.service";
 import LazyImage from "../components/common/LazyImage";
-import { MarkdownRenderer } from "../utils/markdown.jsx";
 import Navbar from "../components/common/Navbar";
 import ProductQuickView from "../components/products/ProductQuickView";
 import LoadingSpinner from "../components/common/LoadingSpinner";
@@ -332,12 +331,13 @@ const Products = () => {
               )}
             </div>
 
-            <MarkdownRenderer
-              content={product.shortDescription || product.description}
+            <p
               className={`text-sm mb-4 line-clamp-2 ${
-                isDark ? "text-gray-300" : "text-gray-600"
+                isDark ? "text-gray-300" : "text-black"
               }`}
-            />
+            >
+              {product.shortDescription || product.description}
+            </p>
 
             {/* Rating */}
             {product.rating > 0 && product.reviewCount > 0 && (
@@ -355,7 +355,7 @@ const Products = () => {
                   ))}
                 </div>
                 <span
-                  className={`text-sm ml-2 ${isDark ? "text-gray-400" : "text-gray-500"}`}
+                  className={`text-sm ml-2 ${isDark ? "text-gray-400" : "text-black"}`}
                 >
                   ({product.reviewCount})
                 </span>
@@ -376,7 +376,7 @@ const Products = () => {
                   Number(product.originalPrice) > Number(product.price) && (
                     <span
                       className={`text-sm ml-2 line-through ${
-                        isDark ? "text-gray-500" : "text-gray-400"
+                        isDark ? "text-gray-500" : "text-black"
                       }`}
                     >
                       {formatPrice(product.originalPrice)}
@@ -397,7 +397,7 @@ const Products = () => {
               <div className="mb-4">
                 <div className="flex items-center space-x-2">
                   <span
-                    className={`text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}
+                    className={`text-sm ${isDark ? "text-gray-400" : "text-black"}`}
                   >
                     Colors:
                   </span>
@@ -422,7 +422,7 @@ const Products = () => {
                       ),
                     ].length > 4 && (
                       <span
-                        className={`text-xs ${isDark ? "text-gray-400" : "text-gray-500"}`}
+                        className={`text-xs ${isDark ? "text-gray-400" : "text-black"}`}
                       >
                         +
                         {[
@@ -466,61 +466,21 @@ const Products = () => {
         className={`min-h-screen ${isDark ? "bg-gray-900" : "bg-gray-50"} pt-20`}
       >
         {/* Hero Section */}
-        <section className="relative overflow-hidden">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center"
-          >
-            {/* full-bleed image area (no container padding) */}
-            {photosLoading ? (
-              <LoadingSpinner />
-            ) : productPhotos.length > 0 ? (
-              <div className="mb-8 relative">
-                {/* full-width hero image */}
-                <div className="relative w-full overflow-hidden">
-                  <img
-                    src={productPhotos[currentPhoto].url}
-                    alt={productPhotos[currentPhoto].title || "Products"}
-                    className="w-full h-auto max-h-96 md:max-h-[60vh] lg:max-h-[70vh] object-contain object-center rounded-lg shadow-lg bg-transparent"
-                  />
-                </div>
-
-                {/* controls remain centered inside the container */}
-                {productPhotos.length > 1 && (
-                  <div className="container mx-auto px-4 flex items-center justify-center gap-3 mt-3">
-                    <button
-                      onClick={() =>
-                        setCurrentPhoto(
-                          (i) =>
-                            (i - 1 + productPhotos.length) %
-                            productPhotos.length,
-                        )
-                      }
-                      className="px-3 py-2 rounded-full bg-white/90 shadow-sm text-sm"
-                      aria-label="Previous photo"
-                    >
-                      ‹
-                    </button>
-                    <div
-                      className={`text-sm ${isDark ? "text-gray-300" : "text-gray-600"}`}
-                    >
-                      {productPhotos[currentPhoto].title || ""}
-                    </div>
-                    <button
-                      onClick={() =>
-                        setCurrentPhoto((i) => (i + 1) % productPhotos.length)
-                      }
-                      className="px-3 py-2 rounded-full bg-white/90 shadow-sm text-sm"
-                      aria-label="Next photo"
-                    >
-                      ›
-                    </button>
-                  </div>
-                )}
-              </div>
-            ) : null}
-          </motion.div>
+        <section className="relative overflow-hidden py-12">
+          <div className="container mx-auto px-4">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-center"
+            >
+              <h1 className={`text-5xl md:text-6xl font-bold mb-4 ${isDark ? "text-white" : "text-gray-900"}`}>
+                Explore Our Collection
+              </h1>
+              <p className={`text-lg md:text-xl ${isDark ? "text-gray-400" : "text-black"}`}>
+                Discover premium clothing that defines your unique style
+              </p>
+            </motion.div>
+          </div>
         </section>
 
         {/* Filters Section */}
@@ -534,7 +494,7 @@ const Products = () => {
               <div className="flex flex-wrap items-center gap-4 mb-4">
                 <div className="flex items-center space-x-2">
                   <Filter
-                    className={`w-5 h-5 ${isDark ? "text-gray-300" : "text-gray-600"}`}
+                    className={`w-5 h-5 ${isDark ? "text-gray-300" : "text-black"}`}
                   />
                   <span
                     className={`font-medium ${isDark ? "text-white" : "text-gray-900"}`}
@@ -557,9 +517,9 @@ const Products = () => {
                         ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
                         : "bg-white border-gray-300 text-gray-900 placeholder-gray-500"
                     }`}
-                    style={{ focusRing: "#d3d1ce" }}
+                    style={{ focusRing: "#000000" }}
                     onFocus={(e) =>
-                      (e.currentTarget.style.outlineColor = "#d3d1ce")
+                      (e.currentTarget.style.outlineColor = "#000000")
                     }
                   />
                 </div>
@@ -575,7 +535,7 @@ const Products = () => {
                         : "bg-white border-gray-300 text-gray-900"
                     }`}
                     onFocus={(e) =>
-                      (e.currentTarget.style.outlineColor = "#d3d1ce")
+                      (e.currentTarget.style.outlineColor = "#000000")
                     }
                   >
                     <option value="All">All Categories</option>
@@ -600,7 +560,7 @@ const Products = () => {
                         : "bg-white border-gray-300 text-gray-900"
                     }`}
                     onFocus={(e) =>
-                      (e.currentTarget.style.outlineColor = "#d3d1ce")
+                      (e.currentTarget.style.outlineColor = "#000000")
                     }
                   >
                     <option value="0-1000000">All Prices</option>
@@ -626,7 +586,7 @@ const Products = () => {
                         : "bg-white border-gray-300 text-gray-900"
                     }`}
                     onFocus={(e) =>
-                      (e.currentTarget.style.outlineColor = "#d3d1ce")
+                      (e.currentTarget.style.outlineColor = "#000000")
                     }
                   >
                     <option value="createdAt-desc">Newest First</option>
@@ -643,7 +603,7 @@ const Products = () => {
               {/* Results Summary */}
               <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                 <p
-                  className={`text-sm ${isDark ? "text-gray-300" : "text-gray-600"}`}
+                  className={`text-sm ${isDark ? "text-gray-300" : "text-black"}`}
                 >
                   Showing {filteredProducts.length} of {products.length}{" "}
                   products
@@ -662,7 +622,7 @@ const Products = () => {
             ) : filteredProducts.length === 0 ? (
               <div className="text-center py-20">
                 <div
-                  className={`text-6xl mb-4 ${isDark ? "text-gray-600" : "text-gray-300"}`}
+                  className={`text-6xl mb-4 ${isDark ? "text-gray-600" : "text-black"}`}
                 >
                   🛍️
                 </div>
@@ -674,7 +634,7 @@ const Products = () => {
                   No products found
                 </h3>
                 <p
-                  className={`mb-6 ${isDark ? "text-gray-300" : "text-gray-600"}`}
+                  className={`mb-6 ${isDark ? "text-gray-300" : "text-black"}`}
                 >
                   Try adjusting your filters or search terms to find what you're
                   looking for.

@@ -24,7 +24,7 @@ const ConfirmDialog = ({
 
         {/* Body */}
         <div className="p-6">
-          <p className={`${isDark ? "text-gray-400" : "text-gray-600"}`}>{message}</p>
+          <p className={`${isDark ? "text-gray-400" : "text-black"}`}>{message}</p>
         </div>
 
         {/* Footer */}

@@ -238,7 +238,7 @@ const ProductPhotosManagement = () => {
           >
             Access Denied
           </h2>
-          <p className={`${isDark ? "text-gray-400" : "text-gray-600"}`}>
+          <p className={`${isDark ? "text-gray-400" : "text-black"}`}>
             You do not have permission to view this page.
           </p>
         </div>
@@ -256,7 +256,7 @@ const ProductPhotosManagement = () => {
             Product page photos
           </h2>
           <p
-            className={`text-sm sm:text-base ${isDark ? "text-gray-400" : "text-gray-600"}`}
+            className={`text-sm sm:text-base ${isDark ? "text-gray-400" : "text-black"}`}
           >
             Add and manage images that appear on the Products page
           </p>
@@ -290,7 +290,7 @@ const ProductPhotosManagement = () => {
             <div className="p-6 space-y-6">
               <div>
                 <label
-                  className={`block text-sm font-medium mb-2 ${isDark ? "text-gray-300" : "text-gray-700"}`}
+                  className={`block text-sm font-medium mb-2 ${isDark ? "text-gray-300" : "text-black"}`}
                 >
                   Image
                 </label>
@@ -423,12 +423,12 @@ const ProductPhotosManagement = () => {
                       <div className="flex flex-col items-center justify-center pt-5 pb-6">
                         <Upload className="w-10 h-10 mb-3 text-gray-400" />
                         <p
-                          className={`text-sm font-semibold ${isDark ? "text-gray-400" : "text-gray-500"}`}
+                          className={`text-sm font-semibold ${isDark ? "text-gray-400" : "text-black"}`}
                         >
                           Click to upload image
                         </p>
                         <p
-                          className={`text-xs mt-1 ${isDark ? "text-gray-500" : "text-gray-500"}`}
+                          className={`text-xs mt-1 ${isDark ? "text-gray-500" : "text-black"}`}
                         >
                           Images (JPG/PNG/WebP) max 10MB
                         </p>
@@ -446,7 +446,7 @@ const ProductPhotosManagement = () => {
 
               <div>
                 <label
-                  className={`block text-sm font-medium mb-2 ${isDark ? "text-gray-300" : "text-gray-700"}`}
+                  className={`block text-sm font-medium mb-2 ${isDark ? "text-gray-300" : "text-black"}`}
                 >
                   Title{" "}
                   <span className="text-gray-400 font-normal">(Optional)</span>
@@ -464,7 +464,7 @@ const ProductPhotosManagement = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label
-                    className={`block text-sm font-medium mb-2 ${isDark ? "text-gray-300" : "text-gray-700"}`}
+                    className={`block text-sm font-medium mb-2 ${isDark ? "text-gray-300" : "text-black"}`}
                   >
                     Order
                   </label>
@@ -481,7 +481,7 @@ const ProductPhotosManagement = () => {
                 </div>
                 <div>
                   <label
-                    className={`block text-sm font-medium mb-2 ${isDark ? "text-gray-300" : "text-gray-700"}`}
+                    className={`block text-sm font-medium mb-2 ${isDark ? "text-gray-300" : "text-black"}`}
                   >
                     Visible
                   </label>
@@ -499,7 +499,7 @@ const ProductPhotosManagement = () => {
                         }
                       />
                       <span
-                        className={`text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}
+                        className={`text-sm ${isDark ? "text-gray-400" : "text-black"}`}
                       >
                         Show on products page
                       </span>
@@ -542,7 +542,7 @@ const ProductPhotosManagement = () => {
           </div>
         ) : photos.length === 0 ? (
           <div className="p-12 text-center">
-            <p className={`${isDark ? "text-gray-400" : "text-gray-600"}`}>
+            <p className={`${isDark ? "text-gray-400" : "text-black"}`}>
               No photos found.
             </p>
           </div>
@@ -572,7 +572,7 @@ const ProductPhotosManagement = () => {
                       {p.title || "Untitled"}
                     </h3>
                     <p
-                      className={`text-xs ${isDark ? "text-gray-500" : "text-gray-400"}`}
+                      className={`text-xs ${isDark ? "text-gray-500" : "text-black"}`}
                     >
                       Order: {p.order ?? 0}
                     </p>

@@ -308,7 +308,7 @@ const SlidesManagement = () => {
           >
             Access Denied
           </h2>
-          <p className={`${isDark ? "text-gray-400" : "text-gray-600"}`}>
+          <p className={`${isDark ? "text-gray-400" : "text-black"}`}>
             You do not have permission to view this page.
           </p>
         </div>
@@ -326,7 +326,7 @@ const SlidesManagement = () => {
             Slides
           </h2>
           <p
-            className={`text-sm sm:text-base ${isDark ? "text-gray-400" : "text-gray-600"}`}
+            className={`text-sm sm:text-base ${isDark ? "text-gray-400" : "text-black"}`}
           >
             Add and manage hero slides (images/videos)
           </p>
@@ -362,7 +362,7 @@ const SlidesManagement = () => {
               {/* Media Upload */}
               <div>
                 <label
-                  className={`block text-sm font-medium mb-2 ${isDark ? "text-gray-300" : "text-gray-700"}`}
+                  className={`block text-sm font-medium mb-2 ${isDark ? "text-gray-300" : "text-black"}`}
                 >
                   Image / Video
                 </label>
@@ -507,12 +507,12 @@ const SlidesManagement = () => {
                       <div className="flex flex-col items-center justify-center pt-5 pb-6">
                         <Upload className="w-10 h-10 mb-3 text-gray-400" />
                         <p
-                          className={`text-sm font-semibold ${isDark ? "text-gray-400" : "text-gray-500"}`}
+                          className={`text-sm font-semibold ${isDark ? "text-gray-400" : "text-black"}`}
                         >
                           Click to upload image or video
                         </p>
                         <p
-                          className={`text-xs mt-1 ${isDark ? "text-gray-500" : "text-gray-500"}`}
+                          className={`text-xs mt-1 ${isDark ? "text-gray-500" : "text-black"}`}
                         >
                           Images (JPG/PNG/WebP) max 10MB, Videos (MP4/WebM/MOV)
                           max ~80MB
@@ -532,7 +532,7 @@ const SlidesManagement = () => {
               {/* Category (Title) Select */}
               <div className="relative">
                 <label
-                  className={`block text-sm font-medium mb-2 ${isDark ? "text-gray-300" : "text-gray-700"}`}
+                  className={`block text-sm font-medium mb-2 ${isDark ? "text-gray-300" : "text-black"}`}
                 >
                   Category (Title){" "}
                   <span className="text-gray-400 font-normal">(Optional)</span>
@@ -629,7 +629,7 @@ const SlidesManagement = () => {
               {/* Subtitle */}
               <div>
                 <label
-                  className={`block text-sm font-medium mb-2 ${isDark ? "text-gray-300" : "text-gray-700"}`}
+                  className={`block text-sm font-medium mb-2 ${isDark ? "text-gray-300" : "text-black"}`}
                 >
                   Subtitle{" "}
                   <span className="text-gray-400 font-normal">(Optional)</span>
@@ -651,7 +651,7 @@ const SlidesManagement = () => {
               {/* Description */}
               <div>
                 <label
-                  className={`block text-sm font-medium mb-2 ${isDark ? "text-gray-300" : "text-gray-700"}`}
+                  className={`block text-sm font-medium mb-2 ${isDark ? "text-gray-300" : "text-black"}`}
                 >
                   Description{" "}
                   <span className="text-gray-400 font-normal">(Optional)</span>
@@ -674,7 +674,7 @@ const SlidesManagement = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label
-                    className={`block text-sm font-medium mb-2 ${isDark ? "text-gray-300" : "text-gray-700"}`}
+                    className={`block text-sm font-medium mb-2 ${isDark ? "text-gray-300" : "text-black"}`}
                   >
                     Order
                   </label>
@@ -695,7 +695,7 @@ const SlidesManagement = () => {
                 </div>
                 <div>
                   <label
-                    className={`block text-sm font-medium mb-2 ${isDark ? "text-gray-300" : "text-gray-700"}`}
+                    className={`block text-sm font-medium mb-2 ${isDark ? "text-gray-300" : "text-black"}`}
                   >
                     Visible
                   </label>
@@ -713,7 +713,7 @@ const SlidesManagement = () => {
                         }
                       />
                       <span
-                        className={`text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}
+                        className={`text-sm ${isDark ? "text-gray-400" : "text-black"}`}
                       >
                         Show on homepage
                       </span>
@@ -771,7 +771,7 @@ const SlidesManagement = () => {
           </div>
         ) : slides.length === 0 ? (
           <div className="p-12 text-center">
-            <p className={`${isDark ? "text-gray-400" : "text-gray-600"}`}>
+            <p className={`${isDark ? "text-gray-400" : "text-black"}`}>
               No slides found.
             </p>
           </div>
@@ -808,12 +808,12 @@ const SlidesManagement = () => {
                       {s.title || "Untitled"}
                     </h3>
                     <p
-                      className={`text-sm line-clamp-1 ${isDark ? "text-gray-400" : "text-gray-500"}`}
+                      className={`text-sm line-clamp-1 ${isDark ? "text-gray-400" : "text-black"}`}
                     >
                       {s.subtitle}
                     </p>
                     <p
-                      className={`text-xs ${isDark ? "text-gray-500" : "text-gray-400"}`}
+                      className={`text-xs ${isDark ? "text-gray-500" : "text-black"}`}
                     >
                       Order: {s.order ?? 0} • {s.type}
                     </p>
