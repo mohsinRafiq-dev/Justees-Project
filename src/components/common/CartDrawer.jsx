@@ -1,11 +1,13 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Plus, Minus, Trash2, ShoppingBag } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useCart } from '../../contexts/CartContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { formatPrice } from '../../utils/validation';
 import { WHATSAPP_NUMBER } from '../../utils/constants';
 
 const CartDrawer = () => {
+    const navigate = useNavigate();
     const { 
         cartItems, 
         updateQuantity, 
@@ -178,7 +180,7 @@ const CartDrawer = () => {
                                 {getDeliveryFee() > 0 && (
                                     <>
                                       <p className="text-xs text-gray-400 mb-2">
-                                        Orders under Rs. 4000 incur a delivery fee of Rs. 250.
+                                        Orders under Rs. 4000 incur a delivery fee of Rs. 500.
                                       </p>
                                       {/* additional informational line */}
                                       <p className="text-xs text-gray-400 mb-2">
@@ -194,6 +196,16 @@ const CartDrawer = () => {
                                     <span className="text-gray-500">Total</span>
                                     <span className="text-2xl font-bold">{formatPrice(getCartFinalTotal())}</span>
                                 </div>
+                                <button
+                                    onClick={() => {
+                                        navigate('/checkout');
+                                        closeCart();
+                                    }}
+                                    style={{ backgroundColor: "#d3d1ce" }}
+                                    className="w-full text-gray-900 py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all mb-3"
+                                >
+                                    Proceed to Checkout
+                                </button>
                                 <button
                                     onClick={handleWhatsAppCheckout}
                                     className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-green-500/30 transition-all flex items-center justify-center gap-2"

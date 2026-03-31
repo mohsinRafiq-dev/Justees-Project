@@ -18,6 +18,7 @@ import Products from "../pages/Products";
 import ProductDetail from "../pages/ProductDetail";
 import Categories from "../pages/Categories";
 import About from "../pages/About";
+import Checkout from "../pages/Checkout";
 import AdminLogin from "../pages/admin/AdminLogin";
 import AdminDashboard from "../pages/admin/AdminDashboard";
 
@@ -65,6 +66,7 @@ const AppLayout = ({ isDark }) => {
             <Route path="/products/:id" element={<ProductDetail />} />
             <Route path="/categories" element={<Categories />} />
             <Route path="/about" element={<About />} />
+            <Route path="/checkout" element={<Checkout />} />
 
             {/* Admin Routes */}
             <Route path="/admin/login" element={<AdminLogin />} />

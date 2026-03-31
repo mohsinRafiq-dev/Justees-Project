@@ -37,11 +37,13 @@ import {
 } from "../../services/settings.service";
 import { formatPrice } from "../../utils/validation";
 import ProductManagement from "../../components/admin/ProductManagement";
+import NotificationsPanel from "../../components/admin/NotificationsPanel";
 import CategoriesManagement from "./CategoriesManagement";
 import ReviewsManagement from "./ReviewsManagement";
 import SlidesManagement from "./SlidesManagement";
 import ProductPhotosManagement from "./ProductPhotosManagement";
 import SizesManagement from "./SizesManagement";
+import OrdersManagement from "./OrdersManagement";
 
 const AdminDashboard = () => {
   const { user, logout } = useAuth();
@@ -123,6 +125,7 @@ const AdminDashboard = () => {
 
   const sidebarItems = [
     { id: "dashboard", name: "Dashboard", icon: BarChart3 },
+    { id: "orders", name: "Orders", icon: ShoppingBag },
     { id: "products", name: "Products", icon: Package },
     { id: "categories", name: "Categories", icon: Tag },
     { id: "slides", name: "Slides", icon: Image },
@@ -819,18 +822,21 @@ const AdminDashboard = () => {
               exit={{ opacity: 0, y: -20 }}
               className="p-4 sm:p-6 lg:p-8 pt-16 lg:pt-8"
             >
-              {/* Header */}
-              <div className="mb-6 sm:mb-8">
-                <h2
-                  className={`text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 ${isDark ? "text-white" : "text-gray-900"}`}
-                >
-                  Welcome back, {user?.displayName?.split(" ")[0] || "Admin"}!
-                </h2>
-                <p
-                  className={`text-sm sm:text-base lg:text-lg ${isDark ? "text-gray-400" : "text-black"}`}
-                >
-                  Here's what's happening with your store today.
-                </p>
+              {/* Header with Notifications */}
+              <div className="mb-6 sm:mb-8 flex items-center justify-between">
+                <div>
+                  <h2
+                    className={`text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 ${isDark ? "text-white" : "text-gray-900"}`}
+                  >
+                    Welcome back, {user?.displayName?.split(" ")[0] || "Admin"}!
+                  </h2>
+                  <p
+                    className={`text-sm sm:text-base lg:text-lg ${isDark ? "text-gray-400" : "text-black"}`}
+                  >
+                    Here's what's happening with your store today.
+                  </p>
+                </div>
+                <NotificationsPanel />
               </div>
 
               {/* Stats Grid */}
@@ -986,6 +992,17 @@ const AdminDashboard = () => {
                   </div>
                 </div>
               </div>
+            </motion.div>
+          )}
+
+          {activeTab === "orders" && (
+            <motion.div
+              key="orders"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+            >
+              <OrdersManagement />
             </motion.div>
           )}
 
