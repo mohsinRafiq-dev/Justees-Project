@@ -24,9 +24,9 @@ const Navbar = () => {
           <div className="flex justify-between items-center h-16 overflow-visible">
             <Link to="/" className="flex items-center">
               <img 
-                src="/justees_logo.png" 
+                src="/New Logo.png" 
                 alt="Justees" 
-                className="h-40 w-auto object-contain"
+                className="h-14 w-auto object-contain"
               />
             </Link>
 

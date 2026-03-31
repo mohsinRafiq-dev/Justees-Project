@@ -178,7 +178,7 @@ const CartDrawer = () => {
                                 {getDeliveryFee() > 0 && (
                                     <>
                                       <p className="text-xs text-gray-400 mb-2">
-                                        Orders under Rs. 4000 incur a delivery fee of Rs. 300.
+                                        Orders under Rs. 4000 incur a delivery fee of Rs. 250.
                                       </p>
                                       {/* additional informational line */}
                                       <p className="text-xs text-gray-400 mb-2">

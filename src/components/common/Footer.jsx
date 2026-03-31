@@ -11,7 +11,7 @@ const Footer = () => {
           <div>
             <Link to="/" className="inline-block mb-4">
               <img 
-                src="/justees_logo.png" 
+                src="/New Logo.png" 
                 alt="Justees" 
                 className="h-48 w-auto object-contain"
               />

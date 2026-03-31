@@ -61,6 +61,7 @@ const Home = () => {
   const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [currentCategorySlide, setCurrentCategorySlide] = useState(0);
+  const [categoriesPerView, setCategoriesPerView] = useState(1); // 1 on mobile, 2 on tablet, 3 on desktop
   const [showScrollTop, setShowScrollTop] = useState(false);
   const videoRefs = useRef({});
   const [videoErrors, setVideoErrors] = useState({});
@@ -154,6 +155,23 @@ const Home = () => {
     }
     return product.stock || 0;
   };
+
+  // Handle responsive categories display
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setCategoriesPerView(1); // Mobile: 1 category
+      } else if (window.innerWidth < 1024) {
+        setCategoriesPerView(2); // Tablet: 2 categories
+      } else {
+        setCategoriesPerView(3); // Desktop: 3 categories
+      }
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   // Load featured products from database
   useEffect(() => {
@@ -805,26 +823,27 @@ const Home = () => {
             </h2>
           </motion.div>
 
-          {/* Horizontal Categories Carousel */}
+          {/* Responsive Category Carousel */}
           <div className="relative">
-            {/* Categories Container with overflow */}
-            <div className="overflow-hidden px-4 md:px-0">
+            {/* Categories Grid/Carousel */}
+            <div className="overflow-hidden">
               <motion.div
-                animate={{ x: -currentCategorySlide * 100 }}
+                animate={{ x: `${-(currentCategorySlide * 100) / categoriesPerView}%` }}
                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
                 className="flex gap-4"
               >
                 {categories.map((category, index) => (
                   <motion.div
-                    key={`${index}`}
+                    key={`category-${index}`}
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: index * 0.05 }}
-                    className="flex-shrink-0 w-48 md:w-56"
+                    style={{ width: `${100 / categoriesPerView}%` }}
+                    className="flex-shrink-0"
                   >
                     <Link
                       to={`/products?category=${encodeURIComponent(category.name)}#products-grid`}
-                      className="group relative overflow-hidden rounded-lg aspect-square hover:shadow-xl transition-all block w-full text-left"
+                      className="group relative overflow-hidden rounded-xl aspect-square hover:shadow-2xl transition-all block w-full text-left mx-auto md:mr-4"
                     >
                       <LazyImage
                         src={category.image}
@@ -832,8 +851,8 @@ const Home = () => {
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/30 to-transparent opacity-80 group-hover:opacity-100 transition-opacity" />
-                      <div className="absolute bottom-0 left-0 right-0 p-3 text-white">
-                        <h3 className="text-sm md:text-lg font-bold">{category.name}</h3>
+                      <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+                        <h3 className="text-lg md:text-2xl font-bold">{category.name}</h3>
                       </div>
                     </Link>
                   </motion.div>
@@ -841,25 +860,50 @@ const Home = () => {
               </motion.div>
             </div>
 
-            {/* Navigation Buttons - Bottom on Mobile, Sides on Desktop */}
-            <div className="flex md:absolute md:inset-y-0 md:inset-x-0 md:items-center md:justify-between mt-4 md:mt-0 gap-4 md:gap-0 justify-center md:px-0">
-              {currentCategorySlide > 0 && (
-                <button
-                  onClick={() => setCurrentCategorySlide((prev) => Math.max(0, prev - 1))}
-                  className="bg-white/80 hover:bg-white dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-900 dark:text-white p-2 md:p-3 rounded-full transition-all shadow-lg"
-                >
-                  <ChevronLeft className="w-6 h-6" />
-                </button>
+            {/* Navigation Buttons */}
+            <div className="flex items-center justify-between mt-6 md:absolute md:mt-0 md:inset-y-0 md:inset-x-0 md:px-0 gap-4 md:gap-0">
+              {/* Left Button */}
+              <button
+                onClick={() => setCurrentCategorySlide((prev) => Math.max(0, prev - 1))}
+                disabled={currentCategorySlide === 0}
+                className={`flex-shrink-0 p-2 md:p-3 rounded-full transition-all shadow-lg ${
+                  currentCategorySlide === 0
+                    ? "opacity-50 cursor-not-allowed bg-gray-400 dark:bg-gray-600"
+                    : "bg-white/80 hover:bg-white dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-900 dark:text-white hover:shadow-xl"
+                }`}
+              >
+                <ChevronLeft className="w-6 h-6 md:w-7 md:h-7" />
+              </button>
+
+              {/* Indicators */}
+              {categories.length > categoriesPerView && (
+                <div className="flex justify-center gap-2">
+                  {[...Array(Math.ceil(categories.length / categoriesPerView))].map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentCategorySlide(Math.min(index * categoriesPerView, categories.length - categoriesPerView))}
+                      className={`h-2 rounded-full transition-all ${
+                        index === Math.floor(currentCategorySlide / categoriesPerView)
+                          ? "w-8 bg-gray-600 dark:bg-gray-400"
+                          : "w-2 bg-gray-400 dark:bg-gray-600 hover:bg-gray-500 dark:hover:bg-gray-500"
+                      }`}
+                    />
+                  ))}
+                </div>
               )}
-              
-              {currentCategorySlide < categories.length - 1 && (
-                <button
-                  onClick={() => setCurrentCategorySlide((prev) => Math.min(categories.length - 1, prev + 1))}
-                  className="bg-white/80 hover:bg-white dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-900 dark:text-white p-2 md:p-3 rounded-full transition-all shadow-lg"
-                >
-                  <ChevronRight className="w-6 h-6" />
-                </button>
-              )}
+
+              {/* Right Button */}
+              <button
+                onClick={() => setCurrentCategorySlide((prev) => Math.min(categories.length - categoriesPerView, prev + 1))}
+                disabled={currentCategorySlide >= categories.length - categoriesPerView}
+                className={`flex-shrink-0 p-2 md:p-3 rounded-full transition-all shadow-lg ${
+                  currentCategorySlide >= categories.length - categoriesPerView
+                    ? "opacity-50 cursor-not-allowed bg-gray-400 dark:bg-gray-600"
+                    : "bg-white/80 hover:bg-white dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-900 dark:text-white hover:shadow-xl"
+                }`}
+              >
+                <ChevronRight className="w-6 h-6 md:w-7 md:h-7" />
+              </button>
             </div>
           </div>
         </div>

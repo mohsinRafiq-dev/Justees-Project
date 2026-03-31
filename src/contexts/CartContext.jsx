@@ -114,10 +114,10 @@ export const CartProvider = ({ children }) => {
     return cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
   };
 
-  // delivery fee rule: PKR 300 if total is under 4000, otherwise free
+  // delivery fee rule: PKR 250 if total is under 4000, otherwise free
   const getDeliveryFee = () => {
     const total = getCartTotal();
-    return total > 0 && total < 4000 ? 300 : 0;
+    return total > 0 && total < 4000 ? 250 : 0;
   };
 
   const getCartFinalTotal = () => {
