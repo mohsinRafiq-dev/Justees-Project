@@ -6,7 +6,6 @@ import { useTheme } from "../contexts/ThemeContext";
 import { useAuth } from "../hooks/useAuth";
 import { toast } from "react-hot-toast";
 import Navbar from "../components/common/Navbar";
-import Footer from "../components/common/Footer";
 import LazyImage from "../components/common/LazyImage";
 import { createOrder } from "../services/orders.service";
 import { createNotification } from "../services/notifications.service";
@@ -820,7 +819,6 @@ const Checkout = () => {
           </div>
         )}
       </div>
-      <Footer />
     </>
   );
 };
