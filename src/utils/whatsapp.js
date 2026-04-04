@@ -14,7 +14,7 @@ export const generateWhatsAppOrderLink = (product, options = {}) => {
   
   // Compute totals and delivery
   const baseTotal = product.price * quantity;
-  const deliveryFee = baseTotal > 0 && baseTotal < 5000 ? 500 : 0;
+  const deliveryFee = baseTotal > 0 && baseTotal < 5000 ? 250 : 0;
   const finalTotal = baseTotal + deliveryFee;
 
   // Construct the message
