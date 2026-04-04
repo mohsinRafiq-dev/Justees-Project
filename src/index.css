@@ -1,0 +1,322 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Oswald', sans-serif;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+button {
+  cursor: pointer;
+}
+
+/* Custom Animations */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+@keyframes gradient-shift {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(99, 102, 241, 0.6);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.8s ease-out;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.6s ease-out forwards;
+}
+
+.animate-slide-in-left {
+  animation: slide-in-left 0.8s ease-out;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.5s ease-out;
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient-shift 3s ease infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Glassmorphism effect */
+.glass {
+  background: rgba(31, 41, 55, 0.7);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.glass-light {
+  background: rgba(255, 255, 255, 0.7);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar for webkit browsers */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1f2937;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #4b5563;
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+
+/* Marquee animation */
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.animate-marquee {
+  display: inline-block;
+  animation: marquee 40s linear infinite; /* slower scroll */
+}
+
+/* Print Styles for Order Confirmation */
+@media print {
+  /* Hide unnecessary elements when printing */
+  .navbar,
+  .footer,
+  button:not(.no-hide),
+  [class*="Back"],
+  .sticky {
+    display: none !important;
+  }
+
+  body {
+    background: white;
+    color: black;
+  }
+
+  /* Make dark mode visible when printing */
+  * {
+    background: white !important;
+    color: black !important;
+    border-color: #333 !important;
+  }
+
+  .dark\:bg-gray-800,
+  .dark\:bg-gray-700,
+  .dark\:bg-green-900\/30,
+  .dark\:bg-blue-900\/30,
+  [class*="dark:bg"] {
+    background: white !important;
+  }
+
+  .dark\:text-white,
+  .dark\:text-gray-300,
+  .dark\:text-green-400,
+  .dark\:text-white,
+  [class*="dark:text"] {
+    color: black !important;
+  }
+
+  /* Order confirmation specific styles */
+  .max-w-4xl {
+    max-width: 100%;
+  }
+
+  h1, h2, h3 {
+    page-break-after: avoid;
+  }
+
+  .shadow-2xl,
+  .shadow-lg,
+  .shadow-md {
+    box-shadow: none !important;
+  }
+
+  /* Add borders instead of shadows */
+  .rounded-lg,
+  .rounded-xl {
+    border: 1px solid #999 !important;
+  }
+
+  /* Ensure proper spacing and readability */
+  p, div {
+    orphans: 2;
+    widows: 2;
+  }
+
+  /* Add page break after sections if needed */
+  .space-y-8 > * {
+    page-break-inside: avoid;
+  }
+
+  /* Gradient backgrounds become solid */
+  .bg-gradient-to-br {
+    background: #f0f0f0 !important;
+  }
+
+  /* Remove animations */
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  /* QR code and important info should print large */
+  [class*="order"] {
+    font-weight: bold;
+  }
+
+  /* Header styling for print */
+  .text-4xl,
+  .text-5xl {
+    page-break-after: avoid;
+  }
+
+  /* Ensure all text is visible with adequate contrast */
+  .text-gray-400,
+  .text-gray-500,
+  .text-gray-600 {
+    color: #666 !important;
+  }
+
+  .text-green-400,
+  .text-green-300,
+  .text-green-600 {
+    color: #22c55e !important;
+  }
+
+  .text-blue-400,
+  .text-blue-300 {
+    color: #3b82f6 !important;
+  }
+}
+
+/* extra-slow version for promotional tickers */
+.animate-marquee-slow {
+  display: inline-block;
+  animation: marquee 60s linear infinite;
+} 
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}

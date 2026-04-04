@@ -1,0 +1,1142 @@
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Package,
+  ShoppingBag,
+  Users,
+  TrendingUp,
+  Plus,
+  Eye,
+  EyeOff,
+  Settings,
+  BarChart3,
+  AlertTriangle,
+  Tag,
+  Layers,
+  LogOut,
+  Menu,
+  X,
+  Home,
+  Sun,
+  Moon,
+  Star,
+  Image,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
+import { useAuth } from "../../hooks/useAuth";
+import { useNavigate, Link } from "react-router-dom";
+import { useTheme } from "../../contexts/ThemeContext";
+import { getProductAnalytics } from "../../services/products.service";
+import { getCategories } from "../../services/products/admin";
+import { getSlides } from "../../services/slides.service";
+import { getAllReviews } from "../../services/reviews.service";
+import {
+  getSiteSettings,
+  updateSiteSettings,
+} from "../../services/settings.service";
+import { formatPrice } from "../../utils/validation";
+import ProductManagement from "../../components/admin/ProductManagement";
+import NotificationsPanel from "../../components/admin/NotificationsPanel";
+import CategoriesManagement from "./CategoriesManagement";
+import ReviewsManagement from "./ReviewsManagement";
+import SlidesManagement from "./SlidesManagement";
+import ProductPhotosManagement from "./ProductPhotosManagement";
+import SizesManagement from "./SizesManagement";
+import OrdersManagement from "./OrdersManagement";
+
+const AdminDashboard = () => {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const { isDark, toggleTheme } = useTheme();
+  // Initialize activeTab from localStorage or default to "dashboard"
+  const [activeTab, setActiveTab] = useState(() => {
+    return localStorage.getItem("adminActiveTab") || "dashboard";
+  });
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [stats, setStats] = useState({
+    totalProducts: 0,
+    totalCategories: 0,
+    totalReviews: 0,
+    totalSlides: 0,
+    totalViews: 0,
+    lowStockItems: 0,
+    outOfStockItems: 0,
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadDashboardData();
+  }, []);
+
+  // Function to handle tab changes and persist to localStorage
+  const handleTabChange = (tabId) => {
+    setActiveTab(tabId);
+    localStorage.setItem("adminActiveTab", tabId);
+  };
+
+  const loadDashboardData = async () => {
+    try {
+      setLoading(true);
+
+      const [analyticsResult, categoriesResult, slidesResult, reviewsResult] =
+        await Promise.all([
+          getProductAnalytics(),
+          getCategories(),
+          getSlides(),
+          getAllReviews({ limitCount: 1000 }),
+        ]);
+
+      setStats((prev) => ({
+        ...prev,
+        totalProducts: analyticsResult.success
+          ? analyticsResult.analytics.totalProducts
+          : 0,
+        totalViews: analyticsResult.success
+          ? analyticsResult.analytics.totalViews
+          : 0,
+        lowStockItems: analyticsResult.success
+          ? analyticsResult.analytics.totalProducts -
+            analyticsResult.analytics.outOfStock
+          : 0,
+        outOfStockItems: analyticsResult.success
+          ? analyticsResult.analytics.outOfStock
+          : 0,
+        totalCategories: categoriesResult.success
+          ? categoriesResult.categories.length
+          : 0,
+        totalSlides: slidesResult.success ? slidesResult.slides.length : 0,
+        totalReviews: reviewsResult.success ? reviewsResult.reviews.length : 0,
+      }));
+    } catch (error) {
+      console.error("Error loading dashboard data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    const result = await logout();
+    if (result.success) {
+      navigate("/admin/login");
+    }
+  };
+
+  const sidebarItems = [
+    { id: "dashboard", name: "Dashboard", icon: BarChart3 },
+    { id: "orders", name: "Orders", icon: ShoppingBag },
+    { id: "products", name: "Products", icon: Package },
+    { id: "categories", name: "Categories", icon: Tag },
+    { id: "slides", name: "Slides", icon: Image },
+    { id: "productPhotos", name: "Product page photos", icon: Image },
+    { id: "sizes", name: "Sizes & Colors", icon: Layers },
+    { id: "reviews", name: "Reviews", icon: Star },
+    { id: "settings", name: "Settings", icon: Settings },
+  ];
+
+  const quickActions = [
+    {
+      title: "Add Product",
+      description: "Create new product",
+      icon: Plus,
+      color: "blue",
+      action: () => handleTabChange("products"),
+    },
+    {
+      title: "Manage Slides",
+      description: "Add images & videos",
+      icon: Image,
+      color: "yellow",
+      action: () => handleTabChange("slides"),
+    },
+  ];
+
+  const PasswordUpdateForm = () => {
+    const { updatePassword } = useAuth();
+    const [passLoading, setPassLoading] = useState(false);
+    const [message, setMessage] = useState({ type: "", text: "" });
+    const [pass, setPass] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
+
+    const handleUpdate = async (e) => {
+      e.preventDefault();
+      if (pass.length < 6) {
+        setMessage({
+          type: "error",
+          text: "Password must be at least 6 characters",
+        });
+        return;
+      }
+      setPassLoading(true);
+      setMessage({ type: "", text: "" });
+
+      const res = await updatePassword(pass);
+      if (res.success) {
+        setMessage({
+          type: "success",
+          text: "Password updated successfully!",
+        });
+        setPass("");
+      } else {
+        setMessage({
+          type: "error",
+          text: res.error || "Failed to update password",
+        });
+      }
+      setPassLoading(false);
+    };
+
+    return (
+      <div>
+        <h4
+          className={`font-medium mb-4 ${isDark ? "text-white" : "text-gray-900"}`}
+        >
+          Change Password
+        </h4>
+        {message.text && (
+          <div
+            className={`p-3 rounded-xl mb-4 text-sm ${
+              message.type === "error"
+                ? isDark
+                  ? "bg-red-900/30 text-red-300 border border-red-500/50"
+                  : "bg-red-50 text-red-700"
+                : isDark
+                  ? "bg-green-900/30 text-green-300 border border-green-500/50"
+                  : "bg-green-50 text-green-700"
+            }`}
+          >
+            {message.text}
+          </div>
+        )}
+        <form onSubmit={handleUpdate} className="space-y-4">
+          <div>
+            <label
+              className={`block text-sm font-medium mb-1 ${isDark ? "text-gray-300" : "text-black"}`}
+            >
+              New Password
+            </label>
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                value={pass}
+                onChange={(e) => setPass(e.target.value)}
+                className={`w-full border ${isDark ? "border-gray-600 bg-gray-700/50 text-white placeholder-gray-400" : "border-gray-300 bg-white text-gray-900 placeholder-gray-500"} rounded-xl px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none pr-10 transition-all`}
+                placeholder="Enter new password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className={`absolute inset-y-0 right-0 pr-3 flex items-center ${isDark ? "text-gray-400 hover:text-gray-300" : "text-gray-400 hover:text-gray-500"}`}
+              >
+                {showPassword ? (
+                  <EyeOff className="h-5 w-5" aria-hidden="true" />
+                ) : (
+                  <Eye className="h-5 w-5" aria-hidden="true" />
+                )}
+              </button>
+            </div>
+          </div>
+          <button
+            type="submit"
+            disabled={passLoading}
+            className="bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-600 text-white px-6 py-2 rounded-xl hover:from-blue-700 hover:via-cyan-700 hover:to-teal-700 disabled:opacity-50 transition-all shadow-lg"
+          >
+            {passLoading ? "Changing..." : "Change Password"}
+          </button>
+        </form>
+      </div>
+    );
+  };
+
+  const SiteSettingsForm = () => {
+    const [settingsLoading, setSettingsLoading] = useState(false);
+    const [message, setMessage] = useState({ type: "", text: "" });
+    const [volumeTexts, setVolumeTexts] = useState(["Volume 1: The Debut"]); // Array of texts
+    const [newText, setNewText] = useState(""); // Input for new text
+    const [isLoading, setIsLoading] = useState(true);
+
+    // Load current settings on mount
+    useEffect(() => {
+      const loadSettings = async () => {
+        setIsLoading(true);
+        const result = await getSiteSettings();
+        if (result.success && result.settings) {
+          // Support both old single text and new array format
+          if (
+            result.settings.volumeTexts &&
+            Array.isArray(result.settings.volumeTexts)
+          ) {
+            setVolumeTexts(
+              result.settings.volumeTexts.length > 0
+                ? result.settings.volumeTexts
+                : ["Volume 1: The Debut"],
+            );
+          } else if (result.settings.volumeText) {
+            // Migrate old single text to array format
+            setVolumeTexts([result.settings.volumeText]);
+          }
+        }
+        setIsLoading(false);
+      };
+      loadSettings();
+    }, []);
+
+    const handleAddText = () => {
+      if (!newText.trim()) {
+        setMessage({
+          type: "error",
+          text: "Please enter text before adding",
+        });
+        return;
+      }
+      setVolumeTexts([...volumeTexts, newText.trim()]);
+      setNewText("");
+      setMessage({ type: "", text: "" });
+    };
+
+    const handleRemoveText = (index) => {
+      if (volumeTexts.length === 1) {
+        setMessage({
+          type: "error",
+          text: "You must have at least one ticker text",
+        });
+        return;
+      }
+      setVolumeTexts(volumeTexts.filter((_, i) => i !== index));
+      setMessage({ type: "", text: "" });
+    };
+
+    const handleUpdate = async (e) => {
+      e.preventDefault();
+      if (
+        volumeTexts.length === 0 ||
+        volumeTexts.every((text) => !text.trim())
+      ) {
+        setMessage({
+          type: "error",
+          text: "You must have at least one ticker text",
+        });
+        return;
+      }
+      setSettingsLoading(true);
+      setMessage({ type: "", text: "" });
+
+      const res = await updateSiteSettings({
+        volumeTexts,
+        volumeText: volumeTexts[0],
+      }); // Keep volumeText for backward compatibility
+      if (res.success) {
+        setMessage({
+          type: "success",
+          text: "Settings updated successfully!",
+        });
+      } else {
+        setMessage({
+          type: "error",
+          text: res.error || "Failed to update settings",
+        });
+      }
+      setSettingsLoading(false);
+    };
+
+    return (
+      <div>
+        <h4
+          className={`font-medium mb-4 ${isDark ? "text-white" : "text-gray-900"}`}
+        >
+          Volume Ticker Texts
+        </h4>
+        {message.text && (
+          <div
+            className={`p-3 rounded-xl mb-4 text-sm ${
+              message.type === "error"
+                ? isDark
+                  ? "bg-red-900/30 text-red-300 border border-red-500/50"
+                  : "bg-red-50 text-red-700"
+                : isDark
+                  ? "bg-green-900/30 text-green-300 border border-green-500/50"
+                  : "bg-green-50 text-green-700"
+            }`}
+          >
+            {message.text}
+          </div>
+        )}
+
+        {/* Current Ticker Texts */}
+        <div className="space-y-3 mb-4">
+          <label
+            className={`block text-sm font-medium ${isDark ? "text-gray-300" : "text-black"}`}
+          >
+            Current Ticker Texts
+          </label>
+          {isLoading ? (
+            <div className="text-sm text-gray-500">Loading...</div>
+          ) : (
+            <div className="space-y-2">
+              {volumeTexts.map((text, index) => (
+                <div
+                  key={index}
+                  className={`flex items-center gap-2 p-3 rounded-lg ${isDark ? "bg-gray-700/50" : "bg-gray-100"}`}
+                >
+                  <span
+                    className={`flex-1 ${isDark ? "text-white" : "text-gray-900"}`}
+                  >
+                    {text}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveText(index)}
+                    className="text-red-500 hover:text-red-700 px-2 py-1 rounded transition-colors"
+                    title="Remove"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Add New Text */}
+        <div className="space-y-2 mb-4">
+          <label
+            className={`block text-sm font-medium ${isDark ? "text-gray-300" : "text-black"}`}
+          >
+            Add New Ticker Text
+          </label>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={newText}
+              onChange={(e) => setNewText(e.target.value)}
+              onKeyPress={(e) =>
+                e.key === "Enter" && (e.preventDefault(), handleAddText())
+              }
+              disabled={isLoading}
+              className={`flex-1 border ${isDark ? "border-gray-600 bg-gray-700/50 text-white placeholder-gray-400" : "border-gray-300 bg-white text-gray-900 placeholder-gray-500"} rounded-xl px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none transition-all disabled:opacity-50`}
+              placeholder="e.g., Volume 2: The Evolution"
+            />
+            <button
+              type="button"
+              onClick={handleAddText}
+              disabled={isLoading}
+              className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-4 py-2 rounded-xl hover:from-green-700 hover:to-emerald-700 disabled:opacity-50 transition-all shadow-lg whitespace-nowrap"
+            >
+              Add
+            </button>
+          </div>
+          <p
+            className={`text-xs ${isDark ? "text-gray-400" : "text-black"}`}
+          >
+            These texts will scroll across the homepage ticker bar
+          </p>
+        </div>
+
+        {/* Save Button */}
+        <button
+          onClick={handleUpdate}
+          disabled={settingsLoading || isLoading}
+          className="bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-600 text-white px-6 py-2 rounded-xl hover:from-blue-700 hover:via-cyan-700 hover:to-teal-700 disabled:opacity-50 transition-all shadow-lg"
+        >
+          {settingsLoading ? "Saving..." : "Save All Changes"}
+        </button>
+      </div>
+    );
+  };
+
+  const StatCard = ({ title, value, icon: Icon, color, change, loading }) => (
+    <motion.div
+      whileHover={{ scale: 1.02, y: -4 }}
+      className={`glass ${isDark ? "" : "glass-light"} rounded-2xl shadow-xl p-6 border ${isDark ? "border-gray-700" : "border-gray-200"}`}
+    >
+      <div className="flex items-center justify-between">
+        <div className="flex-1">
+          <p
+            className={`text-sm font-medium ${isDark ? "text-gray-400" : "text-black"} mb-2`}
+          >
+            {title}
+          </p>
+          <div
+            className={`text-3xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}
+          >
+            {loading ? (
+              <div className="h-8 w-20 bg-gray-300 dark:bg-gray-700 rounded animate-pulse" />
+            ) : typeof value === "number" && title.includes("Revenue") ? (
+              formatPrice(value)
+            ) : (
+              value
+            )}
+          </div>
+          {change && (
+            <p
+              className={`text-sm mt-2 flex items-center ${
+                change.positive ? "text-green-500" : "text-red-500"
+              }`}
+            >
+              {change.positive ? "↗" : "↘"} {change.value}% from last month
+            </p>
+          )}
+        </div>
+        <div
+          className={`p-4 rounded-xl bg-gradient-to-br ${
+            color === "blue"
+              ? "from-blue-500/20 to-cyan-500/20"
+              : color === "green"
+                ? "from-green-500/20 to-emerald-500/20"
+                : color === "purple"
+                  ? "from-purple-500/20 to-pink-500/20"
+                  : "from-yellow-500/20 to-orange-500/20"
+          }`}
+        >
+          <Icon
+            className={`w-8 h-8 ${
+              color === "blue"
+                ? "text-blue-500"
+                : color === "green"
+                  ? "text-green-500"
+                  : color === "purple"
+                    ? "text-purple-500"
+                    : "text-yellow-500"
+            }`}
+          />
+        </div>
+      </div>
+    </motion.div>
+  );
+
+  return (
+    <div
+      className={`min-h-screen ${isDark ? "bg-gray-900" : "bg-gray-50"} flex relative`}
+    >
+      {/* Mobile Menu Button */}
+      <button
+        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        className={`lg:hidden fixed top-4 left-4 z-50 p-3 rounded-xl shadow-lg ${isDark ? "bg-gray-800 text-white" : "bg-white text-gray-900"} border ${isDark ? "border-gray-700" : "border-gray-200"}`}
+      >
+        {mobileMenuOpen ? (
+          <X className="w-6 h-6" />
+        ) : (
+          <Menu className="w-6 h-6" />
+        )}
+      </button>
+
+      {/* Sidebar Overlay for Mobile */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setMobileMenuOpen(false)}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden"
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Desktop Sidebar - Always Visible */}
+      <div
+        className={`hidden lg:flex flex-col h-screen sticky top-0 ${sidebarOpen ? "w-72" : "w-20"} transition-all duration-300 glass ${isDark ? "" : "glass-light"} shadow-2xl border-r ${isDark ? "border-gray-700" : "border-gray-200"} relative`}
+      >
+        {/* Collapse Toggle Button */}
+        <button
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="absolute -right-3 top-1/2 -translate-y-1/2 bg-blue-600 text-white p-1.5 rounded-full shadow-lg z-50 hover:scale-110 transition-transform"
+        >
+          {sidebarOpen ? (
+            <ChevronLeft className="w-4 h-4" />
+          ) : (
+            <ChevronRight className="w-4 h-4" />
+          )}
+        </button>
+
+        {/* Inner Content Wrapper */}
+        <div className="flex flex-col h-full overflow-hidden w-full whitespace-nowrap">
+          <div
+            className={`p-6 flex items-center ${sidebarOpen ? "justify-between" : "justify-center"}`}
+          >
+            {sidebarOpen ? (
+              <Link
+                to="/"
+                className="text-2xl font-bold bg-gradient-to-r from-blue-500 via-cyan-500 to-teal-500 bg-clip-text text-transparent flex items-center space-x-2 whitespace-nowrap"
+              >
+                <span>Justees</span>
+                <span
+                  className={`text-sm ${isDark ? "text-gray-400" : "text-black"}`}
+                >
+                  Admin
+                </span>
+              </Link>
+            ) : (
+              <Link to="/" className="text-2xl font-bold text-blue-500">
+                J
+              </Link>
+            )}
+          </div>
+
+          <nav className="mt-6 px-3 flex-1 space-y-1 overflow-y-auto">
+            {sidebarItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <motion.button
+                  key={item.id}
+                  whileHover={{ scale: 1.02, x: sidebarOpen ? 4 : 0 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => handleTabChange(item.id)}
+                  title={!sidebarOpen ? item.name : ""}
+                  className={`w-full flex items-center ${sidebarOpen ? "px-4" : "justify-center"} py-3 text-left rounded-xl ${
+                    activeTab === item.id
+                      ? "bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-600 text-white shadow-lg"
+                      : isDark
+                        ? "text-gray-300 hover:bg-gray-800/50"
+                        : "text-gray-700 hover:bg-gray-100"
+                  }`}
+                >
+                  <Icon className={`w-5 h-5 ${sidebarOpen ? "mr-3" : ""}`} />
+                  {sidebarOpen && (
+                    <span className="font-medium whitespace-nowrap">
+                      {item.name}
+                    </span>
+                  )}
+                </motion.button>
+              );
+            })}
+          </nav>
+
+          {/* User Menu */}
+          <div
+            className={`p-4 border-t ${isDark ? "border-gray-700" : "border-gray-200"}`}
+          >
+            {sidebarOpen ? (
+              <div
+                className={`glass ${isDark ? "" : "glass-light"} rounded-xl p-4 mb-3`}
+              >
+                <div className="flex items-center space-x-3 mb-3">
+                  <img
+                    className="h-10 w-10 rounded-full ring-2 ring-blue-500 flex-shrink-0 object-contain bg-white p-1"
+                    src="/justees_logo.png"
+                    alt="Justees"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p
+                      className={`text-sm font-medium truncate ${isDark ? "text-white" : "text-gray-900"}`}
+                    >
+                      {user?.displayName || "Admin"}
+                    </p>
+                    <p
+                      className={`text-xs truncate ${isDark ? "text-gray-400" : "text-black"}`}
+                    >
+                      {user?.email}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={toggleTheme}
+                    className={`flex-1 flex items-center justify-center p-2 rounded-lg transition-all ${isDark ? "bg-gray-700 hover:bg-gray-600" : "bg-gray-200 hover:bg-gray-300"}`}
+                  >
+                    {isDark ? (
+                      <Sun className="w-4 h-4" />
+                    ) : (
+                      <Moon className="w-4 h-4" />
+                    )}
+                  </button>
+                  <Link
+                    to="/"
+                    className={`flex-1 flex items-center justify-center p-2 rounded-lg transition-all ${isDark ? "bg-gray-700 hover:bg-gray-600" : "bg-gray-200 hover:bg-gray-300"}`}
+                  >
+                    <Home className="w-4 h-4" />
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center space-y-4 mb-3">
+                <img
+                  className="h-10 w-10 rounded-full ring-2 ring-blue-500 object-contain bg-white p-1"
+                  src="/justees_logo.png"
+                  alt="Justees"
+                />
+                <div className="flex flex-col items-center gap-2 w-full">
+                  <button
+                    onClick={toggleTheme}
+                    className={`p-2 rounded-lg transition-all ${isDark ? "bg-gray-700 hover:bg-gray-600" : "bg-gray-200 hover:bg-gray-300"}`}
+                  >
+                    {isDark ? (
+                      <Sun className="w-4 h-4" />
+                    ) : (
+                      <Moon className="w-4 h-4" />
+                    )}
+                  </button>
+                  <Link
+                    to="/"
+                    className={`p-2 rounded-lg transition-all ${isDark ? "bg-gray-700 hover:bg-gray-600" : "bg-gray-200 hover:bg-gray-300"}`}
+                  >
+                    <Home className="w-4 h-4" />
+                  </Link>
+                </div>
+              </div>
+            )}
+
+            <button
+              onClick={handleLogout}
+              className={`w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-xl text-sm font-semibold shadow-lg flex items-center justify-center ${sidebarOpen ? "px-4 py-2 space-x-2" : "p-3"}`}
+              title={!sidebarOpen ? "Logout" : ""}
+            >
+              <LogOut className="w-4 h-4" />
+              {sidebarOpen && <span>Logout</span>}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Sidebar */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ x: -300 }}
+            animate={{ x: 0 }}
+            exit={{ x: -300 }}
+            transition={{ type: "spring", damping: 20, stiffness: 150 }}
+            className="lg:hidden fixed inset-y-0 left-0 z-50 w-80 max-w-[85vw] glass shadow-2xl border-r border-gray-700"
+          >
+            {/* Inner Content Wrapper */}
+            <div className="flex flex-col h-full overflow-hidden w-full whitespace-nowrap">
+              <div className="p-6 flex items-center justify-between">
+                <Link
+                  to="/"
+                  className="text-2xl font-bold bg-gradient-to-r from-blue-500 via-cyan-500 to-teal-500 bg-clip-text text-transparent flex items-center space-x-2 whitespace-nowrap"
+                >
+                  <span>Justees</span>
+                  <span
+                    className={`text-sm ${isDark ? "text-gray-400" : "text-black"}`}
+                  >
+                    Admin
+                  </span>
+                </Link>
+
+                {/* Mobile Close Button */}
+                <button
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="p-2 text-gray-500"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <nav className="mt-6 px-3 flex-1 space-y-1 overflow-y-auto">
+                {sidebarItems.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <motion.button
+                      key={item.id}
+                      whileHover={{ scale: 1.02, x: 4 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => {
+                        handleTabChange(item.id);
+                        setMobileMenuOpen(false);
+                      }}
+                      className={`w-full flex items-center px-4 py-3 text-left rounded-xl ${
+                        activeTab === item.id
+                          ? "bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-600 text-white shadow-lg"
+                          : isDark
+                            ? "text-gray-300 hover:bg-gray-800/50"
+                            : "text-gray-700 hover:bg-gray-100"
+                      }`}
+                    >
+                      <Icon className="w-5 h-5 mr-3" />
+                      <span className="font-medium whitespace-nowrap">
+                        {item.name}
+                      </span>
+                    </motion.button>
+                  );
+                })}
+              </nav>
+
+              {/* User Menu */}
+              <div
+                className={`p-4 border-t ${isDark ? "border-gray-700" : "border-gray-200"}`}
+              >
+                <div
+                  className={`glass ${isDark ? "" : "glass-light"} rounded-xl p-4 mb-3`}
+                >
+                  <div className="flex items-center space-x-3 mb-3">
+                    <img
+                      className="h-10 w-10 rounded-full ring-2 ring-blue-500 flex-shrink-0 object-contain bg-white p-1"
+                      src="/justees_logo.png"
+                      alt="Justees"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p
+                        className={`text-sm font-medium truncate ${isDark ? "text-white" : "text-gray-900"}`}
+                      >
+                        {user?.displayName || "Admin"}
+                      </p>
+                      <p
+                        className={`text-xs truncate ${isDark ? "text-gray-400" : "text-black"}`}
+                      >
+                        {user?.email}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={toggleTheme}
+                      className={`flex-1 flex items-center justify-center p-2 rounded-lg transition-all ${isDark ? "bg-gray-700 hover:bg-gray-600" : "bg-gray-200 hover:bg-gray-300"}`}
+                    >
+                      {isDark ? (
+                        <Sun className="w-4 h-4" />
+                      ) : (
+                        <Moon className="w-4 h-4" />
+                      )}
+                    </button>
+                    <Link
+                      to="/"
+                      className={`flex-1 flex items-center justify-center p-2 rounded-lg transition-all ${isDark ? "bg-gray-700 hover:bg-gray-600" : "bg-gray-200 hover:bg-gray-300"}`}
+                    >
+                      <Home className="w-4 h-4" />
+                    </Link>
+                  </div>
+                </div>
+
+                <button
+                  onClick={handleLogout}
+                  className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-xl px-4 py-2 text-sm font-semibold shadow-lg flex items-center justify-center space-x-2"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Logout</span>
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Main Content */}
+      <div className="flex-1 overflow-hidden w-full">
+        <AnimatePresence mode="wait">
+          {activeTab === "dashboard" && (
+            <motion.div
+              key="dashboard"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="p-4 sm:p-6 lg:p-8 pt-16 lg:pt-8"
+            >
+              {/* Header with Notifications */}
+              <div className="mb-6 sm:mb-8 flex items-center justify-between">
+                <div>
+                  <h2
+                    className={`text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 ${isDark ? "text-white" : "text-gray-900"}`}
+                  >
+                    Welcome back, {user?.displayName?.split(" ")[0] || "Admin"}!
+                  </h2>
+                  <p
+                    className={`text-sm sm:text-base lg:text-lg ${isDark ? "text-gray-400" : "text-black"}`}
+                  >
+                    Here's what's happening with your store today.
+                  </p>
+                </div>
+                <NotificationsPanel />
+              </div>
+
+              {/* Stats Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+                <StatCard
+                  title="Total Products"
+                  value={stats.totalProducts}
+                  icon={Package}
+                  color="blue"
+                  loading={loading}
+                />
+                <StatCard
+                  title="Total Categories"
+                  value={stats.totalCategories}
+                  icon={Tag}
+                  color="purple"
+                  loading={loading}
+                />
+                <StatCard
+                  title="Total Slides"
+                  value={stats.totalSlides}
+                  icon={Image}
+                  color="yellow"
+                  loading={loading}
+                />
+                <StatCard
+                  title="Total Reviews"
+                  value={stats.totalReviews}
+                  icon={Star}
+                  color="green"
+                  loading={loading}
+                />
+              </div>
+
+              {/* Alerts */}
+              {(stats.outOfStockItems > 0 || stats.lowStockItems > 0) && (
+                <div className="mb-6 sm:mb-8">
+                  <h3
+                    className={`text-base sm:text-lg font-semibold mb-4 ${isDark ? "text-white" : "text-gray-900"}`}
+                  >
+                    Alerts & Notifications
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {stats.outOfStockItems > 0 && (
+                      <motion.div
+                        whileHover={{ scale: 1.02 }}
+                        className={`glass ${isDark ? "" : "glass-light"} border-2 ${isDark ? "border-red-500/50" : "border-red-200"} rounded-xl p-4`}
+                      >
+                        <div className="flex items-center">
+                          <div className="p-3 bg-red-500/20 rounded-xl mr-4">
+                            <AlertTriangle className="w-6 h-6 text-red-500" />
+                          </div>
+                          <div>
+                            <h4
+                              className={`font-semibold ${isDark ? "text-red-300" : "text-red-900"}`}
+                            >
+                              Out of Stock
+                            </h4>
+                            <p
+                              className={`text-sm ${isDark ? "text-red-200" : "text-red-700"}`}
+                            >
+                              {stats.outOfStockItems} products need restocking
+                            </p>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                    {stats.lowStockItems > 0 && (
+                      <motion.div
+                        whileHover={{ scale: 1.02 }}
+                        className={`glass ${isDark ? "" : "glass-light"} border-2 ${isDark ? "border-orange-500/50" : "border-orange-200"} rounded-xl p-4`}
+                      >
+                        <div className="flex items-center">
+                          <div className="p-3 bg-orange-500/20 rounded-xl mr-4">
+                            <AlertTriangle className="w-6 h-6 text-orange-500" />
+                          </div>
+                          <div>
+                            <h4
+                              className={`font-semibold ${isDark ? "text-orange-300" : "text-orange-900"}`}
+                            >
+                              Low Stock Warning
+                            </h4>
+                            <p
+                              className={`text-sm ${isDark ? "text-orange-200" : "text-orange-700"}`}
+                            >
+                              Some products are running low
+                            </p>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Quick Actions */}
+              <div
+                className={`glass ${isDark ? "" : "glass-light"} rounded-2xl shadow-xl border ${isDark ? "border-gray-700" : "border-gray-200"}`}
+              >
+                <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                  <h3
+                    className={`text-lg font-semibold ${isDark ? "text-white" : "text-gray-900"}`}
+                  >
+                    Quick Actions
+                  </h3>
+                </div>
+                <div className="p-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {quickActions.map((action, index) => {
+                      const Icon = action.icon;
+                      return (
+                        <motion.button
+                          key={index}
+                          whileHover={{ scale: 1.05, y: -4 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={action.action}
+                          className={`flex items-center p-4 border ${isDark ? "border-gray-700 hover:bg-gray-800/50" : "border-gray-200 hover:bg-gray-50"} rounded-xl transition-all`}
+                        >
+                          <div
+                            className={`p-3 rounded-xl mr-4 ${
+                              action.color === "blue"
+                                ? "bg-blue-500/20"
+                                : action.color === "green"
+                                  ? "bg-green-500/20"
+                                  : "bg-purple-500/20"
+                            }`}
+                          >
+                            <Icon
+                              className={`h-6 w-6 ${
+                                action.color === "blue"
+                                  ? "text-blue-500"
+                                  : action.color === "green"
+                                    ? "text-green-500"
+                                    : "text-purple-500"
+                              }`}
+                            />
+                          </div>
+                          <div className="text-left">
+                            <p
+                              className={`font-semibold ${isDark ? "text-white" : "text-gray-900"}`}
+                            >
+                              {action.title}
+                            </p>
+                            <p
+                              className={`text-sm ${isDark ? "text-gray-400" : "text-black"}`}
+                            >
+                              {action.description}
+                            </p>
+                          </div>
+                        </motion.button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {activeTab === "orders" && (
+            <motion.div
+              key="orders"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+            >
+              <OrdersManagement />
+            </motion.div>
+          )}
+
+          {activeTab === "products" && (
+            <motion.div
+              key="products"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+            >
+              <ProductManagement />
+            </motion.div>
+          )}
+
+          {activeTab === "categories" && (
+            <motion.div
+              key="categories"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+            >
+              <CategoriesManagement />
+            </motion.div>
+          )}
+
+          {activeTab === "reviews" && (
+            <motion.div
+              key="reviews"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+            >
+              <ReviewsManagement />
+            </motion.div>
+          )}
+
+          {activeTab === "slides" && (
+            <motion.div
+              key="slides"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+            >
+              <SlidesManagement />
+            </motion.div>
+          )}
+
+          {activeTab === "productPhotos" && (
+            <motion.div
+              key="productPhotos"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+            >
+              <ProductPhotosManagement />
+            </motion.div>
+          )}
+
+          {activeTab === "sizes" && (
+            <motion.div
+              key="sizes"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+            >
+              <SizesManagement />
+            </motion.div>
+          )}
+
+          {activeTab === "settings" && (
+            <motion.div
+              key="settings"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="p-8"
+            >
+              <h2
+                className={`text-3xl font-bold mb-6 ${isDark ? "text-white" : "text-gray-900"}`}
+              >
+                Settings
+              </h2>
+
+              <div className="space-y-6 max-w-2xl">
+                {/* Site Settings */}
+                <div
+                  className={`glass ${isDark ? "" : "glass-light"} rounded-2xl shadow-xl border ${isDark ? "border-gray-700" : "border-gray-200"}`}
+                >
+                  <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+                    <h3
+                      className={`text-lg font-semibold ${isDark ? "text-white" : "text-gray-900"}`}
+                    >
+                      Site Settings
+                    </h3>
+                    <p
+                      className={`text-sm mt-1 ${isDark ? "text-gray-400" : "text-black"}`}
+                    >
+                      Customize your website content and appearance
+                    </p>
+                  </div>
+
+                  <div className="p-6">
+                    <SiteSettingsForm />
+                  </div>
+                </div>
+
+                {/* Security Settings */}
+                <div
+                  className={`glass ${isDark ? "" : "glass-light"} rounded-2xl shadow-xl border ${isDark ? "border-gray-700" : "border-gray-200"}`}
+                >
+                  <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+                    <h3
+                      className={`text-lg font-semibold ${isDark ? "text-white" : "text-gray-900"}`}
+                    >
+                      Security Settings
+                    </h3>
+                    <p
+                      className={`text-sm mt-1 ${isDark ? "text-gray-400" : "text-black"}`}
+                    >
+                      Manage your account security and preferences
+                    </p>
+                  </div>
+
+                  <div className="p-6">
+                    <PasswordUpdateForm />
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </div>
+  );
+};
+
+export default AdminDashboard;

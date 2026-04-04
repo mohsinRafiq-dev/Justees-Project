@@ -1,0 +1,53 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Products collection - Public read, Authenticated write
+    match /products/{productId} {
+      allow read, list: if true; // Anyone can read products
+      allow write: if request.auth != null; // Authenticated users can write
+      
+      // Subcollections
+      match /{subcollection=**} {
+        allow read: if true;
+        allow write: if request.auth != null;
+      }
+    }
+    
+    // Categories collection - Public read, Authenticated write
+    match /categories/{categoryId} {
+      allow read, list: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // Reviews collection - Public read, Authenticated write
+    match /reviews/{reviewId} {
+      allow read, list: if true; // Anyone can read reviews
+      allow write: if request.auth != null; // Only authenticated users can write
+    }
+
+    // Slides collection - Public read, Authenticated write
+    match /slides/{slideId} {
+      allow read, list: if true;
+      allow write: if request.auth != null;
+    }
+
+    // Site settings (ticker text, etc.) - public read
+    match /siteSettings/{docId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
+    // Colors or other global config - public read
+    match /colors/{colorId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // All other collections - Authenticated users only
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
