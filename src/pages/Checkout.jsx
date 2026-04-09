@@ -212,6 +212,8 @@ const Checkout = () => {
               customerName: `${delivery.firstName} ${delivery.lastName}`,
               customerEmail: contact.email,
               orderTotal: total,
+              shippingCost: orderData.shippingCost,
+              tax: 0,
               items: orderData.items,
               deliveryAddress: {
                 name: `${delivery.firstName} ${delivery.lastName}`,
