@@ -111,7 +111,7 @@ const NotificationsPanel = () => {
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className={`absolute right-0 top-12 z-40 w-96 max-w-full rounded-lg shadow-2xl ${
+              className={`fixed inset-x-0 top-0 z-40 w-full md:absolute md:inset-auto md:right-4 md:top-16 md:w-96 md:max-w-[24rem] max-w-full md:rounded-lg rounded-b-lg shadow-2xl ${
                 isDark ? 'bg-gray-900 border border-gray-700' : 'bg-white border border-gray-200'
               }`}
             >
@@ -140,7 +140,7 @@ const NotificationsPanel = () => {
               </div>
 
               {/* Content */}
-              <div className="max-h-96 overflow-y-auto">
+              <div className="max-h-[calc(100vh-6rem)] md:max-h-96 overflow-y-auto">
                 {loading ? (
                   <div className="p-4 text-center">
                     <p className={isDark ? 'text-gray-400' : 'text-gray-500'}>
