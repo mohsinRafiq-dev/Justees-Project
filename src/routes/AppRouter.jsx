@@ -40,10 +40,24 @@ const AppContent = () => {
 
 // Extracted inner component to use useLocation hook (which requires being inside BrowserRouter)
 import { useLocation } from 'react-router-dom';
+import { useEffect, useRef } from 'react';
+import { trackEvent } from '../utils/metaPixel';
 
 const AppLayout = ({ isDark }) => {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith('/admin');
+
+  // Fire a Meta Pixel PageView on client-side route changes.
+  // The initial PageView is already sent by initMetaPixel() on load,
+  // so we skip the first render to avoid double-counting.
+  const isFirstRender = useRef(true);
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    trackEvent('PageView');
+  }, [location.pathname]);
 
   return (
     <>
